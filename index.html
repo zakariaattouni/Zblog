@@ -92,9 +92,7 @@
       animation: slideUp 0.3s ease;
     }
 
-    #installPrompt.show {
-      display: flex;
-    }
+    #installPrompt.show { display: flex; }
 
     #installPrompt .install-text {
       flex: 1;
@@ -216,9 +214,7 @@
       flex-direction: column;
     }
 
-    .nav-overlay.active .nav-drawer {
-      right: 0;
-    }
+    .nav-overlay.active .nav-drawer { right: 0; }
 
     .close-nav {
       align-self: flex-end;
@@ -801,7 +797,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-    import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDaxCW0tvWgsLfxujQJcjsfezBpHe_qzHo",
@@ -818,7 +814,7 @@
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
 
-    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjQueTkgNjAtNjAtNjAtNjAtMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
 
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
@@ -834,13 +830,6 @@
     let isAdminLoggedIn = false;
     let deferredPrompt = null;
     window.currentViewPostId = null;
-
-    // Helper: Normalize comments array safely
-    function parseComments(commentsData) {
-      if (!commentsData) return [];
-      if (Array.isArray(commentsData)) return commentsData.filter(Boolean);
-      return Object.values(commentsData).filter(Boolean);
-    }
 
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
@@ -858,10 +847,10 @@
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        blogPosts = Object.values(data).map(p => {
-          p.comments = parseComments(p.comments);
-          return p;
-        });
+        blogPosts = Object.keys(data).map(key => ({
+          ...data[key],
+          id: key
+        }));
       } else {
         blogPosts = [];
       }
@@ -874,10 +863,9 @@
         window.renderAdminCommentsList();
       }
       
-      // Auto refresh current open post comments
       if (window.currentViewPostId) {
         const post = blogPosts.find(p => p.id === window.currentViewPostId);
-        if (post) window.renderComments(post);
+        if (post) window.listenToComments(post.id);
       }
     });
 
@@ -991,7 +979,7 @@
       window.renderHomePosts(filtered);
     };
 
-    window.renderSinglePost = async function(postId) {
+    window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
 
@@ -1041,51 +1029,56 @@
         </section>
       `;
 
-      // Fetch fresh comments explicitly from DB to guarantee readers see existing comments instantly
-      try {
-        const commentsSnap = await get(ref(db, `posts/${postId}/comments`));
-        post.comments = parseComments(commentsSnap.val());
-      } catch(e) {}
-
-      window.renderComments(post);
+      window.listenToComments(postId);
 
       document.querySelectorAll('#articleBody img').forEach(img => {
         img.addEventListener('click', () => window.openLightbox(img.src));
       });
     };
 
-    window.renderComments = function(post) {
+    // Realtime Listener for Post's Comments
+    window.listenToComments = function(postId) {
+      const commentsRef = ref(db, `posts/${postId}/comments`);
+      onValue(commentsRef, (snapshot) => {
+        const commentsData = snapshot.val();
+        window.renderCommentsUI(postId, commentsData);
+      });
+    };
+
+    window.renderCommentsUI = function(postId, commentsData) {
       const container = document.getElementById('commentsList');
       if (!container) return;
       container.innerHTML = '';
 
-      const comments = parseComments(post.comments);
-      if (comments.length === 0) {
+      if (!commentsData) {
         container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">لا توجد تعليقات بعد.</p>';
         return;
       }
 
-      comments.forEach((c, index) => {
+      Object.keys(commentsData).forEach(commentId => {
+        const c = commentsData[commentId];
         const card = document.createElement('div');
         card.className = 'comment-card';
 
         let repliesHTML = '';
-        const replies = parseComments(c.replies);
-        if (replies.length > 0) {
+        if (c.replies) {
           repliesHTML = `<div class="replies-list">` + 
-            replies.map((r, rIndex) => `
-              <div style="margin-top: 8px;">
-                <div class="comment-header">
-                  <span class="comment-author">${r.author}</span>
-                  <span>${r.date}</span>
+            Object.keys(c.replies).map(replyId => {
+              const r = c.replies[replyId];
+              return `
+                <div style="margin-top: 8px;">
+                  <div class="comment-header">
+                    <span class="comment-author">${r.author}</span>
+                    <span>${r.date}</span>
+                  </div>
+                  <div class="comment-body">${r.text}</div>
+                  ${isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteReply('${postId}', '${commentId}', '${replyId}')">حذف الرد</button>` : ''}
                 </div>
-                <div class="comment-body">${r.text}</div>
-                ${isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteReply('${post.id}', ${index}, ${rIndex})">حذف الرد</button>` : ''}
-              </div>
-            `).join('') + `</div>`;
+              `;
+            }).join('') + `</div>`;
         }
 
-        const deleteBtnHTML = isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteComment('${post.id}', ${index})">حذف التعليق</button>` : '';
+        const deleteBtnHTML = isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteComment('${postId}', '${commentId}')">حذف التعليق</button>` : '';
 
         card.innerHTML = `
           <div class="comment-header">
@@ -1094,13 +1087,13 @@
           </div>
           <div class="comment-body">${c.text}</div>
           <div>
-            <button class="reply-btn" onclick="window.showReplyForm('${post.id}', ${index})">رد</button>
+            <button class="reply-btn" onclick="window.showReplyForm('${commentId}')">رد</button>
             ${deleteBtnHTML}
           </div>
-          <div id="replyForm-${index}" style="display:none; margin-top:10px;">
-            <input type="text" id="replyAuthor-${index}" placeholder="الاسم" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
-            <textarea id="replyText-${index}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
-            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="window.addReply(event, '${post.id}', ${index})">إرسال الرد</button>
+          <div id="replyForm-${commentId}" style="display:none; margin-top:10px;">
+            <input type="text" id="replyAuthor-${commentId}" placeholder="الاسم" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+            <textarea id="replyText-${commentId}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
+            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="window.addReply(event, '${postId}', '${commentId}')">إرسال الرد</button>
           </div>
           ${repliesHTML}
         `;
@@ -1124,37 +1117,83 @@
         return;
       }
 
-      const commentsRef = ref(db, `posts/${postId}/comments`);
-
       try {
-        const snapshot = await get(commentsRef);
-        let currentComments = parseComments(snapshot.val());
-
-        const newComment = {
-          id: 'c_' + Date.now(),
+        const commentsRef = ref(db, `posts/${postId}/comments`);
+        await push(commentsRef, {
           author: author,
           text: text,
-          date: new Date().toISOString().split('T')[0],
-          replies: []
-        };
-
-        currentComments.push(newComment);
-
-        await set(commentsRef, currentComments);
+          date: new Date().toISOString().split('T')[0]
+        });
 
         if (authorInput) authorInput.value = '';
         textInput.value = '';
         alert('تم إضافة التعليق بنجاح!');
-
       } catch (err) {
         console.error("خطأ تفصيلي:", err);
         alert('تعذر إرسال التعليق:\n' + (err.message || err));
       }
     };
 
-    /* ==========================================================================
-       إدارة وحذف التعليقات والردود من لوحة التحكم وقاعدة البيانات
-       ========================================================================== */
+    window.deleteComment = async function(postId, commentId) {
+      if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
+
+      try {
+        await remove(ref(db, `posts/${postId}/comments/${commentId}`));
+        alert('تم حذف التعليق بنجاح.');
+      } catch (err) {
+        console.error("خطأ في الحذف:", err);
+        alert('تعذر حذف التعليق: ' + (err.message || err));
+      }
+    };
+
+    window.deleteReply = async function(postId, commentId, replyId) {
+      if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
+
+      try {
+        await remove(ref(db, `posts/${postId}/comments/${commentId}/replies/${replyId}`));
+        alert('تم حذف الرد بنجاح.');
+      } catch (err) {
+        console.error("خطأ في حذف الرد:", err);
+        alert('تعذر حذف الرد: ' + (err.message || err));
+      }
+    };
+
+    window.showReplyForm = function(commentId) {
+      const el = document.getElementById(`replyForm-${commentId}`);
+      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    };
+
+    window.addReply = async function(e, postId, commentId) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      const authorInput = document.getElementById(`replyAuthor-${commentId}`);
+      const textInput = document.getElementById(`replyText-${commentId}`);
+
+      if (!textInput) return;
+
+      const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
+      const text = textInput.value.trim();
+
+      if (!text) {
+        alert('يرجى كتابة نص الرد أولاً');
+        return;
+      }
+
+      try {
+        const repliesRef = ref(db, `posts/${postId}/comments/${commentId}/replies`);
+        await push(repliesRef, {
+          author: author,
+          text: text,
+          date: new Date().toISOString().split('T')[0]
+        });
+
+        alert('تم إضافة الرد بنجاح!');
+      } catch (err) {
+        console.error("خطأ في حفظ الرد:", err);
+        alert('حدث خطأ أثناء إرسال الرد:\n' + (err.message || err));
+      }
+    };
+
     window.renderAdminCommentsList = function() {
       const container = document.getElementById('adminCommentsList');
       if (!container) return;
@@ -1163,10 +1202,10 @@
       let hasComments = false;
 
       blogPosts.forEach(post => {
-        const comments = parseComments(post.comments);
-        if (comments.length > 0) {
+        if (post.comments) {
           hasComments = true;
-          comments.forEach((c, cIndex) => {
+          Object.keys(post.comments).forEach(commentId => {
+            const c = post.comments[commentId];
             const item = document.createElement('div');
             item.className = 'admin-post-item';
             item.style.flexDirection = 'column';
@@ -1174,23 +1213,25 @@
             item.style.gap = '8px';
 
             let repliesHTML = '';
-            const replies = parseComments(c.replies);
-            if (replies.length > 0) {
+            if (c.replies) {
               repliesHTML = `<div style="margin-right: 15px; border-right: 2px solid var(--border-color); padding-right: 10px; margin-top: 5px;">` +
-                replies.map((r, rIndex) => `
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; background: #f0f0f0; padding: 6px; border-radius: 4px;">
-                    <div style="font-size: 0.85rem;">
-                      <strong>${r.author}:</strong> ${r.text} <span style="font-size:0.75rem; color:#888;">(${r.date})</span>
+                Object.keys(c.replies).map(replyId => {
+                  const r = c.replies[replyId];
+                  return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; background: #f0f0f0; padding: 6px; border-radius: 4px;">
+                      <div style="font-size: 0.85rem;">
+                        <strong>${r.author}:</strong> ${r.text} <span style="font-size:0.75rem; color:#888;">(${r.date})</span>
+                      </div>
+                      <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.75rem;" onclick="window.deleteReply('${post.id}', '${commentId}', '${replyId}')">حذف الرد</button>
                     </div>
-                    <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.75rem;" onclick="window.deleteReply('${post.id}', ${cIndex}, ${rIndex})">حذف الرد</button>
-                  </div>
-                `).join('') + `</div>`;
+                  `;
+                }).join('') + `</div>`;
             }
 
             item.innerHTML = `
               <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 6px;">
                 <span style="font-size: 0.85rem; color: var(--accent-color); font-weight: 600;">المقال: ${post.title}</span>
-                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 0.8rem;" onclick="window.deleteComment('${post.id}', ${cIndex})">حذف التعليق</button>
+                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 0.8rem;" onclick="window.deleteComment('${post.id}', '${commentId}')">حذف التعليق</button>
               </div>
               <div>
                 <strong>${c.author}:</strong> ${c.text}
@@ -1205,92 +1246,6 @@
 
       if (!hasComments) {
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد أي تعليقات في الوقت الحالي.</p>';
-      }
-    };
-
-    window.deleteComment = async function(postId, commentIndex) {
-      if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
-
-      const commentsRef = ref(db, `posts/${postId}/comments`);
-      try {
-        const snapshot = await get(commentsRef);
-        let currentComments = parseComments(snapshot.val());
-        
-        currentComments.splice(commentIndex, 1);
-        
-        await set(commentsRef, currentComments);
-        alert('تم حذف التعليق بنجاح.');
-      } catch (err) {
-        console.error("خطأ في الحذف:", err);
-        alert('تعذر حذف التعليق.');
-      }
-    };
-
-    window.deleteReply = async function(postId, commentIndex, replyIndex) {
-      if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
-
-      const commentsRef = ref(db, `posts/${postId}/comments`);
-      try {
-        const snapshot = await get(commentsRef);
-        let currentComments = parseComments(snapshot.val());
-
-        if (currentComments[commentIndex]) {
-          let replies = parseComments(currentComments[commentIndex].replies);
-          replies.splice(replyIndex, 1);
-          currentComments[commentIndex].replies = replies;
-          
-          await set(commentsRef, currentComments);
-          alert('تم حذف الرد بنجاح.');
-        }
-      } catch (err) {
-        console.error("خطأ في حذف الرد:", err);
-        alert('تعذر حذف الرد.');
-      }
-    };
-
-    window.showReplyForm = function(postId, index) {
-      const el = document.getElementById(`replyForm-${index}`);
-      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
-    };
-
-    window.addReply = async function(e, postId, commentIndex) {
-      if (e && e.preventDefault) e.preventDefault();
-
-      const authorInput = document.getElementById(`replyAuthor-${commentIndex}`);
-      const textInput = document.getElementById(`replyText-${commentIndex}`);
-
-      if (!textInput) return;
-
-      const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
-      const text = textInput.value.trim();
-
-      if (!text) {
-        alert('يرجى كتابة نص الرد أولاً');
-        return;
-      }
-
-      const newReply = {
-        author: author,
-        text: text,
-        date: new Date().toISOString().split('T')[0]
-      };
-
-      try {
-        const commentsRef = ref(db, `posts/${postId}/comments`);
-        const snapshot = await get(commentsRef);
-        let currentComments = parseComments(snapshot.val());
-
-        if (currentComments[commentIndex]) {
-          let replies = parseComments(currentComments[commentIndex].replies);
-          replies.push(newReply);
-          currentComments[commentIndex].replies = replies;
-
-          await set(commentsRef, currentComments);
-          alert('تم إضافة الرد بنجاح!');
-        }
-      } catch (err) {
-        console.error("خطأ في حفظ الرد:", err);
-        alert('حدث خطأ أثناء إرسال الرد:\n' + (err.message || err));
       }
     };
 
@@ -1398,17 +1353,14 @@
       }
 
       const postId = editId ? editId : 'post-' + Date.now();
-      const existingPost = blogPosts.find(p => p.id === postId);
 
       const postData = {
-        id: postId,
         title: title,
         category: category,
         content: content,
         cover: cover,
         status: status,
-        date: existingPost ? existingPost.date : new Date().toISOString().split('T')[0],
-        comments: existingPost && existingPost.comments ? parseComments(existingPost.comments) : [],
+        date: new Date().toISOString().split('T')[0],
         updatedAt: new Date().toISOString()
       };
 

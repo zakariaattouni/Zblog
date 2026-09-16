@@ -412,13 +412,21 @@
       margin-bottom: 10px;
     }
 
-    .reply-btn {
+    .reply-btn, .delete-comment-btn {
       background: none;
       border: none;
-      color: var(--accent-color);
       font-size: 0.85rem;
       cursor: pointer;
       padding: 0;
+    }
+
+    .reply-btn {
+      color: var(--accent-color);
+    }
+
+    .delete-comment-btn {
+      color: var(--danger-color);
+      margin-right: 12px;
     }
 
     .replies-list {
@@ -808,7 +816,7 @@
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
 
-    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjYuOSA2MC02MC0yNi45LTYwLTYwLTYwem0wIDE0MGMtMjIuMSAwLTQwLTE3LjktNDAtNDBzMTcuOS00MCA0MC00MCA0MCAxNy45IDQwIDQwLTE3LjkgNDAtNDAgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
 
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
@@ -1067,16 +1075,19 @@
         const replies = c.replies || [];
         if (replies.length > 0) {
           repliesHTML = `<div class="replies-list">` + 
-            replies.map(r => `
+            replies.map((r, rIndex) => `
               <div style="margin-top: 8px;">
                 <div class="comment-header">
                   <span class="comment-author">${r.author}</span>
                   <span>${r.date}</span>
                 </div>
                 <div class="comment-body">${r.text}</div>
+                ${isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteReply('${post.id}', ${index}, ${rIndex})">حذف الرد</button>` : ''}
               </div>
             `).join('') + `</div>`;
         }
+
+        const deleteBtnHTML = isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteComment('${post.id}', ${index})">حذف التعليق</button>` : '';
 
         card.innerHTML = `
           <div class="comment-header">
@@ -1084,7 +1095,10 @@
             <span>${c.date}</span>
           </div>
           <div class="comment-body">${c.text}</div>
-          <button class="reply-btn" onclick="window.showReplyForm('${post.id}', ${index})">رد</button>
+          <div>
+            <button class="reply-btn" onclick="window.showReplyForm('${post.id}', ${index})">رد</button>
+            ${deleteBtnHTML}
+          </div>
           <div id="replyForm-${index}" style="display:none; margin-top:10px;">
             <input type="text" id="replyAuthor-${index}" placeholder="الاسم" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
             <textarea id="replyText-${index}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
@@ -1096,9 +1110,6 @@
       });
     };
 
-    /* ==========================================================================
-       دالة إضافة التعليق مع التحديث الفوري للواجهة
-       ========================================================================== */
     window.addComment = async function(e, postId) {
       if (e && e.preventDefault) e.preventDefault();
 
@@ -1136,10 +1147,8 @@
 
         currentComments.push(newComment);
 
-        // الحفظ في الفايربيس
         await set(commentsRef, currentComments);
 
-        // تحديث البيانات المحلية وعرض التعليقات فوراً
         const localPost = blogPosts.find(p => p.id === postId);
         if (localPost) {
           localPost.comments = currentComments;
@@ -1153,6 +1162,57 @@
       } catch (err) {
         console.error("خطأ تفصيلي:", err);
         alert('تعذر إرسال التعليق:\n' + (err.message || err));
+      }
+    };
+
+    /* ==========================================================================
+       دوال حذف التعليقات والردود (خاصة بالمسؤول)
+       ========================================================================== */
+    window.deleteComment = async function(postId, commentIndex) {
+      if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
+
+      const commentsRef = ref(db, `posts/${postId}/comments`);
+      try {
+        const snapshot = await get(commentsRef);
+        if (snapshot.exists()) {
+          let currentComments = Array.isArray(snapshot.val()) ? snapshot.val() : Object.values(snapshot.val());
+          currentComments.splice(commentIndex, 1);
+          await set(commentsRef, currentComments);
+
+          const localPost = blogPosts.find(p => p.id === postId);
+          if (localPost) {
+            localPost.comments = currentComments;
+            window.renderComments(localPost);
+          }
+        }
+      } catch (err) {
+        console.error("خطأ في الحذف:", err);
+        alert('تعذر حذف التعليق.');
+      }
+    };
+
+    window.deleteReply = async function(postId, commentIndex, replyIndex) {
+      if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
+
+      const commentsRef = ref(db, `posts/${postId}/comments`);
+      try {
+        const snapshot = await get(commentsRef);
+        if (snapshot.exists()) {
+          let currentComments = Array.isArray(snapshot.val()) ? snapshot.val() : Object.values(snapshot.val());
+          if (currentComments[commentIndex] && currentComments[commentIndex].replies) {
+            currentComments[commentIndex].replies.splice(replyIndex, 1);
+            await set(commentsRef, currentComments);
+
+            const localPost = blogPosts.find(p => p.id === postId);
+            if (localPost) {
+              localPost.comments = currentComments;
+              window.renderComments(localPost);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("خطأ في حذف الرد:", err);
+        alert('تعذر حذف الرد.');
       }
     };
 

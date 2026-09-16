@@ -5,6 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مدونة زكريا</title>
 
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#3b5249">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="مدونة زكريا">
+  <meta name="application-name" content="مدونة زكريا">
+  <meta name="mobile-web-app-capable" content="yes">
+
   <!-- Google Fonts for Clean Arabic Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,31 +21,26 @@
   <style>
     /* ==========================================================================
        1. VARIABLES & CONFIGURATION
-       يمكنك تعديل الألوان، الخطوط، والأبعاد هنا لضبط مظهر المدونة لاحقاً.
        ========================================================================== */
     :root {
-      /* Palette */
-      --bg-color: #f7f7f6;           /* رمادي فاتح جداً مريح للعين */
-      --paper-color: #ffffff;        /* لون المساحات والأوراق */
-      --text-main: #2b2b2b;          /* لون النص الرئيسي */
-      --text-muted: #6e6e6e;         /* لون النصوص الثانوية والتفاصيل */
-      --accent-color: #3b5249;       /* لون أنيق هادئ للروابط والأزرار (زيتي دافئ) */
+      --bg-color: #f7f7f6;
+      --paper-color: #ffffff;
+      --text-main: #2b2b2b;
+      --text-muted: #6e6e6e;
+      --accent-color: #3b5249;
       --accent-hover: #2a3c35;
-      --border-color: #e5e5e3;       /* حدود خفيفة هادئة */
+      --border-color: #e5e5e3;
       --danger-color: #a94442;
 
-      /* Typography */
       --font-family: 'Noto Naskh Arabic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-heading: 'Amiri', serif;
       --font-size-base: 17px;
       --line-height: 1.8;
 
-      /* Layout */
-      --max-width: 720px;            /* عرض المقالات المريح للعين على الهواتف والشاشات */
+      --max-width: 720px;
       --radius: 8px;
     }
 
-    /* Reset & Base Setup */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -74,6 +77,70 @@
     button, input, textarea, select {
       font-family: inherit;
       font-size: inherit;
+    }
+
+    /* Install Prompt Banner */
+    #installPrompt {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      left: 20px;
+      background: var(--accent-color);
+      color: white;
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      z-index: 3000;
+      animation: slideUp 0.3s ease;
+    }
+
+    #installPrompt.show {
+      display: flex;
+    }
+
+    #installPrompt .install-text {
+      flex: 1;
+      font-size: 0.95rem;
+    }
+
+    #installPrompt .install-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    #installPrompt button {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    #installPrompt .install-btn {
+      background: white;
+      color: var(--accent-color);
+    }
+
+    #installPrompt .dismiss-btn {
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     /* ==========================================================================
@@ -123,7 +190,6 @@
       margin-top: 4px;
     }
 
-    /* Floating Menu Trigger */
     .menu-btn {
       background: none;
       border: 1px solid var(--border-color);
@@ -341,7 +407,6 @@
       cursor: pointer;
     }
 
-    /* Simple Share Section */
     .article-share {
       margin-top: 30px;
       padding-top: 20px;
@@ -363,7 +428,6 @@
       color: var(--text-main);
     }
 
-    /* Comments Section */
     .comments-container {
       margin-top: 40px;
       padding-top: 30px;
@@ -462,7 +526,6 @@
       background-color: var(--danger-color);
     }
 
-    /* Lightbox for images */
     .lightbox {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: 0;
@@ -595,7 +658,6 @@
       color: #7f6000;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 600px) {
       .header-content {
         padding: 16px;
@@ -614,9 +676,15 @@
 </head>
 <body>
 
-  <!-- ==========================================================================
-     HEADER & COVER SECTION
-     ========================================================================== -->
+  <!-- Install Prompt Banner -->
+  <div id="installPrompt">
+    <div class="install-text">قم بتثبيت التطبيق على جهازك للوصول السريع</div>
+    <div class="install-actions">
+      <button class="dismiss-btn" onclick="dismissInstall()">لاحقاً</button>
+      <button class="install-btn" onclick="installApp()">تثبيت</button>
+    </div>
+  </div>
+
   <header>
     <div class="cover-container" id="coverContainer">
       <img id="headerCoverImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='200' viewBox='0 0 800 200'><rect width='100%' height='100%' fill='%23e2e2e0'/><text x='50%' y='50%' fill='%23888888' font-family='sans-serif' font-size='18' text-anchor='middle'>غلاف المدونة</text></svg>" alt="تغويسة المدونة">
@@ -633,9 +701,6 @@
     </div>
   </header>
 
-  <!-- ==========================================================================
-     NAVIGATION OVERLAY (MOBILE FIRST)
-     ========================================================================== -->
   <div class="nav-overlay" id="navOverlay" onclick="toggleNav(false)">
     <div class="nav-drawer" onclick="event.stopPropagation()">
       <button class="close-nav" onclick="toggleNav(false)">&times;</button>
@@ -648,51 +713,34 @@
     </div>
   </div>
 
-  <!-- ==========================================================================
-     MAIN CONTENT AREA
-     ========================================================================== -->
   <main>
-
-    <!-- 1. HOME PAGE -->
     <section id="page-home" class="page active">
       <div class="search-box">
         <input type="text" id="searchInput" class="search-input" placeholder="بحث في المقالات..." oninput="handleSearch()">
       </div>
-      <div id="postsList" class="posts-list">
-        <!-- Posts rendered dynamically -->
-      </div>
+      <div id="postsList" class="posts-list"></div>
     </section>
 
-    <!-- 2. SINGLE POST PAGE -->
     <section id="page-post" class="page">
-      <div id="postSingleContainer">
-        <!-- Single post rendered dynamically -->
-      </div>
+      <div id="postSingleContainer"></div>
     </section>
 
-    <!-- 3. CATEGORIES PAGE -->
     <section id="page-categories" class="page">
       <h2 style="font-family: var(--font-heading); margin-bottom: 15px;">التصنيفات</h2>
-      <div id="categoriesList" class="categories-list">
-        <!-- Categories rendered dynamically -->
-      </div>
+      <div id="categoriesList" class="categories-list"></div>
       <div id="categoryPostsResult" class="posts-list" style="margin-top: 30px;"></div>
     </section>
 
-    <!-- 4. ABOUT PAGE -->
     <section id="page-about" class="page">
       <div class="about-card">
         <h2 style="font-family: var(--font-heading); margin-bottom: 15px;" id="aboutTitle">عن الكاتب</h2>
         <div id="aboutImageContainer" style="margin-bottom: 20px; display: none;">
           <img id="aboutImg" src="" alt="صورة الكاتب" style="max-width: 180px; border-radius: 50%;">
         </div>
-        <div id="aboutBody" style="line-height: 1.9; color: #333;">
-          <!-- About text rendered dynamically -->
-        </div>
+        <div id="aboutBody" style="line-height: 1.9; color: #333;"></div>
       </div>
     </section>
 
-    <!-- 5. ADMIN LOGIN -->
     <section id="page-admin-login" class="page">
       <div class="about-card" style="max-width: 400px; margin: 0 auto;">
         <h3 style="margin-bottom: 15px; font-family: var(--font-heading);">تسجيل الدخول للإدارة</h3>
@@ -705,7 +753,6 @@
       </div>
     </section>
 
-    <!-- 6. ADMIN PANEL -->
     <section id="page-admin-panel" class="page">
       <div class="admin-nav">
         <button class="admin-tab active" onclick="switchAdminTab('editor')">مقال جديد / تحرير</button>
@@ -714,7 +761,6 @@
         <button class="admin-tab" onclick="logoutAdmin()" style="color: var(--danger-color);">خروج</button>
       </div>
 
-      <!-- Admin Tab: Editor -->
       <div id="admin-tab-editor" class="admin-tab-content">
         <h3 style="margin-bottom: 15px;" id="editorFormTitle">إنشاء مقال جديد</h3>
         <input type="hidden" id="editPostId">
@@ -753,15 +799,11 @@
         </div>
       </div>
 
-      <!-- Admin Tab: Posts Management -->
       <div id="admin-tab-posts" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">المقالات والمسودات</h3>
-        <div id="adminPostsList" class="admin-post-list">
-          <!-- Admin post items -->
-        </div>
+        <div id="adminPostsList" class="admin-post-list"></div>
       </div>
 
-      <!-- Admin Tab: Settings -->
       <div id="admin-tab-settings" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">إعدادات العامة والترويسة</h3>
         
@@ -801,21 +843,16 @@
         <button class="btn" onclick="saveBlogSettings()">حفظ الإعدادات</button>
       </div>
     </section>
-
   </main>
 
-  <!-- LIGHTBOX FOR IMAGES -->
   <div class="lightbox" id="lightbox" onclick="closeLightbox()">
     <img id="lightboxImg" src="" alt="عرض مكبر">
   </div>
 
-  <!-- ==========================================================================
-     JAVASCRIPT LOGIC & LOCALSTORAGE INTERACTION
-     ========================================================================== -->
   <script>
-    /* --------------------------------------------------------------------------
-       1. INITIAL DATA STRUCTURES & DEFAULT CONTENT
-       -------------------------------------------------------------------------- */
+    // PWA App Icon (SVG - Elegant design)
+    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOCA4MC04MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjYuOS02MCA2MC02MCA2MCAyNi45IDYwIDYwLTI2LjkgNjAtNjAgNjB6IiBmaWxsPSIjZmZmIi8+PHBhdGggZD0iTTI1NiAyMDBjLTMzLjEgMC02MCAyNi45LTYwIDYwczI2LjkgNjAgNjAgNjAgNjAtMjYuOSA2MC02MC0yNi45LTYwLTYwLTYwem0wIDEwMGMtMjIuMSAwLTQwLTE3LjktNDAtNDBzMTcuOS00MCA0MC00MCA0MCAxNy45IDQwIDQwLTE3LjkgNDAtNDAgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
       subtitle: "ملاحظات وقراءات شخصية",
@@ -851,15 +888,129 @@
     let blogSettings = JSON.parse(localStorage.getItem('zk_settings')) || DEFAULT_SETTINGS;
     let blogPosts = JSON.parse(localStorage.getItem('zk_posts')) || DEFAULT_POSTS;
     let isAdminLoggedIn = false;
+    let deferredPrompt = null;
 
-    /* --------------------------------------------------------------------------
-       2. APP INITIALIZATION & NAVIGATION
-       -------------------------------------------------------------------------- */
     document.addEventListener("DOMContentLoaded", function() {
       applySettings();
       renderHomePosts(getPublishedPosts());
       renderCategories();
+      registerServiceWorker();
+      setupInstallPrompt();
     });
+
+    // PWA Service Worker Registration
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+          const CACHE_NAME = 'zakaria-blog-v1';
+          const urlsToCache = ['/'];
+
+          self.addEventListener('install', (event) => {
+            event.waitUntil(
+              caches.open(CACHE_NAME)
+                .then((cache) => cache.addAll(urlsToCache))
+            );
+          });
+
+          self.addEventListener('fetch', (event) => {
+            event.respondWith(
+              caches.match(event.request)
+                .then((response) => {
+                  if (response) {
+                    return response;
+                  }
+                  return fetch(event.request);
+                })
+            );
+          });
+        `;
+
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+
+        navigator.serviceWorker.register(swUrl)
+          .then(() => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      }
+    }
+
+    // PWA Manifest
+    function setupInstallPrompt() {
+      const manifest = {
+        name: 'مدونة زكريا',
+        short_name: 'مدونة زكريا',
+        description: 'ملاحظات وقراءات شخصية',
+        start_url: './',
+        display: 'standalone',
+        background_color: '#f7f7f6',
+        theme_color: '#3b5249',
+        orientation: 'portrait',
+        icons: [
+          {
+            src: APP_ICON,
+            sizes: '192x192',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          },
+          {
+            src: APP_ICON,
+            sizes: '512x512',
+            type: 'image/svg+xml',
+            purpose: 'any maskable'
+          }
+        ]
+      };
+
+      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+      const manifestUrl = URL.createObjectURL(manifestBlob);
+      
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = manifestUrl;
+      document.head.appendChild(link);
+
+      // Apple Touch Icon
+      const appleIcon = document.createElement('link');
+      appleIcon.rel = 'apple-touch-icon';
+      appleIcon.href = APP_ICON;
+      document.head.appendChild(appleIcon);
+
+      // Favicon
+      const favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      favicon.type = 'image/svg+xml';
+      favicon.href = APP_ICON;
+      document.head.appendChild(favicon);
+
+      // Install Prompt
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installPrompt').classList.add('show');
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        document.getElementById('installPrompt').classList.remove('show');
+      });
+    }
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          }
+          deferredPrompt = null;
+          document.getElementById('installPrompt').classList.remove('show');
+        });
+      }
+    }
+
+    function dismissInstall() {
+      document.getElementById('installPrompt').classList.remove('show');
+    }
 
     function toggleNav(show) {
       const nav = document.getElementById('navOverlay');
@@ -892,9 +1043,6 @@
       return blogPosts.filter(p => p.status === 'published');
     }
 
-    /* --------------------------------------------------------------------------
-       3. SETTINGS & RENDERING HELPERS
-       -------------------------------------------------------------------------- */
     function applySettings() {
       document.getElementById('siteTitle').innerText = blogSettings.title;
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
@@ -919,9 +1067,6 @@
       }
     }
 
-    /* --------------------------------------------------------------------------
-       4. HOME & SEARCH RENDERING
-       -------------------------------------------------------------------------- */
     function renderHomePosts(posts) {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
@@ -967,9 +1112,6 @@
       renderHomePosts(filtered);
     }
 
-    /* --------------------------------------------------------------------------
-       5. SINGLE POST & COMMENTS
-       -------------------------------------------------------------------------- */
     function renderSinglePost(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
@@ -981,7 +1123,6 @@
 
       const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
       
-      // Transform newlines to paragraphs safely
       const formattedContent = post.content.split('\n\n').map(p => {
         if (p.trim().startsWith('<img')) return p;
         return `<p>${p.replace(/\n/g, '<br>')}</p>`;
@@ -1024,7 +1165,6 @@
 
       renderComments(post);
 
-      // Attach image lightbox triggers
       document.querySelectorAll('#articleBody img').forEach(img => {
         img.addEventListener('click', () => openLightbox(img.src));
       });
@@ -1140,9 +1280,6 @@
       window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, '_blank');
     }
 
-    /* --------------------------------------------------------------------------
-       6. CATEGORIES RENDERING
-       -------------------------------------------------------------------------- */
     function renderCategories() {
       const container = document.getElementById('categoriesList');
       container.innerHTML = '';
@@ -1180,9 +1317,6 @@
       });
     }
 
-    /* --------------------------------------------------------------------------
-       7. ADMIN PANEL & POST MANAGEMENT
-       -------------------------------------------------------------------------- */
     function loginAdmin() {
       const pass = document.getElementById('adminPassInput').value;
       if (pass === 'admin') {
@@ -1337,9 +1471,6 @@
       alert('تم حفظ الإعدادات بنجاح!');
     }
 
-    /* --------------------------------------------------------------------------
-       8. IMAGE HANDLING (LOCAL STORAGE DATA URLs)
-       -------------------------------------------------------------------------- */
     function handleImageUpload(input, previewId, callback) {
       const file = input.files[0];
       if (!file) return;

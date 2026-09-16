@@ -899,7 +899,7 @@
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
 
-    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOCA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjYuOS02MCA2MC02MCA2MCAyNi45IDYwLTYwLTI2LjkgNjAtNjAgNjB6IiBmaWxsPSIjZmZmIi8+PHBhdGggZD0iTTI1NiAyMDBjLTMzLjEgMC02MCAyNi45LTYwIDYwczI2LjkgNjAgNjAgNjAgNjAtMjYuOSA2MC02MC0yNi45LTYwLTYwLTYwem0wIDE0MGMtMjIuMSAwLTQwLTE3LjktNDAtNDBzMTcuOS00MCA0MC00MCA0MCAxNy45IDQwIDQwLTE3LjkgNDAtNDAgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOCA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjYuOSA2MC02MC0yNi45LTYwLTYwLTYwem0wIDE0MGMtMjIuMSAwLTQwLTE3LjktNDAtNDBzMTcuOS00MCA0MC00MCA0MCAxNy45IDQwIDQwLTE3LjkgNDAtNDAgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
 
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
@@ -1126,7 +1126,7 @@
             <h4 style="font-size: 1rem;">أضف تعليقاً</h4>
             <input type="text" id="commentAuthorInput" placeholder="الاسم">
             <textarea id="commentTextInput" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
-            <button class="btn" onclick="window.addComment('${post.id}')">إرسال التعليق</button>
+            <button class="btn" onclick="window.addComment(event, '${post.id}')">إرسال التعليق</button>
           </div>
         </section>
       `;
@@ -1138,6 +1138,9 @@
       });
     };
 
+    /* ==========================================================================
+       دوال التعليقات والردود المعدلة كلياً لتستوعب مدخلات الهواتف المحمولة
+       ========================================================================== */
     window.renderComments = function(post) {
       const container = document.getElementById('commentsList');
       if (!container) return;
@@ -1178,7 +1181,7 @@
           <div id="replyForm-${index}" style="display:none; margin-top:10px;">
             <input type="text" id="replyAuthor-${index}" placeholder="الاسم" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
             <textarea id="replyText-${index}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
-            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="window.addReply('${post.id}', ${index})">إرسال الرد</button>
+            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="window.addReply(event, '${post.id}', ${index})">إرسال الرد</button>
           </div>
           ${repliesHTML}
         `;
@@ -1186,14 +1189,21 @@
       });
     };
 
-    /* ==========================================================================
-       مُصَحَّح: حفظ التعليقات مباشرة باستخدام ID المقال الفعلي
-       ========================================================================== */
-    window.addComment = async function(postId) {
-      const author = document.getElementById('commentAuthorInput').value.trim() || 'زائر';
-      const text = document.getElementById('commentTextInput').value.trim();
+    window.addComment = async function(e, postId) {
+      if (e && e.preventDefault) e.preventDefault();
 
-      if (!text) return;
+      const authorInput = document.getElementById('commentAuthorInput');
+      const textInput = document.getElementById('commentTextInput');
+
+      if (!textInput) return;
+
+      const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
+      const text = textInput.value.trim();
+
+      if (!text) {
+        alert('يرجى كتابة نص التعليق أولاً');
+        return;
+      }
 
       const newComment = {
         id: 'c_' + Date.now(),
@@ -1211,13 +1221,15 @@
           const currentComments = postData.comments || [];
           currentComments.push(newComment);
           await update(ref(db, 'posts/' + postId), { comments: currentComments });
+          
+          if (authorInput) authorInput.value = '';
+          textInput.value = '';
+          alert('تم إضافة التعليق بنجاح!');
         }
       } catch (err) {
         console.error("خطأ في حفظ التعليق:", err);
+        alert('حدث خطأ أثناء إرسال التعليق، يرجى التأكد من اتصال الإنترنت ثم المحاولة مجدداً');
       }
-
-      document.getElementById('commentAuthorInput').value = '';
-      document.getElementById('commentTextInput').value = '';
     };
 
     window.showReplyForm = function(postId, index) {
@@ -1225,14 +1237,21 @@
       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     };
 
-    /* ==========================================================================
-       مُصَحَّح: حفظ الردود مباشرة باستخدام ID المقال الفعلي
-       ========================================================================== */
-    window.addReply = async function(postId, commentIndex) {
-      const author = document.getElementById(`replyAuthor-${commentIndex}`).value.trim() || 'زائر';
-      const text = document.getElementById(`replyText-${commentIndex}`).value.trim();
+    window.addReply = async function(e, postId, commentIndex) {
+      if (e && e.preventDefault) e.preventDefault();
 
-      if (!text) return;
+      const authorInput = document.getElementById(`replyAuthor-${commentIndex}`);
+      const textInput = document.getElementById(`replyText-${commentIndex}`);
+
+      if (!textInput) return;
+
+      const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
+      const text = textInput.value.trim();
+
+      if (!text) {
+        alert('يرجى كتابة نص الرد أولاً');
+        return;
+      }
 
       const newReply = {
         author: author,
@@ -1252,14 +1271,13 @@
             }
             currentComments[commentIndex].replies.push(newReply);
             await update(ref(db, 'posts/' + postId), { comments: currentComments });
+            alert('تم إضافة الرد بنجاح!');
           }
         }
       } catch (err) {
         console.error("خطأ في حفظ الرد:", err);
+        alert('حدث خطأ أثناء إرسال الرد');
       }
-
-      document.getElementById(`replyAuthor-${commentIndex}`).value = '';
-      document.getElementById(`replyText-${commentIndex}`).value = '';
     };
 
     window.sharePost = function(title) {
@@ -1350,9 +1368,6 @@
       if (targetTab) targetTab.style.display = 'block';
     };
 
-    /* ==========================================================================
-       مُصَحَّح: حفظ وحفظ التعديل بدون استخدام push لمنع التعارض المساري
-       ========================================================================== */
     window.savePost = function(status) {
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();

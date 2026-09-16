@@ -777,7 +777,7 @@
     <section id="page-admin-login" class="page">
       <div class="about-card" style="max-width: 400px; margin: 0 auto;">
         <h3 style="margin-bottom: 15px; font-family: var(--font-heading);">تسجيل الدخول للإدارة</h3>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">اختبار واجهة الإدارة محلياً (كلمة المرور التجريبية: admin)</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">هذه الصفحة مخصصة للمسؤول فقط</p>
         <div class="form-group">
           <label>كلمة المرور</label>
           <input type="password" id="adminPassInput">
@@ -968,31 +968,42 @@
       if (data) {
         blogSettings = { ...DEFAULT_SETTINGS, ...data };
       } else {
-        // First time: set default settings
         set(ref(db, 'settings'), DEFAULT_SETTINGS);
       }
       window.applySettings();
       window.renderAboutPage();
     });
 
-    // Listen to Posts
+    // Listen to Posts (مع إصلاح هيكلية التعليقات لتظهر بشكل صحيح)
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        blogPosts = Object.values(data);
+        blogPosts = Object.values(data).map(post => {
+          // إصلاح: تحويل التعليقات من كائن إلى مصفوفة إذا لزم الأمر (بسبب push في فايربيس)
+          if (post.comments && typeof post.comments === 'object' && !Array.isArray(post.comments)) {
+            post.comments = Object.values(post.comments).map(c => {
+              if (c.replies && typeof c.replies === 'object' && !Array.isArray(c.replies)) {
+                c.replies = Object.values(c.replies);
+              } else if (!c.replies) {
+                c.replies = [];
+              }
+              return c;
+            });
+          } else if (!post.comments) {
+            post.comments = [];
+          }
+          return post;
+        });
       } else {
-        // First time: set default post
         push(ref(db, 'posts'), DEFAULT_POSTS[0]);
         blogPosts = [...DEFAULT_POSTS];
       }
       
-      // Re-render current view if needed
       const activePage = document.querySelector('.page.active');
       if (activePage && activePage.id === 'page-home') window.renderHomePosts(window.getPublishedPosts());
       if (activePage && activePage.id === 'page-categories') window.renderCategories();
       if (isAdminLoggedIn) window.renderAdminPostsList();
       
-      // If viewing a single post, refresh it to get new comments live
       if (window.currentViewPostId) {
         window.renderSinglePost(window.currentViewPostId);
       }
@@ -1127,7 +1138,6 @@
 
       const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
       
-      // Transform newlines to paragraphs safely
       const formattedContent = post.content.split('\n\n').map(p => {
         if (p.trim().startsWith('<img')) return p;
         return `<p>${p.replace(/\n/g, '<br>')}</p>`;
@@ -1170,7 +1180,6 @@
 
       window.renderComments(post);
 
-      // Attach image lightbox triggers
       document.querySelectorAll('#articleBody img').forEach(img => {
         img.addEventListener('click', () => window.openLightbox(img.src));
       });
@@ -1235,10 +1244,7 @@
         replies: []
       };
 
-      // Push to Firebase
       push(ref(db, `posts/${postId}/comments`), newComment);
-      
-      // Clear input
       document.getElementById('commentTextInput').value = '';
     };
 
@@ -1254,7 +1260,7 @@
       if (!text) return;
 
       const post = blogPosts.find(p => p.id === postId);
-      if (post && post.comments[commentIndex]) {
+      if (post && post.comments && post.comments[commentIndex]) {
         const commentId = post.comments[commentIndex].id;
         const newReply = {
           author: author,
@@ -1262,10 +1268,7 @@
           date: new Date().toISOString().split('T')[0]
         };
 
-        // Push reply to Firebase
         push(ref(db, `posts/${postId}/comments/${commentId}/replies`), newReply);
-        
-        // Clear input
         document.getElementById(`replyText-${commentIndex}`).value = '';
       }
     };
@@ -1333,12 +1336,12 @@
        -------------------------------------------------------------------------- */
     window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
-      if (pass === 'admin') {
+      if (pass === 'salem1959') {
         isAdminLoggedIn = true;
         document.getElementById('adminPassInput').value = '';
         window.navigateTo('admin-panel');
       } else {
-        alert('كلمة المرور غير صحيحة (استخدم: admin لاختبار الواجهة)');
+        alert('كلمة المرور غير صحيحة');
       }
     };
 
@@ -1385,13 +1388,11 @@
       };
 
       if (editId) {
-        // Update existing post
         const existingPost = blogPosts.find(p => p.id === editId);
         postData.date = existingPost ? existingPost.date : new Date().toISOString().split('T')[0];
         postData.comments = existingPost ? existingPost.comments : [];
         update(ref(db, 'posts/' + editId), postData);
       } else {
-        // Create new post
         postData.id = 'post-' + Date.now();
         postData.date = new Date().toISOString().split('T')[0];
         postData.comments = [];

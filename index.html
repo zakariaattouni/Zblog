@@ -21,7 +21,6 @@
   <style>
     /* ==========================================================================
        1. VARIABLES & CONFIGURATION
-       يمكنك تعديل الألوان، الخطوط، والأبعاد هنا لضبط مظهر المدونة لاحقاً.
        ========================================================================== */
     :root {
       /* Palette */
@@ -41,7 +40,7 @@
       --line-height: 1.8;
 
       /* Layout */
-      --max-width: 720px;            /* عرض المقالات المريح للعين على الهواتف والشاشات */
+      --max-width: 720px;            /* عرض المقالات المريح للعين */
       --radius: 8px;
     }
 
@@ -195,7 +194,6 @@
       margin-top: 4px;
     }
 
-    /* Floating Menu Trigger */
     .menu-btn {
       background: none;
       border: 1px solid var(--border-color);
@@ -376,7 +374,7 @@
     }
 
     /* ==========================================================================
-       6. SINGLE POST PAGE
+       6. SINGLE POST PAGE & COMMENTS
        ========================================================================== */
     .article-header {
       margin-bottom: 25px;
@@ -413,7 +411,6 @@
       cursor: pointer;
     }
 
-    /* Simple Share Section */
     .article-share {
       margin-top: 30px;
       padding-top: 20px;
@@ -435,7 +432,6 @@
       color: var(--text-main);
     }
 
-    /* Comments Section */
     .comments-container {
       margin-top: 40px;
       padding-top: 30px;
@@ -534,7 +530,6 @@
       background-color: var(--danger-color);
     }
 
-    /* Lightbox for images */
     .lightbox {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: 0;
@@ -667,7 +662,6 @@
       color: #7f6000;
     }
 
-    /* Responsive adjustments */
     @media (max-width: 600px) {
       .header-content {
         padding: 16px;
@@ -695,9 +689,7 @@
     </div>
   </div>
 
-  <!-- ==========================================================================
-     HEADER & COVER SECTION
-     ========================================================================== -->
+  <!-- HEADER & COVER SECTION -->
   <header>
     <div class="cover-container" id="coverContainer">
       <img id="headerCoverImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='200' viewBox='0 0 800 200'><rect width='100%' height='100%' fill='%23e2e2e0'/><text x='50%' y='50%' fill='%23888888' font-family='sans-serif' font-size='18' text-anchor='middle'>غلاف المدونة</text></svg>" alt="تغويسة المدونة">
@@ -714,9 +706,7 @@
     </div>
   </header>
 
-  <!-- ==========================================================================
-     NAVIGATION OVERLAY (MOBILE FIRST)
-     ========================================================================== -->
+  <!-- NAVIGATION OVERLAY -->
   <div class="nav-overlay" id="navOverlay" onclick="window.toggleNav(false)">
     <div class="nav-drawer" onclick="event.stopPropagation()">
       <button class="close-nav" onclick="window.toggleNav(false)">&times;</button>
@@ -729,9 +719,7 @@
     </div>
   </div>
 
-  <!-- ==========================================================================
-     MAIN CONTENT AREA
-     ========================================================================== -->
+  <!-- MAIN CONTENT AREA -->
   <main>
 
     <!-- 1. HOME PAGE -->
@@ -789,9 +777,9 @@
     <!-- 6. ADMIN PANEL -->
     <section id="page-admin-panel" class="page">
       <div class="admin-nav">
-        <button class="admin-tab active" onclick="window.switchAdminTab('editor')">مقال جديد / تحرير</button>
-        <button class="admin-tab" onclick="window.switchAdminTab('posts')">إدارة المقالات</button>
-        <button class="admin-tab" onclick="window.switchAdminTab('settings')">إعدادات المدونة</button>
+        <button class="admin-tab active" onclick="window.switchAdminTab('editor', event)">مقال جديد / تحرير</button>
+        <button class="admin-tab" onclick="window.switchAdminTab('posts', event)">إدارة المقالات</button>
+        <button class="admin-tab" onclick="window.switchAdminTab('settings', event)">إعدادات المدونة</button>
         <button class="admin-tab" onclick="window.logoutAdmin()" style="color: var(--danger-color);">خروج</button>
       </div>
 
@@ -819,7 +807,7 @@
 
         <div class="form-group">
           <label>نص المقال</label>
-          <textarea id="postContentInput" rows="10" placeholder="اكتب النص هنا... (يمكنك إضافة فقرات عادي)"></textarea>
+          <textarea id="postContentInput" rows="10" placeholder="اكتب النص هنا..."></textarea>
         </div>
 
         <div class="form-group">
@@ -890,16 +878,12 @@
     <img id="lightboxImg" src="" alt="عرض مكبر">
   </div>
 
-  <!-- ==========================================================================
-     JAVASCRIPT LOGIC & FIREBASE INTERACTION
-     ========================================================================== -->
+  <!-- JAVASCRIPT LOGIC & FIREBASE INTERACTION -->
   <script type="module">
-    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-    import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, get, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-    // Your web app's Firebase configuration
     const firebaseConfig = {
       apiKey: "AIzaSyDaxCW0tvWgsLfxujQJcjsfezBpHe_qzHo",
       authDomain: "zblog-5ec1e.firebaseapp.com",
@@ -911,17 +895,12 @@
       measurementId: "G-JGTPVDDD0W"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
 
-    // PWA App Icon (Elegant SVG Base64)
-    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOCA4MC04MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjYuOS02MCA2MC02MCA2MCAyNi45IDYwIDYwLTI2LjkgNjAtNjAgNjB6IiBmaWxsPSIjZmZmIi8+PHBhdGggZD0iTTI1NiAyMDBjLTMzLjEgMC02MCAyNi45LTYwIDYwczI2LjkgNjAgNjAgNjAgNjAtMjYuOSA2MC02MC0yNi45LTYwLTYwLTYwem0wIDEwMGMtMjIuMSAwLTQwLTE3LjktNDAtNDBzMTcuOS00MCA0MC00MCA0MCAxNy45IDQwIDQwLTE3LjkgNDAtNDAgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOCA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjYuOS02MCA2MC02MCA2MCAyNi45IDYwLTYwLTI2LjkgNjAtNjAgNjB6IiBmaWxsPSIjZmZmIi8+PHBhdGggZD0iTTI1NiAyMDBjLTMzLjEgMC02MCAyNi45LTYwIDYwczI2LjkgNjAgNjAgNjAgNjAtMjYuOSA2MC02MC0yNi45LTYwLTYwLTYwem0wIDE0MGMtMjIuMSAwLTQwLTE3LjktNDAtNDBzMTcuOS00MCA0MC00MCA0MCAxNy45IDQwIDQwLTE3LjkgNDAtNDAgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
 
-    /* --------------------------------------------------------------------------
-       1. INITIAL DATA STRUCTURES & DEFAULT CONTENT
-       -------------------------------------------------------------------------- */
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
       subtitle: "ملاحظات وقراءات شخصية",
@@ -931,8 +910,8 @@
       aboutImage: ""
     };
 
-    const DEFAULT_POSTS = [
-      {
+    const DEFAULT_POSTS = {
+      "post-1": {
         id: "post-1",
         title: "عن القراءة الهادئة والتدوين الشخصي",
         category: "تأملات",
@@ -952,23 +931,13 @@
           }
         ]
       }
-    ];
+    };
 
     let blogSettings = { ...DEFAULT_SETTINGS };
     let blogPosts = [];
     let isAdminLoggedIn = false;
     let deferredPrompt = null;
-
-    /* --------------------------------------------------------------------------
-       2. FIREBASE REALTIME DATABASE LISTENERS
-       -------------------------------------------------------------------------- */
-    // دالة مساعدة لتحويل الكائن إلى مصفوفة بشكل آمن
-    function convertToArray(data) {
-      if (!data) return [];
-      if (Array.isArray(data)) return data;
-      if (typeof data === 'object') return Object.values(data);
-      return [];
-    }
+    window.currentViewPostId = null;
 
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
@@ -982,30 +951,14 @@
       window.renderAboutPage();
     });
 
-    // Listen to Posts - مع معالجة قوية للتعليقات
+    // Listen to Posts
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        blogPosts = Object.values(data).map(post => {
-          // تحويل التعليقات إلى مصفوفة بشكل آمن
-          if (post.comments) {
-            post.comments = convertToArray(post.comments).map(comment => {
-              // تحويل الردود إلى مصفوفة بشكل آمن
-              if (comment.replies) {
-                comment.replies = convertToArray(comment.replies);
-              } else {
-                comment.replies = [];
-              }
-              return comment;
-            });
-          } else {
-            post.comments = [];
-          }
-          return post;
-        });
+        blogPosts = Object.values(data);
       } else {
-        push(ref(db, 'posts'), DEFAULT_POSTS[0]);
-        blogPosts = [...DEFAULT_POSTS];
+        set(ref(db, 'posts'), DEFAULT_POSTS);
+        blogPosts = Object.values(DEFAULT_POSTS);
       }
       
       const activePage = document.querySelector('.page.active');
@@ -1018,9 +971,6 @@
       }
     });
 
-    /* --------------------------------------------------------------------------
-       3. APP INITIALIZATION & NAVIGATION
-       -------------------------------------------------------------------------- */
     document.addEventListener("DOMContentLoaded", function() {
       window.registerServiceWorker();
       window.setupInstallPrompt();
@@ -1040,15 +990,19 @@
       window.scrollTo(0, 0);
 
       if (pageId === 'home') {
+        window.currentViewPostId = null;
         window.renderHomePosts(window.getPublishedPosts());
       } else if (pageId === 'post' && param) {
         window.currentViewPostId = param;
         window.renderSinglePost(param);
       } else if (pageId === 'categories') {
+        window.currentViewPostId = null;
         window.renderCategories();
       } else if (pageId === 'about') {
+        window.currentViewPostId = null;
         window.renderAboutPage();
       } else if (pageId === 'admin-panel') {
+        window.currentViewPostId = null;
         if (!isAdminLoggedIn) window.navigateTo('admin-login');
         else window.renderAdminPanel();
       }
@@ -1058,9 +1012,6 @@
       return blogPosts.filter(p => p.status === 'published');
     };
 
-    /* --------------------------------------------------------------------------
-       4. SETTINGS & RENDERING HELPERS
-       -------------------------------------------------------------------------- */
     window.applySettings = function() {
       document.getElementById('siteTitle').innerText = blogSettings.title;
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
@@ -1085,9 +1036,6 @@
       }
     };
 
-    /* --------------------------------------------------------------------------
-       5. HOME & SEARCH RENDERING
-       -------------------------------------------------------------------------- */
     window.renderHomePosts = function(posts) {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
@@ -1133,9 +1081,6 @@
       window.renderHomePosts(filtered);
     };
 
-    /* --------------------------------------------------------------------------
-       6. SINGLE POST & COMMENTS
-       -------------------------------------------------------------------------- */
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
@@ -1182,7 +1127,6 @@
             <input type="text" id="commentAuthorInput" placeholder="الاسم">
             <textarea id="commentTextInput" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
             <button class="btn" onclick="window.addComment('${post.id}')">إرسال التعليق</button>
-            <small style="color: var(--text-muted); margin-top: 4px;">ملاحظة: التعليقات تحفظ مباشرة في قاعدة البيانات.</small>
           </div>
         </section>
       `;
@@ -1196,21 +1140,24 @@
 
     window.renderComments = function(post) {
       const container = document.getElementById('commentsList');
+      if (!container) return;
       container.innerHTML = '';
 
-      if (!post.comments || post.comments.length === 0) {
+      const comments = post.comments || [];
+      if (comments.length === 0) {
         container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">لا توجد تعليقات بعد.</p>';
         return;
       }
 
-      post.comments.forEach((c, index) => {
+      comments.forEach((c, index) => {
         const card = document.createElement('div');
         card.className = 'comment-card';
 
         let repliesHTML = '';
-        if (c.replies && c.replies.length > 0) {
+        const replies = c.replies || [];
+        if (replies.length > 0) {
           repliesHTML = `<div class="replies-list">` + 
-            c.replies.map(r => `
+            replies.map(r => `
               <div style="margin-top: 8px;">
                 <div class="comment-header">
                   <span class="comment-author">${r.author}</span>
@@ -1239,7 +1186,10 @@
       });
     };
 
-    window.addComment = function(postId) {
+    /* ==========================================================================
+       مُصَحَّح: حفظ التعليقات مباشرة باستخدام ID المقال الفعلي
+       ========================================================================== */
+    window.addComment = async function(postId) {
       const author = document.getElementById('commentAuthorInput').value.trim() || 'زائر';
       const text = document.getElementById('commentTextInput').value.trim();
 
@@ -1253,7 +1203,19 @@
         replies: []
       };
 
-      push(ref(db, `posts/${postId}/comments`), newComment);
+      try {
+        const postRef = ref(db, 'posts/' + postId);
+        const snapshot = await get(postRef);
+        if (snapshot.exists()) {
+          const postData = snapshot.val();
+          const currentComments = postData.comments || [];
+          currentComments.push(newComment);
+          await update(ref(db, 'posts/' + postId), { comments: currentComments });
+        }
+      } catch (err) {
+        console.error("خطأ في حفظ التعليق:", err);
+      }
+
       document.getElementById('commentAuthorInput').value = '';
       document.getElementById('commentTextInput').value = '';
     };
@@ -1263,25 +1225,41 @@
       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     };
 
-    window.addReply = function(postId, commentIndex) {
+    /* ==========================================================================
+       مُصَحَّح: حفظ الردود مباشرة باستخدام ID المقال الفعلي
+       ========================================================================== */
+    window.addReply = async function(postId, commentIndex) {
       const author = document.getElementById(`replyAuthor-${commentIndex}`).value.trim() || 'زائر';
       const text = document.getElementById(`replyText-${commentIndex}`).value.trim();
 
       if (!text) return;
 
-      const post = blogPosts.find(p => p.id === postId);
-      if (post && post.comments && post.comments[commentIndex]) {
-        const commentId = post.comments[commentIndex].id;
-        const newReply = {
-          author: author,
-          text: text,
-          date: new Date().toISOString().split('T')[0]
-        };
+      const newReply = {
+        author: author,
+        text: text,
+        date: new Date().toISOString().split('T')[0]
+      };
 
-        push(ref(db, `posts/${postId}/comments/${commentId}/replies`), newReply);
-        document.getElementById(`replyAuthor-${commentIndex}`).value = '';
-        document.getElementById(`replyText-${commentIndex}`).value = '';
+      try {
+        const postRef = ref(db, 'posts/' + postId);
+        const snapshot = await get(postRef);
+        if (snapshot.exists()) {
+          const postData = snapshot.val();
+          const currentComments = postData.comments || [];
+          if (currentComments[commentIndex]) {
+            if (!currentComments[commentIndex].replies) {
+              currentComments[commentIndex].replies = [];
+            }
+            currentComments[commentIndex].replies.push(newReply);
+            await update(ref(db, 'posts/' + postId), { comments: currentComments });
+          }
+        }
+      } catch (err) {
+        console.error("خطأ في حفظ الرد:", err);
       }
+
+      document.getElementById(`replyAuthor-${commentIndex}`).value = '';
+      document.getElementById(`replyText-${commentIndex}`).value = '';
     };
 
     window.sharePost = function(title) {
@@ -1302,9 +1280,6 @@
       window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, '_blank');
     };
 
-    /* --------------------------------------------------------------------------
-       7. CATEGORIES RENDERING
-       -------------------------------------------------------------------------- */
     window.renderCategories = function() {
       const container = document.getElementById('categoriesList');
       container.innerHTML = '';
@@ -1342,9 +1317,6 @@
       });
     };
 
-    /* --------------------------------------------------------------------------
-       8. ADMIN PANEL & POST MANAGEMENT
-       -------------------------------------------------------------------------- */
     window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
       if (pass === 'salem1959') {
@@ -1369,14 +1341,18 @@
       document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
     };
 
-    window.switchAdminTab = function(tabName) {
+    window.switchAdminTab = function(tabName, evt) {
       document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
 
-      event.target.classList.add('active');
-      document.getElementById(`admin-tab-${tabName}`).style.display = 'block';
+      if (evt && evt.target) evt.target.classList.add('active');
+      const targetTab = document.getElementById(`admin-tab-${tabName}`);
+      if (targetTab) targetTab.style.display = 'block';
     };
 
+    /* ==========================================================================
+       مُصَحَّح: حفظ وحفظ التعديل بدون استخدام push لمنع التعارض المساري
+       ========================================================================== */
     window.savePost = function(status) {
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
@@ -1389,26 +1365,22 @@
         return;
       }
 
+      const postId = editId ? editId : 'post-' + Date.now();
+      const existingPost = blogPosts.find(p => p.id === postId);
+
       const postData = {
+        id: postId,
         title: title,
         category: category,
         content: content,
         cover: cover,
         status: status,
+        date: existingPost ? existingPost.date : new Date().toISOString().split('T')[0],
+        comments: existingPost && existingPost.comments ? existingPost.comments : [],
         updatedAt: new Date().toISOString()
       };
 
-      if (editId) {
-        const existingPost = blogPosts.find(p => p.id === editId);
-        postData.date = existingPost ? existingPost.date : new Date().toISOString().split('T')[0];
-        postData.comments = existingPost ? existingPost.comments : [];
-        update(ref(db, 'posts/' + editId), postData);
-      } else {
-        postData.id = 'post-' + Date.now();
-        postData.date = new Date().toISOString().split('T')[0];
-        postData.comments = [];
-        push(ref(db, 'posts'), postData);
-      }
+      set(ref(db, 'posts/' + postId), postData);
 
       window.resetEditor();
       alert(status === 'published' ? 'تم نشر المقال بنجاح!' : 'تم حفظ المسودة.');
@@ -1496,9 +1468,6 @@
       alert('تم حفظ الإعدادات بنجاح!');
     };
 
-    /* --------------------------------------------------------------------------
-       9. IMAGE HANDLING (LOCAL DATA URLs)
-       -------------------------------------------------------------------------- */
     window.handleImageUpload = function(input, previewId, callback) {
       const file = input.files[0];
       if (!file) return;
@@ -1555,9 +1524,6 @@
       document.getElementById('lightbox').classList.remove('active');
     };
 
-    /* --------------------------------------------------------------------------
-       10. PWA SETUP & INSTALLATION
-       -------------------------------------------------------------------------- */
     window.registerServiceWorker = function() {
       if ('serviceWorker' in navigator) {
         const swCode = `

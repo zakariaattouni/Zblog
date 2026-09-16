@@ -420,14 +420,8 @@
       padding: 0;
     }
 
-    .reply-btn {
-      color: var(--accent-color);
-    }
-
-    .delete-comment-btn {
-      color: var(--danger-color);
-      margin-right: 12px;
-    }
+    .reply-btn { color: var(--accent-color); }
+    .delete-comment-btn { color: var(--danger-color); margin-right: 12px; }
 
     .replies-list {
       margin-right: 20px;
@@ -471,7 +465,7 @@
     }
 
     .btn-secondary:hover { background-color: #eee; }
-    .btn-danger { background-color: var(--danger-color); }
+    .btn-danger { background-color: var(--danger-color); color: white; }
 
     .lightbox {
       position: fixed;
@@ -536,6 +530,7 @@
       cursor: pointer;
       border-radius: 4px;
       color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .admin-tab.active {
@@ -698,6 +693,7 @@
       <div class="admin-nav">
         <button class="admin-tab active" onclick="window.switchAdminTab('editor', event)">مقال جديد / تحرير</button>
         <button class="admin-tab" onclick="window.switchAdminTab('posts', event)">إدارة المقالات</button>
+        <button class="admin-tab" onclick="window.switchAdminTab('comments', event)">إدارة التعليقات</button>
         <button class="admin-tab" onclick="window.switchAdminTab('settings', event)">إعدادات المدونة</button>
         <button class="admin-tab" onclick="window.logoutAdmin()" style="color: var(--danger-color);">خروج</button>
       </div>
@@ -745,6 +741,12 @@
       <div id="admin-tab-posts" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">المقالات والمسودات</h3>
         <div id="adminPostsList" class="admin-post-list"></div>
+      </div>
+
+      <!-- Comments Management -->
+      <div id="admin-tab-comments" class="admin-tab-content" style="display: none;">
+        <h3 style="margin-bottom: 15px;">إدارة جميع التعليقات</h3>
+        <div id="adminCommentsList" class="admin-post-list"></div>
       </div>
 
       <!-- Settings -->
@@ -881,7 +883,10 @@
       const activePage = document.querySelector('.page.active');
       if (activePage && activePage.id === 'page-home') window.renderHomePosts(window.getPublishedPosts());
       if (activePage && activePage.id === 'page-categories') window.renderCategories();
-      if (isAdminLoggedIn) window.renderAdminPostsList();
+      if (isAdminLoggedIn) {
+        window.renderAdminPostsList();
+        window.renderAdminCommentsList();
+      }
       
       if (window.currentViewPostId) {
         const post = blogPosts.find(p => p.id === window.currentViewPostId);
@@ -1166,8 +1171,61 @@
     };
 
     /* ==========================================================================
-       دوال حذف التعليقات والردود (خاصة بالمسؤول)
+       دوال حذف وإدارة التعليقات والردود من اللوحة
        ========================================================================== */
+    window.renderAdminCommentsList = function() {
+      const container = document.getElementById('adminCommentsList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      let hasComments = false;
+
+      blogPosts.forEach(post => {
+        const comments = post.comments || [];
+        if (comments.length > 0) {
+          hasComments = true;
+          comments.forEach((c, cIndex) => {
+            const item = document.createElement('div');
+            item.className = 'admin-post-item';
+            item.style.flexDirection = 'column';
+            item.style.alignItems = 'stretch';
+            item.style.gap = '8px';
+
+            let repliesHTML = '';
+            const replies = c.replies || [];
+            if (replies.length > 0) {
+              repliesHTML = `<div style="margin-right: 15px; border-right: 2px solid var(--border-color); padding-right: 10px; margin-top: 5px;">` +
+                replies.map((r, rIndex) => `
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; background: #f0f0f0; padding: 6px; border-radius: 4px;">
+                    <div style="font-size: 0.85rem;">
+                      <strong>${r.author}:</strong> ${r.text} <span style="font-size:0.75rem; color:#888;">(${r.date})</span>
+                    </div>
+                    <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.75rem;" onclick="window.deleteReply('${post.id}', ${cIndex}, ${rIndex})">حذف الرد</button>
+                  </div>
+                `).join('') + `</div>`;
+            }
+
+            item.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 6px;">
+                <span style="font-size: 0.85rem; color: var(--accent-color); font-weight: 600;">المقال: ${post.title}</span>
+                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 0.8rem;" onclick="window.deleteComment('${post.id}', ${cIndex})">حذف التعليق</button>
+              </div>
+              <div>
+                <strong>${c.author}:</strong> ${c.text}
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${c.date}</div>
+              </div>
+              ${repliesHTML}
+            `;
+            container.appendChild(item);
+          });
+        }
+      });
+
+      if (!hasComments) {
+        container.innerHTML = '<p style="color: var(--text-muted);">لا توجد أي تعليقات في الوقت الحالي.</p>';
+      }
+    };
+
     window.deleteComment = async function(postId, commentIndex) {
       if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
 
@@ -1184,6 +1242,7 @@
             localPost.comments = currentComments;
             window.renderComments(localPost);
           }
+          window.renderAdminCommentsList();
         }
       } catch (err) {
         console.error("خطأ في الحذف:", err);
@@ -1208,6 +1267,7 @@
               localPost.comments = currentComments;
               window.renderComments(localPost);
             }
+            window.renderAdminCommentsList();
           }
         }
       } catch (err) {
@@ -1337,6 +1397,7 @@
 
     window.renderAdminPanel = function() {
       window.renderAdminPostsList();
+      window.renderAdminCommentsList();
       document.getElementById('settingTitle').value = blogSettings.title || '';
       document.getElementById('settingSubtitle').value = blogSettings.subtitle || '';
       document.getElementById('settingAboutTitle').value = blogSettings.aboutTitle || '';
@@ -1350,6 +1411,8 @@
       if (evt && evt.target) evt.target.classList.add('active');
       const targetTab = document.getElementById(`admin-tab-${tabName}`);
       if (targetTab) targetTab.style.display = 'block';
+
+      if (tabName === 'comments') window.renderAdminCommentsList();
     };
 
     window.savePost = function(status) {

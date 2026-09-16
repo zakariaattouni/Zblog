@@ -21,26 +21,31 @@
   <style>
     /* ==========================================================================
        1. VARIABLES & CONFIGURATION
+       يمكنك تعديل الألوان، الخطوط، والأبعاد هنا لضبط مظهر المدونة لاحقاً.
        ========================================================================== */
     :root {
-      --bg-color: #f7f7f6;
-      --paper-color: #ffffff;
-      --text-main: #2b2b2b;
-      --text-muted: #6e6e6e;
-      --accent-color: #3b5249;
+      /* Palette */
+      --bg-color: #f7f7f6;           /* رمادي فاتح جداً مريح للعين */
+      --paper-color: #ffffff;        /* لون المساحات والأوراق */
+      --text-main: #2b2b2b;          /* لون النص الرئيسي */
+      --text-muted: #6e6e6e;         /* لون النصوص الثانوية والتفاصيل */
+      --accent-color: #3b5249;       /* لون أنيق هادئ للروابط والأزرار (زيتي دافئ) */
       --accent-hover: #2a3c35;
-      --border-color: #e5e5e3;
+      --border-color: #e5e5e3;       /* حدود خفيفة هادئة */
       --danger-color: #a94442;
 
+      /* Typography */
       --font-family: 'Noto Naskh Arabic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       --font-heading: 'Amiri', serif;
       --font-size-base: 17px;
       --line-height: 1.8;
 
-      --max-width: 720px;
+      /* Layout */
+      --max-width: 720px;            /* عرض المقالات المريح للعين على الهواتف والشاشات */
       --radius: 8px;
     }
 
+    /* Reset & Base Setup */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -190,6 +195,7 @@
       margin-top: 4px;
     }
 
+    /* Floating Menu Trigger */
     .menu-btn {
       background: none;
       border: 1px solid var(--border-color);
@@ -407,6 +413,7 @@
       cursor: pointer;
     }
 
+    /* Simple Share Section */
     .article-share {
       margin-top: 30px;
       padding-top: 20px;
@@ -428,6 +435,7 @@
       color: var(--text-main);
     }
 
+    /* Comments Section */
     .comments-container {
       margin-top: 40px;
       padding-top: 30px;
@@ -526,6 +534,7 @@
       background-color: var(--danger-color);
     }
 
+    /* Lightbox for images */
     .lightbox {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: 0;
@@ -658,6 +667,7 @@
       color: #7f6000;
     }
 
+    /* Responsive adjustments */
     @media (max-width: 600px) {
       .header-content {
         padding: 16px;
@@ -680,11 +690,14 @@
   <div id="installPrompt">
     <div class="install-text">قم بتثبيت التطبيق على جهازك للوصول السريع</div>
     <div class="install-actions">
-      <button class="dismiss-btn" onclick="dismissInstall()">لاحقاً</button>
-      <button class="install-btn" onclick="installApp()">تثبيت</button>
+      <button class="dismiss-btn" onclick="window.dismissInstall()">لاحقاً</button>
+      <button class="install-btn" onclick="window.installApp()">تثبيت</button>
     </div>
   </div>
 
+  <!-- ==========================================================================
+     HEADER & COVER SECTION
+     ========================================================================== -->
   <header>
     <div class="cover-container" id="coverContainer">
       <img id="headerCoverImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='200' viewBox='0 0 800 200'><rect width='100%' height='100%' fill='%23e2e2e0'/><text x='50%' y='50%' fill='%23888888' font-family='sans-serif' font-size='18' text-anchor='middle'>غلاف المدونة</text></svg>" alt="تغويسة المدونة">
@@ -694,53 +707,73 @@
         <h1 id="siteTitle">مدونة زكريا</h1>
         <p id="siteSubtitle">ملاحظات وقراءات شخصية</p>
       </div>
-      <button class="menu-btn" onclick="toggleNav(true)">
+      <button class="menu-btn" onclick="window.toggleNav(true)">
         <span>القائمة</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
       </button>
     </div>
   </header>
 
-  <div class="nav-overlay" id="navOverlay" onclick="toggleNav(false)">
+  <!-- ==========================================================================
+     NAVIGATION OVERLAY (MOBILE FIRST)
+     ========================================================================== -->
+  <div class="nav-overlay" id="navOverlay" onclick="window.toggleNav(false)">
     <div class="nav-drawer" onclick="event.stopPropagation()">
-      <button class="close-nav" onclick="toggleNav(false)">&times;</button>
+      <button class="close-nav" onclick="window.toggleNav(false)">&times;</button>
       <ul class="nav-links">
-        <li><a href="#" onclick="navigateTo('home'); toggleNav(false);">الرئيسية</a></li>
-        <li><a href="#" onclick="navigateTo('categories'); toggleNav(false);">التصنيفات</a></li>
-        <li><a href="#" onclick="navigateTo('about'); toggleNav(false);">عن زكريا</a></li>
-        <li><a href="#" onclick="navigateTo('admin-login'); toggleNav(false);" id="adminNavBtn">دخول الإدارة</a></li>
+        <li><a href="#" onclick="window.navigateTo('home'); window.toggleNav(false);">الرئيسية</a></li>
+        <li><a href="#" onclick="window.navigateTo('categories'); window.toggleNav(false);">التصنيفات</a></li>
+        <li><a href="#" onclick="window.navigateTo('about'); window.toggleNav(false);">عن زكريا</a></li>
+        <li><a href="#" onclick="window.navigateTo('admin-login'); window.toggleNav(false);" id="adminNavBtn">دخول الإدارة</a></li>
       </ul>
     </div>
   </div>
 
+  <!-- ==========================================================================
+     MAIN CONTENT AREA
+     ========================================================================== -->
   <main>
+
+    <!-- 1. HOME PAGE -->
     <section id="page-home" class="page active">
       <div class="search-box">
-        <input type="text" id="searchInput" class="search-input" placeholder="بحث في المقالات..." oninput="handleSearch()">
+        <input type="text" id="searchInput" class="search-input" placeholder="بحث في المقالات..." oninput="window.handleSearch()">
       </div>
-      <div id="postsList" class="posts-list"></div>
+      <div id="postsList" class="posts-list">
+        <!-- Posts rendered dynamically -->
+      </div>
     </section>
 
+    <!-- 2. SINGLE POST PAGE -->
     <section id="page-post" class="page">
-      <div id="postSingleContainer"></div>
+      <div id="postSingleContainer">
+        <!-- Single post rendered dynamically -->
+      </div>
     </section>
 
+    <!-- 3. CATEGORIES PAGE -->
     <section id="page-categories" class="page">
       <h2 style="font-family: var(--font-heading); margin-bottom: 15px;">التصنيفات</h2>
-      <div id="categoriesList" class="categories-list"></div>
+      <div id="categoriesList" class="categories-list">
+        <!-- Categories rendered dynamically -->
+      </div>
       <div id="categoryPostsResult" class="posts-list" style="margin-top: 30px;"></div>
     </section>
 
+    <!-- 4. ABOUT PAGE -->
     <section id="page-about" class="page">
       <div class="about-card">
         <h2 style="font-family: var(--font-heading); margin-bottom: 15px;" id="aboutTitle">عن الكاتب</h2>
         <div id="aboutImageContainer" style="margin-bottom: 20px; display: none;">
           <img id="aboutImg" src="" alt="صورة الكاتب" style="max-width: 180px; border-radius: 50%;">
         </div>
-        <div id="aboutBody" style="line-height: 1.9; color: #333;"></div>
+        <div id="aboutBody" style="line-height: 1.9; color: #333;">
+          <!-- About text rendered dynamically -->
+        </div>
       </div>
     </section>
 
+    <!-- 5. ADMIN LOGIN -->
     <section id="page-admin-login" class="page">
       <div class="about-card" style="max-width: 400px; margin: 0 auto;">
         <h3 style="margin-bottom: 15px; font-family: var(--font-heading);">تسجيل الدخول للإدارة</h3>
@@ -749,18 +782,20 @@
           <label>كلمة المرور</label>
           <input type="password" id="adminPassInput">
         </div>
-        <button class="btn" onclick="loginAdmin()">دخول</button>
+        <button class="btn" onclick="window.loginAdmin()">دخول</button>
       </div>
     </section>
 
+    <!-- 6. ADMIN PANEL -->
     <section id="page-admin-panel" class="page">
       <div class="admin-nav">
-        <button class="admin-tab active" onclick="switchAdminTab('editor')">مقال جديد / تحرير</button>
-        <button class="admin-tab" onclick="switchAdminTab('posts')">إدارة المقالات</button>
-        <button class="admin-tab" onclick="switchAdminTab('settings')">إعدادات المدونة</button>
-        <button class="admin-tab" onclick="logoutAdmin()" style="color: var(--danger-color);">خروج</button>
+        <button class="admin-tab active" onclick="window.switchAdminTab('editor')">مقال جديد / تحرير</button>
+        <button class="admin-tab" onclick="window.switchAdminTab('posts')">إدارة المقالات</button>
+        <button class="admin-tab" onclick="window.switchAdminTab('settings')">إعدادات المدونة</button>
+        <button class="admin-tab" onclick="window.logoutAdmin()" style="color: var(--danger-color);">خروج</button>
       </div>
 
+      <!-- Admin Tab: Editor -->
       <div id="admin-tab-editor" class="admin-tab-content">
         <h3 style="margin-bottom: 15px;" id="editorFormTitle">إنشاء مقال جديد</h3>
         <input type="hidden" id="editPostId">
@@ -777,7 +812,7 @@
 
         <div class="form-group">
           <label>صورة المقال الرئيسية</label>
-          <input type="file" id="postCoverInput" accept="image/*" onchange="handleImageUpload(this, 'postCoverPreview')">
+          <input type="file" id="postCoverInput" accept="image/*" onchange="window.handleImageUpload(this, 'postCoverPreview')">
           <input type="hidden" id="postCoverData">
           <img id="postCoverPreview" src="" style="max-height: 120px; margin-top: 10px; display: none;">
         </div>
@@ -789,21 +824,25 @@
 
         <div class="form-group">
           <label>إضافة صور داخل النص</label>
-          <input type="file" accept="image/*" onchange="insertImageToEditor(this)">
+          <input type="file" accept="image/*" onchange="window.insertImageToEditor(this)">
           <small style="color: var(--text-muted);">اختيار صورة سينشئ مكاناً لها في النص تلقائياً.</small>
         </div>
 
         <div style="display: flex; gap: 10px; margin-top: 20px;">
-          <button class="btn" onclick="savePost('published')">نشر المقال</button>
-          <button class="btn btn-secondary" onclick="savePost('draft')">حفظ كمسودة</button>
+          <button class="btn" onclick="window.savePost('published')">نشر المقال</button>
+          <button class="btn btn-secondary" onclick="window.savePost('draft')">حفظ كمسودة</button>
         </div>
       </div>
 
+      <!-- Admin Tab: Posts Management -->
       <div id="admin-tab-posts" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">المقالات والمسودات</h3>
-        <div id="adminPostsList" class="admin-post-list"></div>
+        <div id="adminPostsList" class="admin-post-list">
+          <!-- Admin post items -->
+        </div>
       </div>
 
+      <!-- Admin Tab: Settings -->
       <div id="admin-tab-settings" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">إعدادات العامة والترويسة</h3>
         
@@ -819,7 +858,7 @@
 
         <div class="form-group">
           <label>صورة الترويسة (الغلاف)</label>
-          <input type="file" accept="image/*" onchange="handleImageUpload(this, 'headerCoverPreview', saveHeaderCover)">
+          <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'headerCoverPreview', window.saveHeaderCover)">
           <img id="headerCoverPreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
         </div>
 
@@ -832,7 +871,7 @@
         </div>
         <div class="form-group">
           <label>الصورة الشخصية</label>
-          <input type="file" accept="image/*" onchange="handleImageUpload(this, 'aboutImagePreview', saveAboutImage)">
+          <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'aboutImagePreview', window.saveAboutImage)">
           <img id="aboutImagePreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
         </div>
         <div class="form-group">
@@ -840,19 +879,49 @@
           <textarea id="settingAboutBody" rows="6"></textarea>
         </div>
 
-        <button class="btn" onclick="saveBlogSettings()">حفظ الإعدادات</button>
+        <button class="btn" onclick="window.saveBlogSettings()">حفظ الإعدادات</button>
       </div>
     </section>
+
   </main>
 
-  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <!-- LIGHTBOX FOR IMAGES -->
+  <div class="lightbox" id="lightbox" onclick="window.closeLightbox()">
     <img id="lightboxImg" src="" alt="عرض مكبر">
   </div>
 
-  <script>
-    // PWA App Icon (SVG - Elegant design)
+  <!-- ==========================================================================
+     JAVASCRIPT LOGIC & FIREBASE INTERACTION
+     ========================================================================== -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+    import { getDatabase, ref, set, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDaxCW0tvWgsLfxujQJcjsfezBpHe_qzHo",
+      authDomain: "zblog-5ec1e.firebaseapp.com",
+      databaseURL: "https://zblog-5ec1e-default-rtdb.firebaseio.com",
+      projectId: "zblog-5ec1e",
+      storageBucket: "zblog-5ec1e.firebasestorage.app",
+      messagingSenderId: "4075480522",
+      appId: "1:4075480522:web:97d376f4c334c0de685b33",
+      measurementId: "G-JGTPVDDD0W"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getDatabase(app);
+
+    // PWA App Icon (Elegant SVG Base64)
     const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOCA4MC04MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjYuOS02MCA2MC02MCA2MCAyNi45IDYwIDYwLTI2LjkgNjAtNjAgNjB6IiBmaWxsPSIjZmZmIi8+PHBhdGggZD0iTTI1NiAyMDBjLTMzLjEgMC02MCAyNi45LTYwIDYwczI2LjkgNjAgNjAgNjAgNjAtMjYuOSA2MC02MC0yNi45LTYwLTYwLTYwem0wIDEwMGMtMjIuMSAwLTQwLTE3LjktNDAtNDBzMTcuOS00MCA0MC00MCA0MCAxNy45IDQwIDQwLTE3LjkgNDAtNDAgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
 
+    /* --------------------------------------------------------------------------
+       1. INITIAL DATA STRUCTURES & DEFAULT CONTENT
+       -------------------------------------------------------------------------- */
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
       subtitle: "ملاحظات وقراءات شخصية",
@@ -885,140 +954,65 @@
       }
     ];
 
-    let blogSettings = JSON.parse(localStorage.getItem('zk_settings')) || DEFAULT_SETTINGS;
-    let blogPosts = JSON.parse(localStorage.getItem('zk_posts')) || DEFAULT_POSTS;
+    let blogSettings = { ...DEFAULT_SETTINGS };
+    let blogPosts = [];
     let isAdminLoggedIn = false;
     let deferredPrompt = null;
 
-    document.addEventListener("DOMContentLoaded", function() {
-      applySettings();
-      renderHomePosts(getPublishedPosts());
-      renderCategories();
-      registerServiceWorker();
-      setupInstallPrompt();
+    /* --------------------------------------------------------------------------
+       2. FIREBASE REALTIME DATABASE LISTENERS
+       -------------------------------------------------------------------------- */
+    // Listen to Settings
+    onValue(ref(db, 'settings'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        blogSettings = { ...DEFAULT_SETTINGS, ...data };
+      } else {
+        // First time: set default settings
+        set(ref(db, 'settings'), DEFAULT_SETTINGS);
+      }
+      window.applySettings();
+      window.renderAboutPage();
     });
 
-    // PWA Service Worker Registration
-    function registerServiceWorker() {
-      if ('serviceWorker' in navigator) {
-        const swCode = `
-          const CACHE_NAME = 'zakaria-blog-v1';
-          const urlsToCache = ['/'];
-
-          self.addEventListener('install', (event) => {
-            event.waitUntil(
-              caches.open(CACHE_NAME)
-                .then((cache) => cache.addAll(urlsToCache))
-            );
-          });
-
-          self.addEventListener('fetch', (event) => {
-            event.respondWith(
-              caches.match(event.request)
-                .then((response) => {
-                  if (response) {
-                    return response;
-                  }
-                  return fetch(event.request);
-                })
-            );
-          });
-        `;
-
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-
-        navigator.serviceWorker.register(swUrl)
-          .then(() => console.log('Service Worker registered'))
-          .catch(err => console.log('Service Worker registration failed:', err));
+    // Listen to Posts
+    onValue(ref(db, 'posts'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        blogPosts = Object.values(data);
+      } else {
+        // First time: set default post
+        push(ref(db, 'posts'), DEFAULT_POSTS[0]);
+        blogPosts = [...DEFAULT_POSTS];
       }
-    }
-
-    // PWA Manifest
-    function setupInstallPrompt() {
-      const manifest = {
-        name: 'مدونة زكريا',
-        short_name: 'مدونة زكريا',
-        description: 'ملاحظات وقراءات شخصية',
-        start_url: './',
-        display: 'standalone',
-        background_color: '#f7f7f6',
-        theme_color: '#3b5249',
-        orientation: 'portrait',
-        icons: [
-          {
-            src: APP_ICON,
-            sizes: '192x192',
-            type: 'image/svg+xml',
-            purpose: 'any maskable'
-          },
-          {
-            src: APP_ICON,
-            sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable'
-          }
-        ]
-      };
-
-      const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-      const manifestUrl = URL.createObjectURL(manifestBlob);
       
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = manifestUrl;
-      document.head.appendChild(link);
-
-      // Apple Touch Icon
-      const appleIcon = document.createElement('link');
-      appleIcon.rel = 'apple-touch-icon';
-      appleIcon.href = APP_ICON;
-      document.head.appendChild(appleIcon);
-
-      // Favicon
-      const favicon = document.createElement('link');
-      favicon.rel = 'icon';
-      favicon.type = 'image/svg+xml';
-      favicon.href = APP_ICON;
-      document.head.appendChild(favicon);
-
-      // Install Prompt
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installPrompt').classList.add('show');
-      });
-
-      window.addEventListener('appinstalled', () => {
-        deferredPrompt = null;
-        document.getElementById('installPrompt').classList.remove('show');
-      });
-    }
-
-    function installApp() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-          }
-          deferredPrompt = null;
-          document.getElementById('installPrompt').classList.remove('show');
-        });
+      // Re-render current view if needed
+      const activePage = document.querySelector('.page.active');
+      if (activePage && activePage.id === 'page-home') window.renderHomePosts(window.getPublishedPosts());
+      if (activePage && activePage.id === 'page-categories') window.renderCategories();
+      if (isAdminLoggedIn) window.renderAdminPostsList();
+      
+      // If viewing a single post, refresh it to get new comments live
+      if (window.currentViewPostId) {
+        window.renderSinglePost(window.currentViewPostId);
       }
-    }
+    });
 
-    function dismissInstall() {
-      document.getElementById('installPrompt').classList.remove('show');
-    }
+    /* --------------------------------------------------------------------------
+       3. APP INITIALIZATION & NAVIGATION
+       -------------------------------------------------------------------------- */
+    document.addEventListener("DOMContentLoaded", function() {
+      window.registerServiceWorker();
+      window.setupInstallPrompt();
+    });
 
-    function toggleNav(show) {
+    window.toggleNav = function(show) {
       const nav = document.getElementById('navOverlay');
       if (show) nav.classList.add('active');
       else nav.classList.remove('active');
-    }
+    };
 
-    function navigateTo(pageId, param = null) {
+    window.navigateTo = function(pageId, param = null) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const target = document.getElementById(`page-${pageId}`);
       if (target) target.classList.add('active');
@@ -1026,24 +1020,28 @@
       window.scrollTo(0, 0);
 
       if (pageId === 'home') {
-        renderHomePosts(getPublishedPosts());
+        window.renderHomePosts(window.getPublishedPosts());
       } else if (pageId === 'post' && param) {
-        renderSinglePost(param);
+        window.currentViewPostId = param;
+        window.renderSinglePost(param);
       } else if (pageId === 'categories') {
-        renderCategories();
+        window.renderCategories();
       } else if (pageId === 'about') {
-        renderAboutPage();
+        window.renderAboutPage();
       } else if (pageId === 'admin-panel') {
-        if (!isAdminLoggedIn) navigateTo('admin-login');
-        else renderAdminPanel();
+        if (!isAdminLoggedIn) window.navigateTo('admin-login');
+        else window.renderAdminPanel();
       }
-    }
+    };
 
-    function getPublishedPosts() {
+    window.getPublishedPosts = function() {
       return blogPosts.filter(p => p.status === 'published');
-    }
+    };
 
-    function applySettings() {
+    /* --------------------------------------------------------------------------
+       4. SETTINGS & RENDERING HELPERS
+       -------------------------------------------------------------------------- */
+    window.applySettings = function() {
       document.getElementById('siteTitle').innerText = blogSettings.title;
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
       document.title = blogSettings.title;
@@ -1051,9 +1049,9 @@
       if (blogSettings.headerCover) {
         document.getElementById('headerCoverImg').src = blogSettings.headerCover;
       }
-    }
+    };
 
-    function renderAboutPage() {
+    window.renderAboutPage = function() {
       document.getElementById('aboutTitle').innerText = blogSettings.aboutTitle || "عن زكريا";
       document.getElementById('aboutBody').innerText = blogSettings.aboutBody || "";
       
@@ -1065,9 +1063,12 @@
       } else {
         imgContainer.style.display = 'none';
       }
-    }
+    };
 
-    function renderHomePosts(posts) {
+    /* --------------------------------------------------------------------------
+       5. HOME & SEARCH RENDERING
+       -------------------------------------------------------------------------- */
+    window.renderHomePosts = function(posts) {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
 
@@ -1087,32 +1088,35 @@
             <span>${post.date}</span>
             ${post.category ? `<span class="post-item-category">${post.category}</span>` : ''}
           </div>
-          <h2 class="post-item-title"><a href="#" onclick="navigateTo('post', '${post.id}'); return false;">${post.title}</a></h2>
+          <h2 class="post-item-title"><a href="#" onclick="window.navigateTo('post', '${post.id}'); return false;">${post.title}</a></h2>
           ${coverHTML}
           <p class="post-item-excerpt">${excerpt}</p>
-          <a href="#" class="read-more-link" onclick="navigateTo('post', '${post.id}'); return false;">اقرأ المقال &larr;</a>
+          <a href="#" class="read-more-link" onclick="window.navigateTo('post', '${post.id}'); return false;">اقرأ المقال &larr;</a>
         `;
         container.appendChild(item);
       });
-    }
+    };
 
-    function handleSearch() {
+    window.handleSearch = function() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
       if (!query) {
-        renderHomePosts(getPublishedPosts());
+        window.renderHomePosts(window.getPublishedPosts());
         return;
       }
 
-      const filtered = getPublishedPosts().filter(p => 
+      const filtered = window.getPublishedPosts().filter(p => 
         p.title.toLowerCase().includes(query) || 
         p.content.toLowerCase().includes(query) ||
         (p.category && p.category.toLowerCase().includes(query))
       );
 
-      renderHomePosts(filtered);
-    }
+      window.renderHomePosts(filtered);
+    };
 
-    function renderSinglePost(postId) {
+    /* --------------------------------------------------------------------------
+       6. SINGLE POST & COMMENTS
+       -------------------------------------------------------------------------- */
+    window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
 
@@ -1123,6 +1127,7 @@
 
       const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
       
+      // Transform newlines to paragraphs safely
       const formattedContent = post.content.split('\n\n').map(p => {
         if (p.trim().startsWith('<img')) return p;
         return `<p>${p.replace(/\n/g, '<br>')}</p>`;
@@ -1144,8 +1149,8 @@
           
           <div class="article-share">
             <span>مشاركة المقال:</span>
-            <button class="share-btn" onclick="sharePost('${post.title}')">مشاركة عبر الهاتف / نسخ الرابط</button>
-            <button class="share-btn" onclick="shareWhatsApp('${post.title}')">واتساب</button>
+            <button class="share-btn" onclick="window.sharePost('${post.title}')">مشاركة عبر الهاتف / نسخ الرابط</button>
+            <button class="share-btn" onclick="window.shareWhatsApp('${post.title}')">واتساب</button>
           </div>
         </article>
 
@@ -1157,20 +1162,21 @@
             <h4 style="font-size: 1rem;">أضف تعليقاً</h4>
             <input type="text" id="commentAuthorInput" placeholder="الاسم">
             <textarea id="commentTextInput" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
-            <button class="btn" onclick="addComment('${post.id}')">إرسال التعليق</button>
-            <small style="color: var(--text-muted); margin-top: 4px;">ملاحظة: التعليقات تحفظ محلياً في هذه النسخة التجريبية.</small>
+            <button class="btn" onclick="window.addComment('${post.id}')">إرسال التعليق</button>
+            <small style="color: var(--text-muted); margin-top: 4px;">ملاحظة: التعليقات تحفظ مباشرة في قاعدة البيانات.</small>
           </div>
         </section>
       `;
 
-      renderComments(post);
+      window.renderComments(post);
 
+      // Attach image lightbox triggers
       document.querySelectorAll('#articleBody img').forEach(img => {
-        img.addEventListener('click', () => openLightbox(img.src));
+        img.addEventListener('click', () => window.openLightbox(img.src));
       });
-    }
+    };
 
-    function renderComments(post) {
+    window.renderComments = function(post) {
       const container = document.getElementById('commentsList');
       container.innerHTML = '';
 
@@ -1203,46 +1209,45 @@
             <span>${c.date}</span>
           </div>
           <div class="comment-body">${c.text}</div>
-          <button class="reply-btn" onclick="showReplyForm('${post.id}', ${index})">رد</button>
+          <button class="reply-btn" onclick="window.showReplyForm('${post.id}', ${index})">رد</button>
           <div id="replyForm-${index}" style="display:none; margin-top:10px;">
             <input type="text" id="replyAuthor-${index}" placeholder="الاسم" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
             <textarea id="replyText-${index}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
-            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="addReply('${post.id}', ${index})">إرسال الرد</button>
+            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="window.addReply('${post.id}', ${index})">إرسال الرد</button>
           </div>
           ${repliesHTML}
         `;
         container.appendChild(card);
       });
-    }
+    };
 
-    function addComment(postId) {
+    window.addComment = function(postId) {
       const author = document.getElementById('commentAuthorInput').value.trim() || 'زائر';
       const text = document.getElementById('commentTextInput').value.trim();
 
       if (!text) return;
 
-      const post = blogPosts.find(p => p.id === postId);
-      if (post) {
-        if (!post.comments) post.comments = [];
-        post.comments.push({
-          id: 'c_' + Date.now(),
-          author: author,
-          text: text,
-          date: new Date().toISOString().split('T')[0],
-          replies: []
-        });
+      const newComment = {
+        id: 'c_' + Date.now(),
+        author: author,
+        text: text,
+        date: new Date().toISOString().split('T')[0],
+        replies: []
+      };
 
-        savePostsToStorage();
-        renderSinglePost(postId);
-      }
-    }
+      // Push to Firebase
+      push(ref(db, `posts/${postId}/comments`), newComment);
+      
+      // Clear input
+      document.getElementById('commentTextInput').value = '';
+    };
 
-    function showReplyForm(postId, index) {
+    window.showReplyForm = function(postId, index) {
       const el = document.getElementById(`replyForm-${index}`);
       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
-    }
+    };
 
-    function addReply(postId, commentIndex) {
+    window.addReply = function(postId, commentIndex) {
       const author = document.getElementById(`replyAuthor-${commentIndex}`).value.trim() || 'زائر';
       const text = document.getElementById(`replyText-${commentIndex}`).value.trim();
 
@@ -1250,19 +1255,22 @@
 
       const post = blogPosts.find(p => p.id === postId);
       if (post && post.comments[commentIndex]) {
-        if (!post.comments[commentIndex].replies) post.comments[commentIndex].replies = [];
-        post.comments[commentIndex].replies.push({
+        const commentId = post.comments[commentIndex].id;
+        const newReply = {
           author: author,
           text: text,
           date: new Date().toISOString().split('T')[0]
-        });
+        };
 
-        savePostsToStorage();
-        renderSinglePost(postId);
+        // Push reply to Firebase
+        push(ref(db, `posts/${postId}/comments/${commentId}/replies`), newReply);
+        
+        // Clear input
+        document.getElementById(`replyText-${commentIndex}`).value = '';
       }
-    }
+    };
 
-    function sharePost(title) {
+    window.sharePost = function(title) {
       if (navigator.share) {
         navigator.share({
           title: title,
@@ -1272,19 +1280,22 @@
         navigator.clipboard.writeText(window.location.href);
         alert('تم نسخ رابط المقال بنجاح!');
       }
-    }
+    };
 
-    function shareWhatsApp(title) {
+    window.shareWhatsApp = function(title) {
       const url = encodeURIComponent(window.location.href);
       const text = encodeURIComponent(title);
       window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, '_blank');
-    }
+    };
 
-    function renderCategories() {
+    /* --------------------------------------------------------------------------
+       7. CATEGORIES RENDERING
+       -------------------------------------------------------------------------- */
+    window.renderCategories = function() {
       const container = document.getElementById('categoriesList');
       container.innerHTML = '';
 
-      const categories = [...new Set(getPublishedPosts().map(p => p.category).filter(Boolean))];
+      const categories = [...new Set(window.getPublishedPosts().map(p => p.category).filter(Boolean))];
 
       if (categories.length === 0) {
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد تصنيفات حالياً.</p>';
@@ -1295,13 +1306,13 @@
         const chip = document.createElement('div');
         chip.className = 'category-chip';
         chip.innerText = cat;
-        chip.onclick = () => filterByCategory(cat);
+        chip.onclick = () => window.filterByCategory(cat);
         container.appendChild(chip);
       });
-    }
+    };
 
-    function filterByCategory(cat) {
-      const filtered = getPublishedPosts().filter(p => p.category === cat);
+    window.filterByCategory = function(cat) {
+      const filtered = window.getPublishedPosts().filter(p => p.category === cat);
       const container = document.getElementById('categoryPostsResult');
       container.innerHTML = `<h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-muted);">المقالات تحت تصنيف: ${cat}</h3>`;
       
@@ -1310,46 +1321,49 @@
         item.className = 'post-item';
         item.style.paddingBottom = '15px';
         item.innerHTML = `
-          <h3 class="post-item-title" style="font-size: 1.2rem;"><a href="#" onclick="navigateTo('post', '${post.id}'); return false;">${post.title}</a></h3>
+          <h3 class="post-item-title" style="font-size: 1.2rem;"><a href="#" onclick="window.navigateTo('post', '${post.id}'); return false;">${post.title}</a></h3>
           <span style="font-size: 0.8rem; color: var(--text-muted);">${post.date}</span>
         `;
         container.appendChild(item);
       });
-    }
+    };
 
-    function loginAdmin() {
+    /* --------------------------------------------------------------------------
+       8. ADMIN PANEL & POST MANAGEMENT
+       -------------------------------------------------------------------------- */
+    window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
       if (pass === 'admin') {
         isAdminLoggedIn = true;
         document.getElementById('adminPassInput').value = '';
-        navigateTo('admin-panel');
+        window.navigateTo('admin-panel');
       } else {
         alert('كلمة المرور غير صحيحة (استخدم: admin لاختبار الواجهة)');
       }
-    }
+    };
 
-    function logoutAdmin() {
+    window.logoutAdmin = function() {
       isAdminLoggedIn = false;
-      navigateTo('home');
-    }
+      window.navigateTo('home');
+    };
 
-    function renderAdminPanel() {
-      renderAdminPostsList();
+    window.renderAdminPanel = function() {
+      window.renderAdminPostsList();
       document.getElementById('settingTitle').value = blogSettings.title || '';
       document.getElementById('settingSubtitle').value = blogSettings.subtitle || '';
       document.getElementById('settingAboutTitle').value = blogSettings.aboutTitle || '';
       document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
-    }
+    };
 
-    function switchAdminTab(tabName) {
+    window.switchAdminTab = function(tabName) {
       document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
 
       event.target.classList.add('active');
       document.getElementById(`admin-tab-${tabName}`).style.display = 'block';
-    }
+    };
 
-    function savePost(status) {
+    window.savePost = function(status) {
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
       const content = document.getElementById('postContentInput').value.trim();
@@ -1361,37 +1375,35 @@
         return;
       }
 
+      const postData = {
+        title: title,
+        category: category,
+        content: content,
+        cover: cover,
+        status: status,
+        updatedAt: new Date().toISOString()
+      };
+
       if (editId) {
-        const post = blogPosts.find(p => p.id === editId);
-        if (post) {
-          post.title = title;
-          post.category = category;
-          post.content = content;
-          if (cover) post.cover = cover;
-          post.status = status;
-        }
+        // Update existing post
+        const existingPost = blogPosts.find(p => p.id === editId);
+        postData.date = existingPost ? existingPost.date : new Date().toISOString().split('T')[0];
+        postData.comments = existingPost ? existingPost.comments : [];
+        update(ref(db, 'posts/' + editId), postData);
       } else {
-        const newPost = {
-          id: 'post-' + Date.now(),
-          title: title,
-          category: category,
-          content: content,
-          cover: cover,
-          date: new Date().toISOString().split('T')[0],
-          status: status,
-          comments: []
-        };
-        blogPosts.unshift(newPost);
+        // Create new post
+        postData.id = 'post-' + Date.now();
+        postData.date = new Date().toISOString().split('T')[0];
+        postData.comments = [];
+        push(ref(db, 'posts'), postData);
       }
 
-      savePostsToStorage();
-      resetEditor();
+      window.resetEditor();
       alert(status === 'published' ? 'تم نشر المقال بنجاح!' : 'تم حفظ المسودة.');
-      switchAdminTab('posts');
-      renderAdminPostsList();
-    }
+      window.switchAdminTab('posts');
+    };
 
-    function resetEditor() {
+    window.resetEditor = function() {
       document.getElementById('editPostId').value = '';
       document.getElementById('postTitleInput').value = '';
       document.getElementById('postCategoryInput').value = '';
@@ -1399,9 +1411,9 @@
       document.getElementById('postCoverData').value = '';
       document.getElementById('postCoverPreview').style.display = 'none';
       document.getElementById('editorFormTitle').innerText = 'إنشاء مقال جديد';
-    }
+    };
 
-    function editPost(id) {
+    window.editPost = function(id) {
       const post = blogPosts.find(p => p.id === id);
       if (!post) return;
 
@@ -1418,18 +1430,16 @@
       }
 
       document.getElementById('editorFormTitle').innerText = 'تعديل المقال';
-      switchAdminTab('editor');
-    }
+      window.switchAdminTab('editor');
+    };
 
-    function deletePost(id) {
-      if (confirm('هل أنت تأكد من حذف هذا المقال؟')) {
-        blogPosts = blogPosts.filter(p => p.id !== id);
-        savePostsToStorage();
-        renderAdminPostsList();
+    window.deletePost = function(id) {
+      if (confirm('هل أنت متأكد من حذف هذا المقال؟')) {
+        remove(ref(db, 'posts/' + id));
       }
-    }
+    };
 
-    function renderAdminPostsList() {
+    window.renderAdminPostsList = function() {
       const container = document.getElementById('adminPostsList');
       container.innerHTML = '';
 
@@ -1452,26 +1462,32 @@
             <div style="font-size: 0.8rem; color: var(--text-muted);">${post.date}</div>
           </div>
           <div style="display: flex; gap: 8px;">
-            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editPost('${post.id}')">تعديل</button>
-            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="deletePost('${post.id}')">حذف</button>
+            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="window.editPost('${post.id}')">تعديل</button>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="window.deletePost('${post.id}')">حذف</button>
           </div>
         `;
         container.appendChild(item);
       });
-    }
+    };
 
-    function saveBlogSettings() {
-      blogSettings.title = document.getElementById('settingTitle').value.trim();
-      blogSettings.subtitle = document.getElementById('settingSubtitle').value.trim();
-      blogSettings.aboutTitle = document.getElementById('settingAboutTitle').value.trim();
-      blogSettings.aboutBody = document.getElementById('settingAboutBody').value.trim();
+    window.saveBlogSettings = function() {
+      const newSettings = {
+        title: document.getElementById('settingTitle').value.trim(),
+        subtitle: document.getElementById('settingSubtitle').value.trim(),
+        aboutTitle: document.getElementById('settingAboutTitle').value.trim(),
+        aboutBody: document.getElementById('settingAboutBody').value.trim(),
+        headerCover: blogSettings.headerCover || "",
+        aboutImage: blogSettings.aboutImage || ""
+      };
 
-      localStorage.setItem('zk_settings', JSON.stringify(blogSettings));
-      applySettings();
+      set(ref(db, 'settings'), newSettings);
       alert('تم حفظ الإعدادات بنجاح!');
-    }
+    };
 
-    function handleImageUpload(input, previewId, callback) {
+    /* --------------------------------------------------------------------------
+       9. IMAGE HANDLING (LOCAL DATA URLs)
+       -------------------------------------------------------------------------- */
+    window.handleImageUpload = function(input, previewId, callback) {
       const file = input.files[0];
       if (!file) return;
 
@@ -1492,20 +1508,19 @@
         if (callback) callback(dataUrl);
       };
       reader.readAsDataURL(file);
-    }
+    };
 
-    function saveHeaderCover(dataUrl) {
+    window.saveHeaderCover = function(dataUrl) {
       blogSettings.headerCover = dataUrl;
-      localStorage.setItem('zk_settings', JSON.stringify(blogSettings));
-      applySettings();
-    }
+      set(ref(db, 'settings'), blogSettings);
+    };
 
-    function saveAboutImage(dataUrl) {
+    window.saveAboutImage = function(dataUrl) {
       blogSettings.aboutImage = dataUrl;
-      localStorage.setItem('zk_settings', JSON.stringify(blogSettings));
-    }
+      set(ref(db, 'settings'), blogSettings);
+    };
 
-    function insertImageToEditor(input) {
+    window.insertImageToEditor = function(input) {
       const file = input.files[0];
       if (!file) return;
 
@@ -1517,24 +1532,88 @@
         textarea.value += imgTag;
       };
       reader.readAsDataURL(file);
-    }
+    };
 
-    function openLightbox(src) {
+    window.openLightbox = function(src) {
       document.getElementById('lightboxImg').src = src;
       document.getElementById('lightbox').classList.add('active');
-    }
+    };
 
-    function closeLightbox() {
+    window.closeLightbox = function() {
       document.getElementById('lightbox').classList.remove('active');
-    }
+    };
 
-    function savePostsToStorage() {
-      try {
-        localStorage.setItem('zk_posts', JSON.stringify(blogPosts));
-      } catch (e) {
-        alert('تنبيه: مساحة localStorage امتلاءت بسبب حجم الصور المحلية. يمكنك تقليل حجم الصور أو حذف بعض المقالات.');
+    /* --------------------------------------------------------------------------
+       10. PWA SETUP & INSTALLATION
+       -------------------------------------------------------------------------- */
+    window.registerServiceWorker = function() {
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+          const CACHE_NAME = 'zakaria-blog-v1';
+          self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['/']))));
+          self.addEventListener('fetch', (e) => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob))
+          .then(() => console.log('Service Worker registered'))
+          .catch(err => console.log('Service Worker registration failed:', err));
       }
-    }
+    };
+
+    window.setupInstallPrompt = function() {
+      const manifest = {
+        name: 'مدونة زكريا',
+        short_name: 'مدونة زكريا',
+        description: 'ملاحظات وقراءات شخصية',
+        start_url: './',
+        display: 'standalone',
+        background_color: '#f7f7f6',
+        theme_color: '#3b5249',
+        orientation: 'portrait',
+        icons: [
+          { src: APP_ICON, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+          { src: APP_ICON, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
+        ]
+      };
+
+      const link = document.createElement('link');
+      link.rel = 'manifest';
+      link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
+      document.head.appendChild(link);
+
+      const appleIcon = document.createElement('link');
+      appleIcon.rel = 'apple-touch-icon';
+      appleIcon.href = APP_ICON;
+      document.head.appendChild(appleIcon);
+
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installPrompt').classList.add('show');
+      });
+
+      window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        document.getElementById('installPrompt').classList.remove('show');
+      });
+    };
+
+    window.installApp = function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted the install prompt');
+          }
+          deferredPrompt = null;
+          document.getElementById('installPrompt').classList.remove('show');
+        });
+      }
+    };
+
+    window.dismissInstall = function() {
+      document.getElementById('installPrompt').classList.remove('show');
+    };
   </script>
 </body>
 </html>

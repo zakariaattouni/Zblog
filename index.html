@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مدونة زكريا</title>
+
+  <!-- Google Fonts for Clean Arabic Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       1. VARIABLES & CONFIGURATION
+       يمكنك تعديل الألوان، الخطوط، والأبعاد هنا لضبط مظهر المدونة لاحقاً.
+       ========================================================================== */
+    :root {
+      /* Palette */
+      --bg-color: #f7f7f6;           /* رمادي فاتح جداً مريح للعين */
+      --paper-color: #ffffff;        /* لون المساحات والأوراق */
+      --text-main: #2b2b2b;          /* لون النص الرئيسي */
+      --text-muted: #6e6e6e;         /* لون النصوص الثانوية والتفاصيل */
+      --accent-color: #3b5249;       /* لون أنيق هادئ للروابط والأزرار (زيتي دافئ) */
+      --accent-hover: #2a3c35;
+      --border-color: #e5e5e3;       /* حدود خفيفة هادئة */
+      --danger-color: #a94442;
+
+      /* Typography */
+      --font-family: 'Noto Naskh Arabic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-heading: 'Amiri', serif;
+      --font-size-base: 17px;
+      --line-height: 1.8;
+
+      /* Layout */
+      --max-width: 720px;            /* عرض المقالات المريح للعين على الهواتف والشاشات */
+      --radius: 8px;
+    }
+
+    /* Reset & Base Setup */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-family);
+      font-size: var(--font-size-base);
+      line-height: var(--line-height);
+      direction: rtl;
+      text-align: right;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--accent-color);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    a:hover {
+      color: var(--accent-hover);
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: var(--radius);
+    }
+
+    button, input, textarea, select {
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    /* ==========================================================================
+       2. HEADER & COVER
+       ========================================================================== */
+    header {
+      position: relative;
+      background-color: var(--paper-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .cover-container {
+      width: 100%;
+      height: 200px;
+      background-color: #eaeaea;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .cover-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 0;
+    }
+
+    .header-content {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 24px 20px 20px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .site-title-area h1 {
+      font-family: var(--font-heading);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.2;
+    }
+
+    .site-title-area p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Floating Menu Trigger */
+    .menu-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+    }
+
+    /* ==========================================================================
+       3. NAVIGATION OVERLAY
+       ========================================================================== */
+    .nav-overlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .nav-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .nav-drawer {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 280px;
+      height: 100%;
+      background-color: var(--paper-color);
+      z-index: 1001;
+      padding: 30px 20px;
+      transition: right 0.3s ease;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-overlay.active .nav-drawer {
+      right: 0;
+    }
+
+    .close-nav {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .nav-links a {
+      font-size: 1.1rem;
+      color: var(--text-main);
+      display: block;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    /* ==========================================================================
+       4. MAIN CONTAINER & PAGES
+       ========================================================================== */
+    main {
+      max-width: var(--max-width);
+      margin: 30px auto;
+      padding: 0 20px 60px 20px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* ==========================================================================
+       5. HOME PAGE & POST LISTINGS
+       ========================================================================== */
+    .search-box {
+      margin-bottom: 30px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      background-color: var(--paper-color);
+      outline: none;
+      color: var(--text-main);
+    }
+
+    .posts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 35px;
+    }
+
+    .post-item {
+      padding-bottom: 30px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .post-item-meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .post-item-category {
+      background-color: #eeeeec;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .post-item-title {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      line-height: 1.3;
+    }
+
+    .post-item-title a {
+      color: var(--text-main);
+    }
+
+    .post-item-title a:hover {
+      color: var(--accent-color);
+    }
+
+    .post-item-cover {
+      margin: 15px 0;
+      max-height: 250px;
+      overflow: hidden;
+      border-radius: var(--radius);
+    }
+
+    .post-item-cover img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+
+    .post-item-excerpt {
+      color: #555;
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .read-more-link {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       6. SINGLE POST PAGE
+       ========================================================================== */
+    .article-header {
+      margin-bottom: 25px;
+    }
+
+    .article-title {
+      font-family: var(--font-heading);
+      font-size: 2.1rem;
+      line-height: 1.3;
+      margin-top: 8px;
+      margin-bottom: 12px;
+    }
+
+    .article-cover {
+      margin: 20px 0 30px 0;
+    }
+
+    .article-content {
+      line-height: 1.9;
+      font-size: 1.1rem;
+      color: #222;
+      background-color: var(--paper-color);
+      padding: 25px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+
+    .article-content p {
+      margin-bottom: 20px;
+    }
+
+    .article-content img {
+      margin: 25px 0;
+      cursor: pointer;
+    }
+
+    /* Simple Share Section */
+    .article-share {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .share-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text-main);
+    }
+
+    /* Comments Section */
+    .comments-container {
+      margin-top: 40px;
+      padding-top: 30px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    .comments-title {
+      font-family: var(--font-heading);
+      font-size: 1.4rem;
+      margin-bottom: 20px;
+    }
+
+    .comment-card {
+      background-color: var(--paper-color);
+      padding: 15px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+      margin-bottom: 15px;
+    }
+
+    .comment-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .comment-author {
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .comment-body {
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+
+    .reply-btn {
+      background: none;
+      border: none;
+      color: var(--accent-color);
+      font-size: 0.85rem;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .replies-list {
+      margin-right: 20px;
+      margin-top: 10px;
+      border-right: 2px solid var(--border-color);
+      padding-right: 15px;
+    }
+
+    .comment-form {
+      margin-top: 25px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .comment-form input, .comment-form textarea {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .btn {
+      background-color: var(--accent-color);
+      color: #fff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      align-self: flex-start;
+      transition: background-color 0.2s;
+    }
+
+    .btn:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: #eee;
+    }
+
+    .btn-danger {
+      background-color: var(--danger-color);
+    }
+
+    /* Lightbox for images */
+    .lightbox {
+      position: fixed;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background-color: rgba(0,0,0,0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 95%;
+      max-height: 90vh;
+      object-fit: contain;
+    }
+
+    /* ==========================================================================
+       7. CATEGORIES & ABOUT PAGE
+       ========================================================================== */
+    .categories-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .category-chip {
+      background-color: var(--paper-color);
+      border: 1px solid var(--border-color);
+      padding: 10px 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .category-chip:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+    }
+
+    .about-card {
+      background-color: var(--paper-color);
+      padding: 30px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
+
+    /* ==========================================================================
+       8. ADMIN PANEL
+       ========================================================================== */
+    .admin-nav {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 25px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 15px;
+      overflow-x: auto;
+    }
+
+    .admin-tab {
+      padding: 8px 14px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+      color: var(--text-muted);
+    }
+
+    .admin-tab.active {
+      background-color: var(--paper-color);
+      color: var(--text-main);
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .form-group input, .form-group textarea, .form-group select {
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background-color: var(--paper-color);
+    }
+
+    .admin-post-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .admin-post-item {
+      background-color: var(--paper-color);
+      padding: 12px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .status-badge {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 8px;
+    }
+
+    .status-badge.published {
+      background-color: #e2f0d9;
+      color: #385723;
+    }
+
+    .status-badge.draft {
+      background-color: #fff2cc;
+      color: #7f6000;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .header-content {
+        padding: 16px;
+      }
+      .site-title-area h1 {
+        font-size: 1.6rem;
+      }
+      .article-title {
+        font-size: 1.7rem;
+      }
+      .article-content {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================================================
+     HEADER & COVER SECTION
+     ========================================================================== -->
+  <header>
+    <div class="cover-container" id="coverContainer">
+      <img id="headerCoverImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='200' viewBox='0 0 800 200'><rect width='100%' height='100%' fill='%23e2e2e0'/><text x='50%' y='50%' fill='%23888888' font-family='sans-serif' font-size='18' text-anchor='middle'>غلاف المدونة</text></svg>" alt="تغويسة المدونة">
+    </div>
+    <div class="header-content">
+      <div class="site-title-area">
+        <h1 id="siteTitle">مدونة زكريا</h1>
+        <p id="siteSubtitle">ملاحظات وقراءات شخصية</p>
+      </div>
+      <button class="menu-btn" onclick="toggleNav(true)">
+        <span>القائمة</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+     NAVIGATION OVERLAY (MOBILE FIRST)
+     ========================================================================== -->
+  <div class="nav-overlay" id="navOverlay" onclick="toggleNav(false)">
+    <div class="nav-drawer" onclick="event.stopPropagation()">
+      <button class="close-nav" onclick="toggleNav(false)">&times;</button>
+      <ul class="nav-links">
+        <li><a href="#" onclick="navigateTo('home'); toggleNav(false);">الرئيسية</a></li>
+        <li><a href="#" onclick="navigateTo('categories'); toggleNav(false);">التصنيفات</a></li>
+        <li><a href="#" onclick="navigateTo('about'); toggleNav(false);">عن زكريا</a></li>
+        <li><a href="#" onclick="navigateTo('admin-login'); toggleNav(false);" id="adminNavBtn">دخول الإدارة</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+     MAIN CONTENT AREA
+     ========================================================================== -->
+  <main>
+
+    <!-- 1. HOME PAGE -->
+    <section id="page-home" class="page active">
+      <div class="search-box">
+        <input type="text" id="searchInput" class="search-input" placeholder="بحث في المقالات..." oninput="handleSearch()">
+      </div>
+      <div id="postsList" class="posts-list">
+        <!-- Posts rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- 2. SINGLE POST PAGE -->
+    <section id="page-post" class="page">
+      <div id="postSingleContainer">
+        <!-- Single post rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- 3. CATEGORIES PAGE -->
+    <section id="page-categories" class="page">
+      <h2 style="font-family: var(--font-heading); margin-bottom: 15px;">التصنيفات</h2>
+      <div id="categoriesList" class="categories-list">
+        <!-- Categories rendered dynamically -->
+      </div>
+      <div id="categoryPostsResult" class="posts-list" style="margin-top: 30px;"></div>
+    </section>
+
+    <!-- 4. ABOUT PAGE -->
+    <section id="page-about" class="page">
+      <div class="about-card">
+        <h2 style="font-family: var(--font-heading); margin-bottom: 15px;" id="aboutTitle">عن الكاتب</h2>
+        <div id="aboutImageContainer" style="margin-bottom: 20px; display: none;">
+          <img id="aboutImg" src="" alt="صورة الكاتب" style="max-width: 180px; border-radius: 50%;">
+        </div>
+        <div id="aboutBody" style="line-height: 1.9; color: #333;">
+          <!-- About text rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. ADMIN LOGIN -->
+    <section id="page-admin-login" class="page">
+      <div class="about-card" style="max-width: 400px; margin: 0 auto;">
+        <h3 style="margin-bottom: 15px; font-family: var(--font-heading);">تسجيل الدخول للإدارة</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">اختبار واجهة الإدارة محلياً (كلمة المرور التجريبية: admin)</p>
+        <div class="form-group">
+          <label>كلمة المرور</label>
+          <input type="password" id="adminPassInput">
+        </div>
+        <button class="btn" onclick="loginAdmin()">دخول</button>
+      </div>
+    </section>
+
+    <!-- 6. ADMIN PANEL -->
+    <section id="page-admin-panel" class="page">
+      <div class="admin-nav">
+        <button class="admin-tab active" onclick="switchAdminTab('editor')">مقال جديد / تحرير</button>
+        <button class="admin-tab" onclick="switchAdminTab('posts')">إدارة المقالات</button>
+        <button class="admin-tab" onclick="switchAdminTab('settings')">إعدادات المدونة</button>
+        <button class="admin-tab" onclick="logoutAdmin()" style="color: var(--danger-color);">خروج</button>
+      </div>
+
+      <!-- Admin Tab: Editor -->
+      <div id="admin-tab-editor" class="admin-tab-content">
+        <h3 style="margin-bottom: 15px;" id="editorFormTitle">إنشاء مقال جديد</h3>
+        <input type="hidden" id="editPostId">
+        
+        <div class="form-group">
+          <label>عنوان المقال</label>
+          <input type="text" id="postTitleInput" placeholder="أدخل العنوان هنا...">
+        </div>
+
+        <div class="form-group">
+          <label>التصنيف</label>
+          <input type="text" id="postCategoryInput" placeholder="مثال: قراءات، طب، ثقافة...">
+        </div>
+
+        <div class="form-group">
+          <label>صورة المقال الرئيسية</label>
+          <input type="file" id="postCoverInput" accept="image/*" onchange="handleImageUpload(this, 'postCoverPreview')">
+          <input type="hidden" id="postCoverData">
+          <img id="postCoverPreview" src="" style="max-height: 120px; margin-top: 10px; display: none;">
+        </div>
+
+        <div class="form-group">
+          <label>نص المقال</label>
+          <textarea id="postContentInput" rows="10" placeholder="اكتب النص هنا... (يمكنك إضافة فقرات عادي)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>إضافة صور داخل النص</label>
+          <input type="file" accept="image/*" onchange="insertImageToEditor(this)">
+          <small style="color: var(--text-muted);">اختيار صورة سينشئ مكاناً لها في النص تلقائياً.</small>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 20px;">
+          <button class="btn" onclick="savePost('published')">نشر المقال</button>
+          <button class="btn btn-secondary" onclick="savePost('draft')">حفظ كمسودة</button>
+        </div>
+      </div>
+
+      <!-- Admin Tab: Posts Management -->
+      <div id="admin-tab-posts" class="admin-tab-content" style="display: none;">
+        <h3 style="margin-bottom: 15px;">المقالات والمسودات</h3>
+        <div id="adminPostsList" class="admin-post-list">
+          <!-- Admin post items -->
+        </div>
+      </div>
+
+      <!-- Admin Tab: Settings -->
+      <div id="admin-tab-settings" class="admin-tab-content" style="display: none;">
+        <h3 style="margin-bottom: 15px;">إعدادات العامة والترويسة</h3>
+        
+        <div class="form-group">
+          <label>عنوان المدونة</label>
+          <input type="text" id="settingTitle">
+        </div>
+
+        <div class="form-group">
+          <label>الوصف القصير</label>
+          <input type="text" id="settingSubtitle">
+        </div>
+
+        <div class="form-group">
+          <label>صورة الترويسة (الغلاف)</label>
+          <input type="file" accept="image/*" onchange="handleImageUpload(this, 'headerCoverPreview', saveHeaderCover)">
+          <img id="headerCoverPreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
+        </div>
+
+        <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
+
+        <h3 style="margin-bottom: 15px;">محتوى صفحة "عن زكريا"</h3>
+        <div class="form-group">
+          <label>عنوان الصفحة</label>
+          <input type="text" id="settingAboutTitle">
+        </div>
+        <div class="form-group">
+          <label>الصورة الشخصية</label>
+          <input type="file" accept="image/*" onchange="handleImageUpload(this, 'aboutImagePreview', saveAboutImage)">
+          <img id="aboutImagePreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
+        </div>
+        <div class="form-group">
+          <label>النص التعريفى</label>
+          <textarea id="settingAboutBody" rows="6"></textarea>
+        </div>
+
+        <button class="btn" onclick="saveBlogSettings()">حفظ الإعدادات</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- LIGHTBOX FOR IMAGES -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="عرض مكبر">
+  </div>
+
+  <!-- ==========================================================================
+     JAVASCRIPT LOGIC & LOCALSTORAGE INTERACTION
+     ========================================================================== -->
+  <script>
+    /* --------------------------------------------------------------------------
+       1. INITIAL DATA STRUCTURES & DEFAULT CONTENT
+       -------------------------------------------------------------------------- */
+    const DEFAULT_SETTINGS = {
+      title: "مدونة زكريا",
+      subtitle: "ملاحظات وقراءات شخصية",
+      headerCover: "",
+      aboutTitle: "عن زكريا",
+      aboutBody: "أهلاً بك في مدونتي الشخصية. هنا أشارك بعض القراءات والملاحظات والأفكار الفكرية والعلمية في مساحة هادئة بعيدة عن ضوضاء وسائل التواصل الاجتماعي.",
+      aboutImage: ""
+    };
+
+    const DEFAULT_POSTS = [
+      {
+        id: "post-1",
+        title: "عن القراءة الهادئة والتدوين الشخصي",
+        category: "تأملات",
+        date: "2026-09-15",
+        status: "published",
+        cover: "",
+        content: "في هذا العصر المتسارع، تصبح المساحات الشخصية على الإنترنت ضرورة لاستعادة التركيز. التدوين ليس مجرد كتابة، بل هو أداة لتنظيم الأفكار وتأمل التجارب بعيداً عن الخوارزميات.\n\nالكتابة الهادئة تتيح لنا إعادة قراءة ما نمر به وعرضه بشكل مبسط ومريح للعين والذهن.",
+        comments: [
+          {
+            id: "c1",
+            author: "أحمد",
+            text: "مقالة رائعة وهادئة، التصميم مريح جداً للعين.",
+            date: "2026-09-16",
+            replies: [
+              { author: "زكريا", text: "شكراً لك سيد أحمد، هذا هو الهدف الأساسي من المدونة.", date: "2026-09-16" }
+            ]
+          }
+        ]
+      }
+    ];
+
+    let blogSettings = JSON.parse(localStorage.getItem('zk_settings')) || DEFAULT_SETTINGS;
+    let blogPosts = JSON.parse(localStorage.getItem('zk_posts')) || DEFAULT_POSTS;
+    let isAdminLoggedIn = false;
+
+    /* --------------------------------------------------------------------------
+       2. APP INITIALIZATION & NAVIGATION
+       -------------------------------------------------------------------------- */
+    document.addEventListener("DOMContentLoaded", function() {
+      applySettings();
+      renderHomePosts(getPublishedPosts());
+      renderCategories();
+    });
+
+    function toggleNav(show) {
+      const nav = document.getElementById('navOverlay');
+      if (show) nav.classList.add('active');
+      else nav.classList.remove('active');
+    }
+
+    function navigateTo(pageId, param = null) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      const target = document.getElementById(`page-${pageId}`);
+      if (target) target.classList.add('active');
+
+      window.scrollTo(0, 0);
+
+      if (pageId === 'home') {
+        renderHomePosts(getPublishedPosts());
+      } else if (pageId === 'post' && param) {
+        renderSinglePost(param);
+      } else if (pageId === 'categories') {
+        renderCategories();
+      } else if (pageId === 'about') {
+        renderAboutPage();
+      } else if (pageId === 'admin-panel') {
+        if (!isAdminLoggedIn) navigateTo('admin-login');
+        else renderAdminPanel();
+      }
+    }
+
+    function getPublishedPosts() {
+      return blogPosts.filter(p => p.status === 'published');
+    }
+
+    /* --------------------------------------------------------------------------
+       3. SETTINGS & RENDERING HELPERS
+       -------------------------------------------------------------------------- */
+    function applySettings() {
+      document.getElementById('siteTitle').innerText = blogSettings.title;
+      document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
+      document.title = blogSettings.title;
+
+      if (blogSettings.headerCover) {
+        document.getElementById('headerCoverImg').src = blogSettings.headerCover;
+      }
+    }
+
+    function renderAboutPage() {
+      document.getElementById('aboutTitle').innerText = blogSettings.aboutTitle || "عن زكريا";
+      document.getElementById('aboutBody').innerText = blogSettings.aboutBody || "";
+      
+      const imgContainer = document.getElementById('aboutImageContainer');
+      const img = document.getElementById('aboutImg');
+      if (blogSettings.aboutImage) {
+        img.src = blogSettings.aboutImage;
+        imgContainer.style.display = 'block';
+      } else {
+        imgContainer.style.display = 'none';
+      }
+    }
+
+    /* --------------------------------------------------------------------------
+       4. HOME & SEARCH RENDERING
+       -------------------------------------------------------------------------- */
+    function renderHomePosts(posts) {
+      const container = document.getElementById('postsList');
+      container.innerHTML = '';
+
+      if (posts.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin: 40px 0;">لا توجد مقالات لعرضها.</p>';
+        return;
+      }
+
+      posts.forEach(post => {
+        const excerpt = post.content.replace(/<[^>]*>?/gm, '').substring(0, 140) + '...';
+        const coverHTML = post.cover ? `<div class="post-item-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
+
+        const item = document.createElement('article');
+        item.className = 'post-item';
+        item.innerHTML = `
+          <div class="post-item-meta">
+            <span>${post.date}</span>
+            ${post.category ? `<span class="post-item-category">${post.category}</span>` : ''}
+          </div>
+          <h2 class="post-item-title"><a href="#" onclick="navigateTo('post', '${post.id}'); return false;">${post.title}</a></h2>
+          ${coverHTML}
+          <p class="post-item-excerpt">${excerpt}</p>
+          <a href="#" class="read-more-link" onclick="navigateTo('post', '${post.id}'); return false;">اقرأ المقال &larr;</a>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function handleSearch() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      if (!query) {
+        renderHomePosts(getPublishedPosts());
+        return;
+      }
+
+      const filtered = getPublishedPosts().filter(p => 
+        p.title.toLowerCase().includes(query) || 
+        p.content.toLowerCase().includes(query) ||
+        (p.category && p.category.toLowerCase().includes(query))
+      );
+
+      renderHomePosts(filtered);
+    }
+
+    /* --------------------------------------------------------------------------
+       5. SINGLE POST & COMMENTS
+       -------------------------------------------------------------------------- */
+    function renderSinglePost(postId) {
+      const post = blogPosts.find(p => p.id === postId);
+      const container = document.getElementById('postSingleContainer');
+
+      if (!post) {
+        container.innerHTML = '<p>المقال غير موجود.</p>';
+        return;
+      }
+
+      const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
+      
+      // Transform newlines to paragraphs safely
+      const formattedContent = post.content.split('\n\n').map(p => {
+        if (p.trim().startsWith('<img')) return p;
+        return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+      }).join('');
+
+      container.innerHTML = `
+        <article>
+          <div class="article-header">
+            <div class="post-item-meta">
+              <span>${post.date}</span>
+              ${post.category ? `<span class="post-item-category">${post.category}</span>` : ''}
+            </div>
+            <h1 class="article-title">${post.title}</h1>
+          </div>
+          ${coverHTML}
+          <div class="article-content" id="articleBody">
+            ${formattedContent}
+          </div>
+          
+          <div class="article-share">
+            <span>مشاركة المقال:</span>
+            <button class="share-btn" onclick="sharePost('${post.title}')">مشاركة عبر الهاتف / نسخ الرابط</button>
+            <button class="share-btn" onclick="shareWhatsApp('${post.title}')">واتساب</button>
+          </div>
+        </article>
+
+        <section class="comments-container">
+          <h3 class="comments-title">التعليقات</h3>
+          <div id="commentsList"></div>
+
+          <div class="comment-form">
+            <h4 style="font-size: 1rem;">أضف تعليقاً</h4>
+            <input type="text" id="commentAuthorInput" placeholder="الاسم">
+            <textarea id="commentTextInput" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
+            <button class="btn" onclick="addComment('${post.id}')">إرسال التعليق</button>
+            <small style="color: var(--text-muted); margin-top: 4px;">ملاحظة: التعليقات تحفظ محلياً في هذه النسخة التجريبية.</small>
+          </div>
+        </section>
+      `;
+
+      renderComments(post);
+
+      // Attach image lightbox triggers
+      document.querySelectorAll('#articleBody img').forEach(img => {
+        img.addEventListener('click', () => openLightbox(img.src));
+      });
+    }
+
+    function renderComments(post) {
+      const container = document.getElementById('commentsList');
+      container.innerHTML = '';
+
+      if (!post.comments || post.comments.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">لا توجد تعليقات بعد.</p>';
+        return;
+      }
+
+      post.comments.forEach((c, index) => {
+        const card = document.createElement('div');
+        card.className = 'comment-card';
+
+        let repliesHTML = '';
+        if (c.replies && c.replies.length > 0) {
+          repliesHTML = `<div class="replies-list">` + 
+            c.replies.map(r => `
+              <div style="margin-top: 8px;">
+                <div class="comment-header">
+                  <span class="comment-author">${r.author}</span>
+                  <span>${r.date}</span>
+                </div>
+                <div class="comment-body">${r.text}</div>
+              </div>
+            `).join('') + `</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="comment-header">
+            <span class="comment-author">${c.author}</span>
+            <span>${c.date}</span>
+          </div>
+          <div class="comment-body">${c.text}</div>
+          <button class="reply-btn" onclick="showReplyForm('${post.id}', ${index})">رد</button>
+          <div id="replyForm-${index}" style="display:none; margin-top:10px;">
+            <input type="text" id="replyAuthor-${index}" placeholder="الاسم" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+            <textarea id="replyText-${index}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
+            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="addReply('${post.id}', ${index})">إرسال الرد</button>
+          </div>
+          ${repliesHTML}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function addComment(postId) {
+      const author = document.getElementById('commentAuthorInput').value.trim() || 'زائر';
+      const text = document.getElementById('commentTextInput').value.trim();
+
+      if (!text) return;
+
+      const post = blogPosts.find(p => p.id === postId);
+      if (post) {
+        if (!post.comments) post.comments = [];
+        post.comments.push({
+          id: 'c_' + Date.now(),
+          author: author,
+          text: text,
+          date: new Date().toISOString().split('T')[0],
+          replies: []
+        });
+
+        savePostsToStorage();
+        renderSinglePost(postId);
+      }
+    }
+
+    function showReplyForm(postId, index) {
+      const el = document.getElementById(`replyForm-${index}`);
+      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function addReply(postId, commentIndex) {
+      const author = document.getElementById(`replyAuthor-${commentIndex}`).value.trim() || 'زائر';
+      const text = document.getElementById(`replyText-${commentIndex}`).value.trim();
+
+      if (!text) return;
+
+      const post = blogPosts.find(p => p.id === postId);
+      if (post && post.comments[commentIndex]) {
+        if (!post.comments[commentIndex].replies) post.comments[commentIndex].replies = [];
+        post.comments[commentIndex].replies.push({
+          author: author,
+          text: text,
+          date: new Date().toISOString().split('T')[0]
+        });
+
+        savePostsToStorage();
+        renderSinglePost(postId);
+      }
+    }
+
+    function sharePost(title) {
+      if (navigator.share) {
+        navigator.share({
+          title: title,
+          url: window.location.href
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(window.location.href);
+        alert('تم نسخ رابط المقال بنجاح!');
+      }
+    }
+
+    function shareWhatsApp(title) {
+      const url = encodeURIComponent(window.location.href);
+      const text = encodeURIComponent(title);
+      window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, '_blank');
+    }
+
+    /* --------------------------------------------------------------------------
+       6. CATEGORIES RENDERING
+       -------------------------------------------------------------------------- */
+    function renderCategories() {
+      const container = document.getElementById('categoriesList');
+      container.innerHTML = '';
+
+      const categories = [...new Set(getPublishedPosts().map(p => p.category).filter(Boolean))];
+
+      if (categories.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted);">لا توجد تصنيفات حالياً.</p>';
+        return;
+      }
+
+      categories.forEach(cat => {
+        const chip = document.createElement('div');
+        chip.className = 'category-chip';
+        chip.innerText = cat;
+        chip.onclick = () => filterByCategory(cat);
+        container.appendChild(chip);
+      });
+    }
+
+    function filterByCategory(cat) {
+      const filtered = getPublishedPosts().filter(p => p.category === cat);
+      const container = document.getElementById('categoryPostsResult');
+      container.innerHTML = `<h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-muted);">المقالات تحت تصنيف: ${cat}</h3>`;
+      
+      filtered.forEach(post => {
+        const item = document.createElement('div');
+        item.className = 'post-item';
+        item.style.paddingBottom = '15px';
+        item.innerHTML = `
+          <h3 class="post-item-title" style="font-size: 1.2rem;"><a href="#" onclick="navigateTo('post', '${post.id}'); return false;">${post.title}</a></h3>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">${post.date}</span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    /* --------------------------------------------------------------------------
+       7. ADMIN PANEL & POST MANAGEMENT
+       -------------------------------------------------------------------------- */
+    function loginAdmin() {
+      const pass = document.getElementById('adminPassInput').value;
+      if (pass === 'admin') {
+        isAdminLoggedIn = true;
+        document.getElementById('adminPassInput').value = '';
+        navigateTo('admin-panel');
+      } else {
+        alert('كلمة المرور غير صحيحة (استخدم: admin لاختبار الواجهة)');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdminLoggedIn = false;
+      navigateTo('home');
+    }
+
+    function renderAdminPanel() {
+      renderAdminPostsList();
+      document.getElementById('settingTitle').value = blogSettings.title || '';
+      document.getElementById('settingSubtitle').value = blogSettings.subtitle || '';
+      document.getElementById('settingAboutTitle').value = blogSettings.aboutTitle || '';
+      document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
+    }
+
+    function switchAdminTab(tabName) {
+      document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+
+      event.target.classList.add('active');
+      document.getElementById(`admin-tab-${tabName}`).style.display = 'block';
+    }
+
+    function savePost(status) {
+      const title = document.getElementById('postTitleInput').value.trim();
+      const category = document.getElementById('postCategoryInput').value.trim();
+      const content = document.getElementById('postContentInput').value.trim();
+      const cover = document.getElementById('postCoverData').value;
+      const editId = document.getElementById('editPostId').value;
+
+      if (!title || !content) {
+        alert('يرجى كتابة العنوان والنص على الأقل.');
+        return;
+      }
+
+      if (editId) {
+        const post = blogPosts.find(p => p.id === editId);
+        if (post) {
+          post.title = title;
+          post.category = category;
+          post.content = content;
+          if (cover) post.cover = cover;
+          post.status = status;
+        }
+      } else {
+        const newPost = {
+          id: 'post-' + Date.now(),
+          title: title,
+          category: category,
+          content: content,
+          cover: cover,
+          date: new Date().toISOString().split('T')[0],
+          status: status,
+          comments: []
+        };
+        blogPosts.unshift(newPost);
+      }
+
+      savePostsToStorage();
+      resetEditor();
+      alert(status === 'published' ? 'تم نشر المقال بنجاح!' : 'تم حفظ المسودة.');
+      switchAdminTab('posts');
+      renderAdminPostsList();
+    }
+
+    function resetEditor() {
+      document.getElementById('editPostId').value = '';
+      document.getElementById('postTitleInput').value = '';
+      document.getElementById('postCategoryInput').value = '';
+      document.getElementById('postContentInput').value = '';
+      document.getElementById('postCoverData').value = '';
+      document.getElementById('postCoverPreview').style.display = 'none';
+      document.getElementById('editorFormTitle').innerText = 'إنشاء مقال جديد';
+    }
+
+    function editPost(id) {
+      const post = blogPosts.find(p => p.id === id);
+      if (!post) return;
+
+      document.getElementById('editPostId').value = post.id;
+      document.getElementById('postTitleInput').value = post.title;
+      document.getElementById('postCategoryInput').value = post.category || '';
+      document.getElementById('postContentInput').value = post.content;
+      document.getElementById('postCoverData').value = post.cover || '';
+      
+      if (post.cover) {
+        const prev = document.getElementById('postCoverPreview');
+        prev.src = post.cover;
+        prev.style.display = 'block';
+      }
+
+      document.getElementById('editorFormTitle').innerText = 'تعديل المقال';
+      switchAdminTab('editor');
+    }
+
+    function deletePost(id) {
+      if (confirm('هل أنت تأكد من حذف هذا المقال؟')) {
+        blogPosts = blogPosts.filter(p => p.id !== id);
+        savePostsToStorage();
+        renderAdminPostsList();
+      }
+    }
+
+    function renderAdminPostsList() {
+      const container = document.getElementById('adminPostsList');
+      container.innerHTML = '';
+
+      if (blogPosts.length === 0) {
+        container.innerHTML = '<p style="color: var(--text-muted);">لا توجد مقالات.</p>';
+        return;
+      }
+
+      blogPosts.forEach(post => {
+        const item = document.createElement('div');
+        item.className = 'admin-post-item';
+        
+        const badgeClass = post.status === 'published' ? 'published' : 'draft';
+        const badgeText = post.status === 'published' ? 'منشور' : 'مسودة';
+
+        item.innerHTML = `
+          <div>
+            <span class="status-badge ${badgeClass}">${badgeText}</span>
+            <strong>${post.title}</strong>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">${post.date}</div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.8rem;" onclick="editPost('${post.id}')">تعديل</button>
+            <button class="btn btn-danger" style="padding: 4px 8px; font-size: 0.8rem;" onclick="deletePost('${post.id}')">حذف</button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function saveBlogSettings() {
+      blogSettings.title = document.getElementById('settingTitle').value.trim();
+      blogSettings.subtitle = document.getElementById('settingSubtitle').value.trim();
+      blogSettings.aboutTitle = document.getElementById('settingAboutTitle').value.trim();
+      blogSettings.aboutBody = document.getElementById('settingAboutBody').value.trim();
+
+      localStorage.setItem('zk_settings', JSON.stringify(blogSettings));
+      applySettings();
+      alert('تم حفظ الإعدادات بنجاح!');
+    }
+
+    /* --------------------------------------------------------------------------
+       8. IMAGE HANDLING (LOCAL STORAGE DATA URLs)
+       -------------------------------------------------------------------------- */
+    function handleImageUpload(input, previewId, callback) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        
+        if (previewId) {
+          const img = document.getElementById(previewId);
+          img.src = dataUrl;
+          img.style.display = 'block';
+        }
+
+        if (previewId === 'postCoverPreview') {
+          document.getElementById('postCoverData').value = dataUrl;
+        }
+
+        if (callback) callback(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveHeaderCover(dataUrl) {
+      blogSettings.headerCover = dataUrl;
+      localStorage.setItem('zk_settings', JSON.stringify(blogSettings));
+      applySettings();
+    }
+
+    function saveAboutImage(dataUrl) {
+      blogSettings.aboutImage = dataUrl;
+      localStorage.setItem('zk_settings', JSON.stringify(blogSettings));
+    }
+
+    function insertImageToEditor(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        const textarea = document.getElementById('postContentInput');
+        const imgTag = `\n<img src="${dataUrl}" alt="صورة مدرجة">\n`;
+        textarea.value += imgTag;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function openLightbox(src) {
+      document.getElementById('lightboxImg').src = src;
+      document.getElementById('lightbox').classList.add('active');
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+
+    function savePostsToStorage() {
+      try {
+        localStorage.setItem('zk_posts', JSON.stringify(blogPosts));
+      } catch (e) {
+        alert('تنبيه: مساحة localStorage امتلاءت بسبب حجم الصور المحلية. يمكنك تقليل حجم الصور أو حذف بعض المقالات.');
+      }
+    }
+  </script>
+</body>
+</html>

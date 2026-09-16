@@ -818,7 +818,7 @@
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
 
-    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjQueTkgNjAtNjAtNjAtNjAtMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
 
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
@@ -829,34 +829,18 @@
       aboutImage: ""
     };
 
-    const DEFAULT_POSTS = {
-      "post-1": {
-        id: "post-1",
-        title: "عن القراءة الهادئة والتدوين الشخصي",
-        category: "تأملات",
-        date: "2026-09-15",
-        status: "published",
-        cover: "",
-        content: "في هذا العصر المتسارع، تصبح المساحات الشخصية على الإنترنت ضرورة لاستعادة التركيز. التدوين ليس مجرد كتابة، بل هو أداة لتنظيم الأفكار وتأمل التجارب بعيداً عن الخوارزميات.\n\nالكتابة الهادئة تتيح لنا إعادة قراءة ما نمر به وعرضه بشكل مبسط ومريح للعين والذهن.",
-        comments: [
-          {
-            id: "c1",
-            author: "أحمد",
-            text: "مقالة رائعة وهادئة، التصميم مريح جداً للعين.",
-            date: "2026-09-16",
-            replies: [
-              { author: "زكريا", text: "شكراً لك سيد أحمد، هذا هو الهدف الأساسي من المدونة.", date: "2026-09-16" }
-            ]
-          }
-        ]
-      }
-    };
-
     let blogSettings = { ...DEFAULT_SETTINGS };
     let blogPosts = [];
     let isAdminLoggedIn = false;
     let deferredPrompt = null;
     window.currentViewPostId = null;
+
+    // Helper: Normalize comments array safely
+    function parseComments(commentsData) {
+      if (!commentsData) return [];
+      if (Array.isArray(commentsData)) return commentsData.filter(Boolean);
+      return Object.values(commentsData).filter(Boolean);
+    }
 
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
@@ -870,14 +854,16 @@
       window.renderAboutPage();
     });
 
-    // Listen to Posts
+    // Realtime Listener to Posts
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
-        blogPosts = Object.values(data);
+        blogPosts = Object.values(data).map(p => {
+          p.comments = parseComments(p.comments);
+          return p;
+        });
       } else {
-        set(ref(db, 'posts'), DEFAULT_POSTS);
-        blogPosts = Object.values(DEFAULT_POSTS);
+        blogPosts = [];
       }
       
       const activePage = document.querySelector('.page.active');
@@ -888,6 +874,7 @@
         window.renderAdminCommentsList();
       }
       
+      // Auto refresh current open post comments
       if (window.currentViewPostId) {
         const post = blogPosts.find(p => p.id === window.currentViewPostId);
         if (post) window.renderComments(post);
@@ -1004,7 +991,7 @@
       window.renderHomePosts(filtered);
     };
 
-    window.renderSinglePost = function(postId) {
+    window.renderSinglePost = async function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
 
@@ -1054,6 +1041,12 @@
         </section>
       `;
 
+      // Fetch fresh comments explicitly from DB to guarantee readers see existing comments instantly
+      try {
+        const commentsSnap = await get(ref(db, `posts/${postId}/comments`));
+        post.comments = parseComments(commentsSnap.val());
+      } catch(e) {}
+
       window.renderComments(post);
 
       document.querySelectorAll('#articleBody img').forEach(img => {
@@ -1066,7 +1059,7 @@
       if (!container) return;
       container.innerHTML = '';
 
-      const comments = post.comments || [];
+      const comments = parseComments(post.comments);
       if (comments.length === 0) {
         container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">لا توجد تعليقات بعد.</p>';
         return;
@@ -1077,7 +1070,7 @@
         card.className = 'comment-card';
 
         let repliesHTML = '';
-        const replies = c.replies || [];
+        const replies = parseComments(c.replies);
         if (replies.length > 0) {
           repliesHTML = `<div class="replies-list">` + 
             replies.map((r, rIndex) => `
@@ -1135,12 +1128,7 @@
 
       try {
         const snapshot = await get(commentsRef);
-        let currentComments = [];
-        
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          currentComments = Array.isArray(data) ? data : Object.values(data);
-        }
+        let currentComments = parseComments(snapshot.val());
 
         const newComment = {
           id: 'c_' + Date.now(),
@@ -1154,12 +1142,6 @@
 
         await set(commentsRef, currentComments);
 
-        const localPost = blogPosts.find(p => p.id === postId);
-        if (localPost) {
-          localPost.comments = currentComments;
-          window.renderComments(localPost);
-        }
-
         if (authorInput) authorInput.value = '';
         textInput.value = '';
         alert('تم إضافة التعليق بنجاح!');
@@ -1171,7 +1153,7 @@
     };
 
     /* ==========================================================================
-       دوال حذف وإدارة التعليقات والردود من اللوحة
+       إدارة وحذف التعليقات والردود من لوحة التحكم وقاعدة البيانات
        ========================================================================== */
     window.renderAdminCommentsList = function() {
       const container = document.getElementById('adminCommentsList');
@@ -1181,7 +1163,7 @@
       let hasComments = false;
 
       blogPosts.forEach(post => {
-        const comments = post.comments || [];
+        const comments = parseComments(post.comments);
         if (comments.length > 0) {
           hasComments = true;
           comments.forEach((c, cIndex) => {
@@ -1192,7 +1174,7 @@
             item.style.gap = '8px';
 
             let repliesHTML = '';
-            const replies = c.replies || [];
+            const replies = parseComments(c.replies);
             if (replies.length > 0) {
               repliesHTML = `<div style="margin-right: 15px; border-right: 2px solid var(--border-color); padding-right: 10px; margin-top: 5px;">` +
                 replies.map((r, rIndex) => `
@@ -1232,18 +1214,12 @@
       const commentsRef = ref(db, `posts/${postId}/comments`);
       try {
         const snapshot = await get(commentsRef);
-        if (snapshot.exists()) {
-          let currentComments = Array.isArray(snapshot.val()) ? snapshot.val() : Object.values(snapshot.val());
-          currentComments.splice(commentIndex, 1);
-          await set(commentsRef, currentComments);
-
-          const localPost = blogPosts.find(p => p.id === postId);
-          if (localPost) {
-            localPost.comments = currentComments;
-            window.renderComments(localPost);
-          }
-          window.renderAdminCommentsList();
-        }
+        let currentComments = parseComments(snapshot.val());
+        
+        currentComments.splice(commentIndex, 1);
+        
+        await set(commentsRef, currentComments);
+        alert('تم حذف التعليق بنجاح.');
       } catch (err) {
         console.error("خطأ في الحذف:", err);
         alert('تعذر حذف التعليق.');
@@ -1256,19 +1232,15 @@
       const commentsRef = ref(db, `posts/${postId}/comments`);
       try {
         const snapshot = await get(commentsRef);
-        if (snapshot.exists()) {
-          let currentComments = Array.isArray(snapshot.val()) ? snapshot.val() : Object.values(snapshot.val());
-          if (currentComments[commentIndex] && currentComments[commentIndex].replies) {
-            currentComments[commentIndex].replies.splice(replyIndex, 1);
-            await set(commentsRef, currentComments);
+        let currentComments = parseComments(snapshot.val());
 
-            const localPost = blogPosts.find(p => p.id === postId);
-            if (localPost) {
-              localPost.comments = currentComments;
-              window.renderComments(localPost);
-            }
-            window.renderAdminCommentsList();
-          }
+        if (currentComments[commentIndex]) {
+          let replies = parseComments(currentComments[commentIndex].replies);
+          replies.splice(replyIndex, 1);
+          currentComments[commentIndex].replies = replies;
+          
+          await set(commentsRef, currentComments);
+          alert('تم حذف الرد بنجاح.');
         }
       } catch (err) {
         console.error("خطأ في حذف الرد:", err);
@@ -1304,19 +1276,17 @@
       };
 
       try {
-        const postRef = ref(db, 'posts/' + postId);
-        const snapshot = await get(postRef);
-        if (snapshot.exists()) {
-          const postData = snapshot.val();
-          const currentComments = postData.comments || [];
-          if (currentComments[commentIndex]) {
-            if (!currentComments[commentIndex].replies) {
-              currentComments[commentIndex].replies = [];
-            }
-            currentComments[commentIndex].replies.push(newReply);
-            await update(ref(db, 'posts/' + postId), { comments: currentComments });
-            alert('تم إضافة الرد بنجاح!');
-          }
+        const commentsRef = ref(db, `posts/${postId}/comments`);
+        const snapshot = await get(commentsRef);
+        let currentComments = parseComments(snapshot.val());
+
+        if (currentComments[commentIndex]) {
+          let replies = parseComments(currentComments[commentIndex].replies);
+          replies.push(newReply);
+          currentComments[commentIndex].replies = replies;
+
+          await set(commentsRef, currentComments);
+          alert('تم إضافة الرد بنجاح!');
         }
       } catch (err) {
         console.error("خطأ في حفظ الرد:", err);
@@ -1438,7 +1408,7 @@
         cover: cover,
         status: status,
         date: existingPost ? existingPost.date : new Date().toISOString().split('T')[0],
-        comments: existingPost && existingPost.comments ? existingPost.comments : [],
+        comments: existingPost && existingPost.comments ? parseComments(existingPost.comments) : [],
         updatedAt: new Date().toISOString()
       };
 

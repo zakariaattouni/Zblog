@@ -962,6 +962,14 @@
     /* --------------------------------------------------------------------------
        2. FIREBASE REALTIME DATABASE LISTENERS
        -------------------------------------------------------------------------- */
+    // دالة مساعدة لتحويل الكائن إلى مصفوفة بشكل آمن
+    function convertToArray(data) {
+      if (!data) return [];
+      if (Array.isArray(data)) return data;
+      if (typeof data === 'object') return Object.values(data);
+      return [];
+    }
+
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
@@ -974,22 +982,23 @@
       window.renderAboutPage();
     });
 
-    // Listen to Posts (مع إصلاح هيكلية التعليقات لتظهر بشكل صحيح)
+    // Listen to Posts - مع معالجة قوية للتعليقات
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
         blogPosts = Object.values(data).map(post => {
-          // إصلاح: تحويل التعليقات من كائن إلى مصفوفة إذا لزم الأمر (بسبب push في فايربيس)
-          if (post.comments && typeof post.comments === 'object' && !Array.isArray(post.comments)) {
-            post.comments = Object.values(post.comments).map(c => {
-              if (c.replies && typeof c.replies === 'object' && !Array.isArray(c.replies)) {
-                c.replies = Object.values(c.replies);
-              } else if (!c.replies) {
-                c.replies = [];
+          // تحويل التعليقات إلى مصفوفة بشكل آمن
+          if (post.comments) {
+            post.comments = convertToArray(post.comments).map(comment => {
+              // تحويل الردود إلى مصفوفة بشكل آمن
+              if (comment.replies) {
+                comment.replies = convertToArray(comment.replies);
+              } else {
+                comment.replies = [];
               }
-              return c;
+              return comment;
             });
-          } else if (!post.comments) {
+          } else {
             post.comments = [];
           }
           return post;
@@ -1245,6 +1254,7 @@
       };
 
       push(ref(db, `posts/${postId}/comments`), newComment);
+      document.getElementById('commentAuthorInput').value = '';
       document.getElementById('commentTextInput').value = '';
     };
 
@@ -1269,6 +1279,7 @@
         };
 
         push(ref(db, `posts/${postId}/comments/${commentId}/replies`), newReply);
+        document.getElementById(`replyAuthor-${commentIndex}`).value = '';
         document.getElementById(`replyText-${commentIndex}`).value = '';
       }
     };

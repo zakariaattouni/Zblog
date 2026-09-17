@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>مدونة زكريا</title>
-
   <!-- PWA Meta Tags -->
   <meta name="theme-color" content="#3b5249">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,12 +11,15 @@
   <meta name="apple-mobile-web-app-title" content="مدونة زكريا">
   <meta name="application-name" content="مدونة زكريا">
   <meta name="mobile-web-app-capable" content="yes">
-
+  <!-- Open Graph Meta Tags for sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="مدونة زكريا">
+  <meta property="og:description" content="ملاحظات وقراءات شخصية">
+  <meta property="og:site_name" content="مدونة زكريا">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
     :root {
       --bg-color: #f7f7f6;
@@ -35,13 +37,11 @@
       --max-width: 720px;
       --radius: 8px;
     }
-
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-
     body {
       background-color: var(--bg-color);
       color: var(--text-main);
@@ -52,7 +52,6 @@
       text-align: right;
       -webkit-font-smoothing: antialiased;
     }
-
     a {
       color: var(--accent-color);
       text-decoration: none;
@@ -61,19 +60,16 @@
     a:hover {
       color: var(--accent-hover);
     }
-
     img {
       max-width: 100%;
       height: auto;
       display: block;
       border-radius: var(--radius);
     }
-
     button, input, textarea, select {
       font-family: inherit;
       font-size: inherit;
     }
-
     #installPrompt {
       position: fixed;
       bottom: 20px;
@@ -91,19 +87,15 @@
       z-index: 3000;
       animation: slideUp 0.3s ease;
     }
-
     #installPrompt.show { display: flex; }
-
     #installPrompt .install-text {
       flex: 1;
       font-size: 0.95rem;
     }
-
     #installPrompt .install-actions {
       display: flex;
       gap: 10px;
     }
-
     #installPrompt button {
       padding: 8px 16px;
       border-radius: 6px;
@@ -112,29 +104,24 @@
       font-size: 0.9rem;
       font-weight: 600;
     }
-
     #installPrompt .install-btn {
       background: white;
       color: var(--accent-color);
     }
-
     #installPrompt .dismiss-btn {
       background: transparent;
       color: white;
       border: 1px solid rgba(255,255,255,0.3);
     }
-
     @keyframes slideUp {
       from { transform: translateY(100px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-
     header {
       position: relative;
       background-color: var(--paper-color);
       border-bottom: 1px solid var(--border-color);
     }
-
     .cover-container {
       width: 100%;
       height: 200px;
@@ -142,14 +129,12 @@
       overflow: hidden;
       position: relative;
     }
-
     .cover-container img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       border-radius: 0;
     }
-
     .header-content {
       max-width: var(--max-width);
       margin: 0 auto;
@@ -158,7 +143,6 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .site-title-area h1 {
       font-family: var(--font-heading);
       font-size: 2rem;
@@ -166,13 +150,11 @@
       color: var(--text-main);
       line-height: 1.2;
     }
-
     .site-title-area p {
       font-size: 0.9rem;
       color: var(--text-muted);
       margin-top: 4px;
     }
-
     .menu-btn {
       background: none;
       border: 1px solid var(--border-color);
@@ -185,7 +167,6 @@
       gap: 6px;
       font-size: 0.9rem;
     }
-
     .nav-overlay {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: 0;
@@ -195,12 +176,10 @@
       visibility: hidden;
       transition: opacity 0.3s ease, visibility 0.3s ease;
     }
-
     .nav-overlay.active {
       opacity: 1;
       visibility: visible;
     }
-
     .nav-drawer {
       position: fixed;
       top: 0; right: -300px;
@@ -213,9 +192,7 @@
       display: flex;
       flex-direction: column;
     }
-
     .nav-overlay.active .nav-drawer { right: 0; }
-
     .close-nav {
       align-self: flex-end;
       background: none;
@@ -225,14 +202,12 @@
       color: var(--text-muted);
       margin-bottom: 20px;
     }
-
     .nav-links {
       list-style: none;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
-
     .nav-links a {
       font-size: 1.1rem;
       color: var(--text-main);
@@ -240,18 +215,14 @@
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border-color);
     }
-
     main {
       max-width: var(--max-width);
       margin: 30px auto;
       padding: 0 20px 60px 20px;
     }
-
     .page { display: none; }
     .page.active { display: block; }
-
     .search-box { margin-bottom: 30px; }
-
     .search-input {
       width: 100%;
       padding: 12px 16px;
@@ -261,18 +232,15 @@
       outline: none;
       color: var(--text-main);
     }
-
     .posts-list {
       display: flex;
       flex-direction: column;
       gap: 35px;
     }
-
     .post-item {
       padding-bottom: 30px;
       border-bottom: 1px solid var(--border-color);
     }
-
     .post-item-meta {
       font-size: 0.85rem;
       color: var(--text-muted);
@@ -280,15 +248,14 @@
       display: flex;
       gap: 12px;
       align-items: center;
+      flex-wrap: wrap;
     }
-
     .post-item-category {
       background-color: #eeeeec;
       padding: 2px 8px;
       border-radius: 4px;
       font-size: 0.8rem;
     }
-
     .post-item-title {
       font-family: var(--font-heading);
       font-size: 1.5rem;
@@ -296,36 +263,68 @@
       margin-bottom: 10px;
       line-height: 1.3;
     }
-
     .post-item-title a { color: var(--text-main); }
     .post-item-title a:hover { color: var(--accent-color); }
-
     .post-item-cover {
       margin: 15px 0;
       max-height: 250px;
       overflow: hidden;
       border-radius: var(--radius);
     }
-
     .post-item-cover img {
       width: 100%;
       height: 250px;
       object-fit: cover;
     }
-
     .post-item-excerpt {
       color: #555;
       font-size: 1rem;
       margin-bottom: 12px;
     }
-
     .read-more-link {
       font-size: 0.9rem;
       font-weight: 600;
     }
-
+    /* Post item share buttons */
+    .post-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 12px;
+      border-top: 1px dashed var(--border-color);
+      flex-wrap: wrap;
+    }
+    .post-item-actions .read-more-link {
+      margin-left: auto;
+    }
+    .mini-share-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background-color: var(--paper-color);
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0;
+    }
+    .mini-share-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    }
+    .mini-share-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .mini-share-btn.fb { color: #1877f2; }
+    .mini-share-btn.tw { color: #000; }
+    .mini-share-btn.wa { color: #25d366; }
+    .mini-share-btn.tg { color: #0088cc; }
+    .mini-share-btn.copy { color: var(--accent-color); }
     .article-header { margin-bottom: 25px; }
-
     .article-title {
       font-family: var(--font-heading);
       font-size: 2.1rem;
@@ -333,9 +332,7 @@
       margin-top: 8px;
       margin-bottom: 12px;
     }
-
     .article-cover { margin: 20px 0 30px 0; }
-
     .article-content {
       line-height: 1.9;
       font-size: 1.1rem;
@@ -345,43 +342,67 @@
       border-radius: var(--radius);
       border: 1px solid var(--border-color);
     }
-
     .article-content p { margin-bottom: 20px; }
     .article-content img { margin: 25px 0; cursor: pointer; }
-
     .article-share {
       margin-top: 30px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      gap: 15px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      background-color: var(--paper-color);
+    }
+    .article-share-title {
       font-size: 0.9rem;
       color: var(--text-muted);
+      margin-bottom: 12px;
+      font-weight: 600;
     }
-
+    .article-share-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
     .share-btn {
-      background: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--paper-color);
       border: 1px solid var(--border-color);
-      padding: 6px 12px;
-      border-radius: 4px;
+      padding: 8px 14px;
+      border-radius: 6px;
       cursor: pointer;
-      font-size: 0.85rem;
+      font-size: 0.88rem;
       color: var(--text-main);
+      transition: all 0.2s;
     }
-
+    .share-btn:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+      transform: translateY(-1px);
+    }
+    .share-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+    .share-btn.fb { color: #1877f2; border-color: #1877f2; }
+    .share-btn.fb:hover { background: #1877f2; color: white; }
+    .share-btn.tw { color: #000; border-color: #000; }
+    .share-btn.tw:hover { background: #000; color: white; }
+    .share-btn.wa { color: #25d366; border-color: #25d366; }
+    .share-btn.wa:hover { background: #25d366; color: white; }
+    .share-btn.tg { color: #0088cc; border-color: #0088cc; }
+    .share-btn.tg:hover { background: #0088cc; color: white; }
+    .share-btn.copy:hover { background: var(--accent-color); color: white; }
     .comments-container {
       margin-top: 40px;
       padding-top: 30px;
       border-top: 1px solid var(--border-color);
     }
-
     .comments-title {
       font-family: var(--font-heading);
       font-size: 1.4rem;
       margin-bottom: 20px;
     }
-
     .comment-card {
       background-color: var(--paper-color);
       padding: 15px;
@@ -389,7 +410,6 @@
       border: 1px solid var(--border-color);
       margin-bottom: 15px;
     }
-
     .comment-header {
       display: flex;
       justify-content: space-between;
@@ -397,17 +417,14 @@
       color: var(--text-muted);
       margin-bottom: 8px;
     }
-
     .comment-author {
       font-weight: 600;
       color: var(--text-main);
     }
-
     .comment-body {
       font-size: 0.95rem;
       margin-bottom: 10px;
     }
-
     .reply-btn, .delete-comment-btn {
       background: none;
       border: none;
@@ -415,31 +432,26 @@
       cursor: pointer;
       padding: 0;
     }
-
     .reply-btn { color: var(--accent-color); }
     .delete-comment-btn { color: var(--danger-color); margin-right: 12px; }
-
     .replies-list {
       margin-right: 20px;
       margin-top: 10px;
       border-right: 2px solid var(--border-color);
       padding-right: 15px;
     }
-
     .comment-form {
       margin-top: 25px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
-
     .comment-form input, .comment-form textarea {
       padding: 10px;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       outline: none;
     }
-
     .btn {
       background-color: var(--accent-color);
       color: #fff;
@@ -451,18 +463,14 @@
       align-self: flex-start;
       transition: background-color 0.2s;
     }
-
     .btn:hover { background-color: var(--accent-hover); }
-
     .btn-secondary {
       background-color: transparent;
       color: var(--text-main);
       border: 1px solid var(--border-color);
     }
-
     .btn-secondary:hover { background-color: #eee; }
     .btn-danger { background-color: var(--danger-color); color: white; }
-
     .lightbox {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: 0;
@@ -473,22 +481,18 @@
       z-index: 2000;
       padding: 20px;
     }
-
     .lightbox.active { display: flex; }
-
     .lightbox img {
       max-width: 95%;
       max-height: 90vh;
       object-fit: contain;
     }
-
     .categories-list {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       margin-top: 20px;
     }
-
     .category-chip {
       background-color: var(--paper-color);
       border: 1px solid var(--border-color);
@@ -497,19 +501,16 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-
     .category-chip:hover {
       border-color: var(--accent-color);
       color: var(--accent-color);
     }
-
     .about-card {
       background-color: var(--paper-color);
       padding: 30px;
       border-radius: var(--radius);
       border: 1px solid var(--border-color);
     }
-
     .admin-nav {
       display: flex;
       gap: 10px;
@@ -518,7 +519,6 @@
       padding-bottom: 15px;
       overflow-x: auto;
     }
-
     .admin-tab {
       padding: 8px 14px;
       background: none;
@@ -528,39 +528,33 @@
       color: var(--text-muted);
       white-space: nowrap;
     }
-
     .admin-tab.active {
       background-color: var(--paper-color);
       color: var(--text-main);
       font-weight: 600;
       border: 1px solid var(--border-color);
     }
-
     .form-group {
       margin-bottom: 18px;
       display: flex;
       flex-direction: column;
       gap: 6px;
     }
-
     .form-group label {
       font-size: 0.9rem;
       font-weight: 600;
     }
-
     .form-group input, .form-group textarea, .form-group select {
       padding: 10px;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       background-color: var(--paper-color);
     }
-
     .admin-post-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
     .admin-post-item {
       background-color: var(--paper-color);
       padding: 12px 16px;
@@ -570,34 +564,53 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .status-badge {
       font-size: 0.75rem;
       padding: 2px 6px;
       border-radius: 4px;
       margin-right: 8px;
     }
-
     .status-badge.published {
       background-color: #e2f0d9;
       color: #385723;
     }
-
     .status-badge.draft {
       background-color: #fff2cc;
       color: #7f6000;
     }
-
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background-color: var(--accent-color);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 4000;
+      opacity: 0;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
     @media (max-width: 600px) {
       .header-content { padding: 16px; }
       .site-title-area h1 { font-size: 1.6rem; }
       .article-title { font-size: 1.7rem; }
       .article-content { padding: 18px; }
+      .share-btn { padding: 6px 10px; font-size: 0.8rem; }
+      .share-btn span { display: none; }
+      .article-share-buttons { gap: 8px; }
     }
   </style>
 </head>
 <body>
-
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
   <!-- Install Prompt Banner -->
   <div id="installPrompt">
     <div class="install-text">قم بتثبيت التطبيق على جهازك للوصول السريع</div>
@@ -606,24 +619,33 @@
       <button class="install-btn" onclick="window.installApp()">تثبيت</button>
     </div>
   </div>
-
   <!-- HEADER & COVER SECTION -->
   <header>
     <div class="cover-container" id="coverContainer">
-      <img id="headerCoverImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='200' viewBox='0 0 800 200'><rect width='100%' height='100%' fill='%23e2e2e0'/><text x='50%' y='50%' fill='%23888888' font-family='sans-serif' font-size='18' text-anchor='middle'>غلاف المدونة</text></svg>" alt="تغويسة المدونة">
+      <img id="headerCoverImg" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='200' viewBox='0 0 800 200'><rect width='100%' height='100%' fill='%23e2e2e0'/><text x='50%' y='50%' fill='%23888888' font-family='sans-serif' font-size='18' text-anchor='middle'>غلاف المدونة</text></svg>" alt="غلاف المدونة">
     </div>
     <div class="header-content">
       <div class="site-title-area">
         <h1 id="siteTitle">مدونة زكريا</h1>
         <p id="siteSubtitle">ملاحظات وقراءات شخصية</p>
       </div>
-      <button class="menu-btn" onclick="window.toggleNav(true)">
-        <span>القائمة</span>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-      </button>
+      <div style="display: flex; gap: 8px;">
+        <button class="menu-btn" onclick="window.shareBlog()" title="مشاركة المدونة" aria-label="مشاركة المدونة">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+        </button>
+        <button class="menu-btn" onclick="window.toggleNav(true)">
+          <span>القائمة</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+      </div>
     </div>
   </header>
-
   <!-- NAVIGATION OVERLAY -->
   <div class="nav-overlay" id="navOverlay" onclick="window.toggleNav(false)">
     <div class="nav-drawer" onclick="event.stopPropagation()">
@@ -632,14 +654,13 @@
         <li><a href="#" onclick="window.navigateTo('home'); window.toggleNav(false);">الرئيسية</a></li>
         <li><a href="#" onclick="window.navigateTo('categories'); window.toggleNav(false);">التصنيفات</a></li>
         <li><a href="#" onclick="window.navigateTo('about'); window.toggleNav(false);">عن زكريا</a></li>
+        <li><a href="#" onclick="window.shareBlog(); window.toggleNav(false);">شارك المدونة</a></li>
         <li><a href="#" onclick="window.navigateTo('admin-login'); window.toggleNav(false);" id="adminNavBtn">دخول الإدارة</a></li>
       </ul>
     </div>
   </div>
-
   <!-- MAIN CONTENT AREA -->
   <main>
-
     <!-- 1. HOME PAGE -->
     <section id="page-home" class="page active">
       <div class="search-box">
@@ -647,19 +668,16 @@
       </div>
       <div id="postsList" class="posts-list"></div>
     </section>
-
     <!-- 2. SINGLE POST PAGE -->
     <section id="page-post" class="page">
       <div id="postSingleContainer"></div>
     </section>
-
     <!-- 3. CATEGORIES PAGE -->
     <section id="page-categories" class="page">
       <h2 style="font-family: var(--font-heading); margin-bottom: 15px;">التصنيفات</h2>
       <div id="categoriesList" class="categories-list"></div>
       <div id="categoryPostsResult" class="posts-list" style="margin-top: 30px;"></div>
     </section>
-
     <!-- 4. ABOUT PAGE -->
     <section id="page-about" class="page">
       <div class="about-card">
@@ -670,7 +688,6 @@
         <div id="aboutBody" style="line-height: 1.9; color: #333;"></div>
       </div>
     </section>
-
     <!-- 5. ADMIN LOGIN -->
     <section id="page-admin-login" class="page">
       <div class="about-card" style="max-width: 400px; margin: 0 auto;">
@@ -678,12 +695,11 @@
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">هذه الصفحة مخصصة للمسؤول فقط</p>
         <div class="form-group">
           <label>كلمة المرور</label>
-          <input type="password" id="adminPassInput">
+          <input type="password" id="adminPassInput" onkeypress="if(event.key==='Enter') window.loginAdmin()">
         </div>
         <button class="btn" onclick="window.loginAdmin()">دخول</button>
       </div>
     </section>
-
     <!-- 6. ADMIN PANEL -->
     <section id="page-admin-panel" class="page">
       <div class="admin-nav">
@@ -693,7 +709,6 @@
         <button class="admin-tab" onclick="window.switchAdminTab('settings', event)">إعدادات المدونة</button>
         <button class="admin-tab" onclick="window.logoutAdmin()" style="color: var(--danger-color);">خروج</button>
       </div>
-
       <!-- Editor -->
       <div id="admin-tab-editor" class="admin-tab-content">
         <h3 style="margin-bottom: 15px;" id="editorFormTitle">إنشاء مقال جديد</h3>
@@ -703,48 +718,40 @@
           <label>عنوان المقال</label>
           <input type="text" id="postTitleInput" placeholder="أدخل العنوان هنا...">
         </div>
-
         <div class="form-group">
           <label>التصنيف</label>
           <input type="text" id="postCategoryInput" placeholder="مثال: قراءات، طب، ثقافة...">
         </div>
-
         <div class="form-group">
           <label>صورة المقال الرئيسية</label>
           <input type="file" id="postCoverInput" accept="image/*" onchange="window.handleImageUpload(this, 'postCoverPreview')">
           <input type="hidden" id="postCoverData">
           <img id="postCoverPreview" src="" style="max-height: 120px; margin-top: 10px; display: none;">
         </div>
-
         <div class="form-group">
           <label>نص المقال</label>
           <textarea id="postContentInput" rows="10" placeholder="اكتب النص هنا..."></textarea>
         </div>
-
         <div class="form-group">
           <label>إضافة صور داخل النص</label>
           <input type="file" accept="image/*" onchange="window.insertImageToEditor(this)">
           <small style="color: var(--text-muted);">اختيار صورة سينشئ مكاناً لها في النص تلقائياً.</small>
         </div>
-
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <button class="btn" onclick="window.savePost('published')">نشر المقال</button>
           <button class="btn btn-secondary" onclick="window.savePost('draft')">حفظ كمسودة</button>
         </div>
       </div>
-
       <!-- Posts Management -->
       <div id="admin-tab-posts" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">المقالات والمسودات</h3>
         <div id="adminPostsList" class="admin-post-list"></div>
       </div>
-
       <!-- Comments Management -->
       <div id="admin-tab-comments" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">إدارة جميع التعليقات</h3>
         <div id="adminCommentsList" class="admin-post-list"></div>
       </div>
-
       <!-- Settings -->
       <div id="admin-tab-settings" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">إعدادات العامة والترويسة</h3>
@@ -753,20 +760,16 @@
           <label>عنوان المدونة</label>
           <input type="text" id="settingTitle">
         </div>
-
         <div class="form-group">
           <label>الوصف القصير</label>
           <input type="text" id="settingSubtitle">
         </div>
-
         <div class="form-group">
           <label>صورة الترويسة (الغلاف)</label>
           <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'headerCoverPreview', window.saveHeaderCover)">
           <img id="headerCoverPreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
         </div>
-
         <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
-
         <h3 style="margin-bottom: 15px;">محتوى صفحة "عن زكريا"</h3>
         <div class="form-group">
           <label>عنوان الصفحة</label>
@@ -781,24 +784,19 @@
           <label>النص التعريفى</label>
           <textarea id="settingAboutBody" rows="6"></textarea>
         </div>
-
         <button class="btn" onclick="window.saveBlogSettings()">حفظ الإعدادات</button>
       </div>
     </section>
-
   </main>
-
   <!-- LIGHTBOX FOR IMAGES -->
   <div class="lightbox" id="lightbox" onclick="window.closeLightbox()">
     <img id="lightboxImg" src="" alt="عرض مكبر">
   </div>
-
   <!-- JAVASCRIPT LOGIC & FIREBASE INTERACTION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
     import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
     const firebaseConfig = {
       apiKey: "AIzaSyDaxCW0tvWgsLfxujQJcjsfezBpHe_qzHo",
       authDomain: "zblog-5ec1e.firebaseapp.com",
@@ -809,13 +807,10 @@
       appId: "1:4075480522:web:97d376f4c334c0de685b33",
       measurementId: "G-JGTPVDDD0W"
     };
-
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
-
-    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC08MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
-
+    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC04MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
       subtitle: "ملاحظات وقراءات شخصية",
@@ -824,13 +819,20 @@
       aboutBody: "أهلاً بك في مدونتي الشخصية. هنا أشارك بعض القراءات والملاحظات والأفكار الفكرية والعلمية في مساحة هادئة بعيدة عن ضوضاء وسائل التواصل الاجتماعي.",
       aboutImage: ""
     };
-
     let blogSettings = { ...DEFAULT_SETTINGS };
     let blogPosts = [];
     let isAdminLoggedIn = false;
     let deferredPrompt = null;
     window.currentViewPostId = null;
-
+    // Toast notification helper
+    window.showToast = function(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2500);
+    };
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
@@ -842,7 +844,6 @@
       window.applySettings();
       window.renderAboutPage();
     });
-
     // Realtime Listener to Posts
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
@@ -851,6 +852,12 @@
           ...data[key],
           id: key
         }));
+        // Sort posts by date (newest first)
+        blogPosts.sort((a, b) => {
+          const dateA = new Date(a.updatedAt || a.date || 0);
+          const dateB = new Date(b.updatedAt || b.date || 0);
+          return dateB - dateA;
+        });
       } else {
         blogPosts = [];
       }
@@ -868,25 +875,20 @@
         if (post) window.listenToComments(post.id);
       }
     });
-
     document.addEventListener("DOMContentLoaded", function() {
       window.registerServiceWorker();
       window.setupInstallPrompt();
     });
-
     window.toggleNav = function(show) {
       const nav = document.getElementById('navOverlay');
       if (show) nav.classList.add('active');
       else nav.classList.remove('active');
     };
-
     window.navigateTo = function(pageId, param = null) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const target = document.getElementById(`page-${pageId}`);
       if (target) target.classList.add('active');
-
       window.scrollTo(0, 0);
-
       if (pageId === 'home') {
         window.currentViewPostId = null;
         window.renderHomePosts(window.getPublishedPosts());
@@ -905,21 +907,27 @@
         else window.renderAdminPanel();
       }
     };
-
     window.getPublishedPosts = function() {
       return blogPosts.filter(p => p.status === 'published');
     };
-
     window.applySettings = function() {
       document.getElementById('siteTitle').innerText = blogSettings.title;
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
       document.title = blogSettings.title;
-
+      
+      // Update Open Graph meta tags
+      document.querySelector('meta[property="og:title"]').setAttribute('content', blogSettings.title);
+      document.querySelector('meta[property="og:description"]').setAttribute('content', blogSettings.subtitle);
+      
       if (blogSettings.headerCover) {
         document.getElementById('headerCoverImg').src = blogSettings.headerCover;
+        document.querySelector('meta[property="og:image"]')?.remove();
+        const ogImage = document.createElement('meta');
+        ogImage.setAttribute('property', 'og:image');
+        ogImage.setAttribute('content', blogSettings.headerCover);
+        document.head.appendChild(ogImage);
       }
     };
-
     window.renderAboutPage = function() {
       document.getElementById('aboutTitle').innerText = blogSettings.aboutTitle || "عن زكريا";
       document.getElementById('aboutBody').innerText = blogSettings.aboutBody || "";
@@ -933,20 +941,16 @@
         imgContainer.style.display = 'none';
       }
     };
-
     window.renderHomePosts = function(posts) {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
-
       if (posts.length === 0) {
         container.innerHTML = '<p style="color: var(--text-muted); text-align: center; margin: 40px 0;">لا توجد مقالات لعرضها.</p>';
         return;
       }
-
       posts.forEach(post => {
         const excerpt = post.content.replace(/<[^>]*>?/gm, '').substring(0, 140) + '...';
         const coverHTML = post.cover ? `<div class="post-item-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
-
         const item = document.createElement('article');
         item.className = 'post-item';
         item.innerHTML = `
@@ -957,44 +961,177 @@
           <h2 class="post-item-title"><a href="#" onclick="window.navigateTo('post', '${post.id}'); return false;">${post.title}</a></h2>
           ${coverHTML}
           <p class="post-item-excerpt">${excerpt}</p>
-          <a href="#" class="read-more-link" onclick="window.navigateTo('post', '${post.id}'); return false;">اقرأ المقال &larr;</a>
+          <div class="post-item-actions">
+            <button class="mini-share-btn fb" onclick="window.shareToFacebook('${post.id}')" title="مشاركة على فيسبوك">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </button>
+            <button class="mini-share-btn tw" onclick="window.shareToTwitter('${post.id}')" title="مشاركة على تويتر">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </button>
+            <button class="mini-share-btn wa" onclick="window.shareToWhatsApp('${post.id}')" title="مشاركة على واتساب">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </button>
+            <a href="#" class="read-more-link" onclick="window.navigateTo('post', '${post.id}'); return false;">اقرأ المقال &larr;</a>
+          </div>
         `;
         container.appendChild(item);
       });
     };
-
     window.handleSearch = function() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
       if (!query) {
         window.renderHomePosts(window.getPublishedPosts());
         return;
       }
-
       const filtered = window.getPublishedPosts().filter(p => 
         p.title.toLowerCase().includes(query) || 
         p.content.toLowerCase().includes(query) ||
         (p.category && p.category.toLowerCase().includes(query))
       );
-
       window.renderHomePosts(filtered);
     };
-
+    // Get post URL for sharing
+    window.getPostUrl = function(postId) {
+      return window.location.origin + window.location.pathname + '#post-' + postId;
+    };
+    // Share blog function
+    window.shareBlog = function() {
+      const shareData = {
+        title: blogSettings.title,
+        text: blogSettings.subtitle || 'ملاحظات وقراءات شخصية',
+        url: window.location.origin + window.location.pathname
+      };
+      if (navigator.share) {
+        navigator.share(shareData).catch(() => {
+          window.copyToClipboard(shareData.url);
+        });
+      } else {
+        window.copyToClipboard(shareData.url);
+      }
+    };
+    // Share to Facebook
+    window.shareToFacebook = function(postId) {
+      const post = blogPosts.find(p => p.id === postId);
+      if (!post) return;
+      const url = encodeURIComponent(window.getPostUrl(postId));
+      const title = encodeURIComponent(post.title);
+      const excerpt = encodeURIComponent(post.content.replace(/<[^>]*>?/gm, '').substring(0, 200));
+      let fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`;
+      window.open(fbUrl, '_blank', 'width=600,height=400');
+    };
+    // Share to Twitter
+    window.shareToTwitter = function(postId) {
+      const post = blogPosts.find(p => p.id === postId);
+      if (!post) return;
+      const url = encodeURIComponent(window.getPostUrl(postId));
+      const title = encodeURIComponent(post.title);
+      window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=600,height=400');
+    };
+    // Share to WhatsApp
+    window.shareToWhatsApp = function(postId) {
+      const post = blogPosts.find(p => p.id === postId);
+      if (!post) return;
+      const url = encodeURIComponent(window.getPostUrl(postId));
+      const title = encodeURIComponent(post.title);
+      window.open(`https://api.whatsapp.com/send?text=${title}%20${url}`, '_blank');
+    };
+    // Share to Telegram
+    window.shareToTelegram = function(postId) {
+      const post = blogPosts.find(p => p.id === postId);
+      if (!post) return;
+      const url = encodeURIComponent(window.getPostUrl(postId));
+      const title = encodeURIComponent(post.title);
+      window.open(`https://t.me/share/url?url=${url}&text=${title}`, '_blank');
+    };
+    // Copy link
+    window.copyLink = function(postId) {
+      const url = window.getPostUrl(postId);
+      window.copyToClipboard(url);
+    };
+    window.copyToClipboard = function(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          window.showToast('تم نسخ الرابط بنجاح!');
+        }).catch(() => {
+          window.fallbackCopy(text);
+        });
+      } else {
+        window.fallbackCopy(text);
+      }
+    };
+    window.fallbackCopy = function(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        window.showToast('تم نسخ الرابط بنجاح!');
+      } catch (err) {
+        alert('تعذر النسخ: ' + text);
+      }
+      document.body.removeChild(textarea);
+    };
+    // Native share for single post
+    window.nativeShare = function(postId) {
+      const post = blogPosts.find(p => p.id === postId);
+      if (!post) return;
+      const shareData = {
+        title: post.title,
+        text: post.content.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...',
+        url: window.getPostUrl(postId)
+      };
+      if (navigator.share) {
+        navigator.share(shareData).catch(() => {});
+      } else {
+        window.copyToClipboard(shareData.url);
+      }
+    };
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
-
       if (!post) {
         container.innerHTML = '<p>المقال غير موجود.</p>';
         return;
       }
-
       const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
       
       const formattedContent = post.content.split('\n\n').map(p => {
         if (p.trim().startsWith('<img')) return p;
         return `<p>${p.replace(/\n/g, '<br>')}</p>`;
       }).join('');
-
+      
+      // Build share buttons
+      const shareButtons = `
+        <div class="article-share">
+          <div class="article-share-title">شارك المقال على:</div>
+          <div class="article-share-buttons">
+            <button class="share-btn fb" onclick="window.shareToFacebook('${post.id}')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              <span>فيسبوك</span>
+            </button>
+            <button class="share-btn tw" onclick="window.shareToTwitter('${post.id}')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              <span>تويتر</span>
+            </button>
+            <button class="share-btn wa" onclick="window.shareToWhatsApp('${post.id}')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              <span>واتساب</span>
+            </button>
+            <button class="share-btn tg" onclick="window.shareToTelegram('${post.id}')">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+              <span>تليجرام</span>
+            </button>
+            <button class="share-btn copy" onclick="window.copyLink('${post.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>نسخ الرابط</span>
+            </button>
+          </div>
+        </div>
+      `;
+      
       container.innerHTML = `
         <article>
           <div class="article-header">
@@ -1008,18 +1145,11 @@
           <div class="article-content" id="articleBody">
             ${formattedContent}
           </div>
-          
-          <div class="article-share">
-            <span>مشاركة المقال:</span>
-            <button class="share-btn" onclick="window.sharePost('${post.title}')">مشاركة عبر الهاتف / نسخ الرابط</button>
-            <button class="share-btn" onclick="window.shareWhatsApp('${post.title}')">واتساب</button>
-          </div>
+          ${shareButtons}
         </article>
-
         <section class="comments-container">
           <h3 class="comments-title">التعليقات</h3>
           <div id="commentsList"></div>
-
           <div class="comment-form">
             <h4 style="font-size: 1rem;">أضف تعليقاً</h4>
             <input type="text" id="commentAuthorInput" placeholder="الاسم">
@@ -1028,14 +1158,11 @@
           </div>
         </section>
       `;
-
       window.listenToComments(postId);
-
       document.querySelectorAll('#articleBody img').forEach(img => {
         img.addEventListener('click', () => window.openLightbox(img.src));
       });
     };
-
     // Realtime Listener for Post's Comments
     window.listenToComments = function(postId) {
       const commentsRef = ref(db, `posts/${postId}/comments`);
@@ -1044,22 +1171,18 @@
         window.renderCommentsUI(postId, commentsData);
       });
     };
-
     window.renderCommentsUI = function(postId, commentsData) {
       const container = document.getElementById('commentsList');
       if (!container) return;
       container.innerHTML = '';
-
       if (!commentsData) {
         container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">لا توجد تعليقات بعد.</p>';
         return;
       }
-
       Object.keys(commentsData).forEach(commentId => {
         const c = commentsData[commentId];
         const card = document.createElement('div');
         card.className = 'comment-card';
-
         let repliesHTML = '';
         if (c.replies) {
           repliesHTML = `<div class="replies-list">` + 
@@ -1077,9 +1200,7 @@
               `;
             }).join('') + `</div>`;
         }
-
         const deleteBtnHTML = isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteComment('${postId}', '${commentId}')">حذف التعليق</button>` : '';
-
         card.innerHTML = `
           <div class="comment-header">
             <span class="comment-author">${c.author}</span>
@@ -1100,23 +1221,17 @@
         container.appendChild(card);
       });
     };
-
     window.addComment = async function(e, postId) {
       if (e && e.preventDefault) e.preventDefault();
-
       const authorInput = document.getElementById('commentAuthorInput');
       const textInput = document.getElementById('commentTextInput');
-
       if (!textInput) return;
-
       const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
       const text = textInput.value.trim();
-
       if (!text) {
         alert('يرجى كتابة نص التعليق أولاً');
         return;
       }
-
       try {
         const commentsRef = ref(db, `posts/${postId}/comments`);
         await push(commentsRef, {
@@ -1124,61 +1239,49 @@
           text: text,
           date: new Date().toISOString().split('T')[0]
         });
-
         if (authorInput) authorInput.value = '';
         textInput.value = '';
-        alert('تم إضافة التعليق بنجاح!');
+        window.showToast('تم إضافة التعليق بنجاح!');
       } catch (err) {
         console.error("خطأ تفصيلي:", err);
         alert('تعذر إرسال التعليق:\n' + (err.message || err));
       }
     };
-
     window.deleteComment = async function(postId, commentId) {
       if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
-
       try {
         await remove(ref(db, `posts/${postId}/comments/${commentId}`));
-        alert('تم حذف التعليق بنجاح.');
+        window.showToast('تم حذف التعليق بنجاح.');
       } catch (err) {
         console.error("خطأ في الحذف:", err);
         alert('تعذر حذف التعليق: ' + (err.message || err));
       }
     };
-
     window.deleteReply = async function(postId, commentId, replyId) {
       if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
-
       try {
         await remove(ref(db, `posts/${postId}/comments/${commentId}/replies/${replyId}`));
-        alert('تم حذف الرد بنجاح.');
+        window.showToast('تم حذف الرد بنجاح.');
       } catch (err) {
         console.error("خطأ في حذف الرد:", err);
         alert('تعذر حذف الرد: ' + (err.message || err));
       }
     };
-
     window.showReplyForm = function(commentId) {
       const el = document.getElementById(`replyForm-${commentId}`);
       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     };
-
     window.addReply = async function(e, postId, commentId) {
       if (e && e.preventDefault) e.preventDefault();
-
       const authorInput = document.getElementById(`replyAuthor-${commentId}`);
       const textInput = document.getElementById(`replyText-${commentId}`);
-
       if (!textInput) return;
-
       const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
       const text = textInput.value.trim();
-
       if (!text) {
         alert('يرجى كتابة نص الرد أولاً');
         return;
       }
-
       try {
         const repliesRef = ref(db, `posts/${postId}/comments/${commentId}/replies`);
         await push(repliesRef, {
@@ -1186,21 +1289,17 @@
           text: text,
           date: new Date().toISOString().split('T')[0]
         });
-
-        alert('تم إضافة الرد بنجاح!');
+        window.showToast('تم إضافة الرد بنجاح!');
       } catch (err) {
         console.error("خطأ في حفظ الرد:", err);
         alert('حدث خطأ أثناء إرسال الرد:\n' + (err.message || err));
       }
     };
-
     window.renderAdminCommentsList = function() {
       const container = document.getElementById('adminCommentsList');
       if (!container) return;
       container.innerHTML = '';
-
       let hasComments = false;
-
       blogPosts.forEach(post => {
         if (post.comments) {
           hasComments = true;
@@ -1211,7 +1310,6 @@
             item.style.flexDirection = 'column';
             item.style.alignItems = 'stretch';
             item.style.gap = '8px';
-
             let repliesHTML = '';
             if (c.replies) {
               repliesHTML = `<div style="margin-right: 15px; border-right: 2px solid var(--border-color); padding-right: 10px; margin-top: 5px;">` +
@@ -1227,7 +1325,6 @@
                   `;
                 }).join('') + `</div>`;
             }
-
             item.innerHTML = `
               <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 6px;">
                 <span style="font-size: 0.85rem; color: var(--accent-color); font-weight: 600;">المقال: ${post.title}</span>
@@ -1243,41 +1340,18 @@
           });
         }
       });
-
       if (!hasComments) {
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد أي تعليقات في الوقت الحالي.</p>';
       }
     };
-
-    window.sharePost = function(title) {
-      if (navigator.share) {
-        navigator.share({
-          title: title,
-          url: window.location.href
-        }).catch(() => {});
-      } else {
-        navigator.clipboard.writeText(window.location.href);
-        alert('تم نسخ رابط المقال بنجاح!');
-      }
-    };
-
-    window.shareWhatsApp = function(title) {
-      const url = encodeURIComponent(window.location.href);
-      const text = encodeURIComponent(title);
-      window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, '_blank');
-    };
-
     window.renderCategories = function() {
       const container = document.getElementById('categoriesList');
       container.innerHTML = '';
-
       const categories = [...new Set(window.getPublishedPosts().map(p => p.category).filter(Boolean))];
-
       if (categories.length === 0) {
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد تصنيفات حالياً.</p>';
         return;
       }
-
       categories.forEach(cat => {
         const chip = document.createElement('div');
         chip.className = 'category-chip';
@@ -1286,7 +1360,6 @@
         container.appendChild(chip);
       });
     };
-
     window.filterByCategory = function(cat) {
       const filtered = window.getPublishedPosts().filter(p => p.category === cat);
       const container = document.getElementById('categoryPostsResult');
@@ -1303,7 +1376,6 @@
         container.appendChild(item);
       });
     };
-
     window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
       if (pass === 'salem1959') {
@@ -1314,12 +1386,10 @@
         alert('كلمة المرور غير صحيحة');
       }
     };
-
     window.logoutAdmin = function() {
       isAdminLoggedIn = false;
       window.navigateTo('home');
     };
-
     window.renderAdminPanel = function() {
       window.renderAdminPostsList();
       window.renderAdminCommentsList();
@@ -1328,32 +1398,25 @@
       document.getElementById('settingAboutTitle').value = blogSettings.aboutTitle || '';
       document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
     };
-
     window.switchAdminTab = function(tabName, evt) {
       document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
-
       if (evt && evt.target) evt.target.classList.add('active');
       const targetTab = document.getElementById(`admin-tab-${tabName}`);
       if (targetTab) targetTab.style.display = 'block';
-
       if (tabName === 'comments') window.renderAdminCommentsList();
     };
-
     window.savePost = function(status) {
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
       const content = document.getElementById('postContentInput').value.trim();
       const cover = document.getElementById('postCoverData').value;
       const editId = document.getElementById('editPostId').value;
-
       if (!title || !content) {
         alert('يرجى كتابة العنوان والنص على الأقل.');
         return;
       }
-
       const postId = editId ? editId : 'post-' + Date.now();
-
       const postData = {
         title: title,
         category: category,
@@ -1363,14 +1426,11 @@
         date: new Date().toISOString().split('T')[0],
         updatedAt: new Date().toISOString()
       };
-
       set(ref(db, 'posts/' + postId), postData);
-
       window.resetEditor();
-      alert(status === 'published' ? 'تم نشر المقال بنجاح!' : 'تم حفظ المسودة.');
+      window.showToast(status === 'published' ? 'تم نشر المقال بنجاح!' : 'تم حفظ المسودة.');
       window.switchAdminTab('posts');
     };
-
     window.resetEditor = function() {
       document.getElementById('editPostId').value = '';
       document.getElementById('postTitleInput').value = '';
@@ -1380,11 +1440,9 @@
       document.getElementById('postCoverPreview').style.display = 'none';
       document.getElementById('editorFormTitle').innerText = 'إنشاء مقال جديد';
     };
-
     window.editPost = function(id) {
       const post = blogPosts.find(p => p.id === id);
       if (!post) return;
-
       document.getElementById('editPostId').value = post.id;
       document.getElementById('postTitleInput').value = post.title;
       document.getElementById('postCategoryInput').value = post.category || '';
@@ -1396,33 +1454,28 @@
         prev.src = post.cover;
         prev.style.display = 'block';
       }
-
       document.getElementById('editorFormTitle').innerText = 'تعديل المقال';
       window.switchAdminTab('editor');
     };
-
     window.deletePost = function(id) {
       if (confirm('هل أنت متأكد من حذف هذا المقال؟')) {
         remove(ref(db, 'posts/' + id));
+        window.showToast('تم حذف المقال.');
       }
     };
-
     window.renderAdminPostsList = function() {
       const container = document.getElementById('adminPostsList');
       container.innerHTML = '';
-
       if (blogPosts.length === 0) {
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد مقالات.</p>';
         return;
       }
-
       blogPosts.forEach(post => {
         const item = document.createElement('div');
         item.className = 'admin-post-item';
         
         const badgeClass = post.status === 'published' ? 'published' : 'draft';
         const badgeText = post.status === 'published' ? 'منشور' : 'مسودة';
-
         item.innerHTML = `
           <div>
             <span class="status-badge ${badgeClass}">${badgeText}</span>
@@ -1437,7 +1490,6 @@
         container.appendChild(item);
       });
     };
-
     window.saveBlogSettings = function() {
       const newSettings = {
         title: document.getElementById('settingTitle').value.trim(),
@@ -1447,15 +1499,12 @@
         headerCover: blogSettings.headerCover || "",
         aboutImage: blogSettings.aboutImage || ""
       };
-
       set(ref(db, 'settings'), newSettings);
-      alert('تم حفظ الإعدادات بنجاح!');
+      window.showToast('تم حفظ الإعدادات بنجاح!');
     };
-
     window.handleImageUpload = function(input, previewId, callback) {
       const file = input.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
         const dataUrl = e.target.result;
@@ -1465,30 +1514,24 @@
           img.src = dataUrl;
           img.style.display = 'block';
         }
-
         if (previewId === 'postCoverPreview') {
           document.getElementById('postCoverData').value = dataUrl;
         }
-
         if (callback) callback(dataUrl);
       };
       reader.readAsDataURL(file);
     };
-
     window.saveHeaderCover = function(dataUrl) {
       blogSettings.headerCover = dataUrl;
       set(ref(db, 'settings'), blogSettings);
     };
-
     window.saveAboutImage = function(dataUrl) {
       blogSettings.aboutImage = dataUrl;
       set(ref(db, 'settings'), blogSettings);
     };
-
     window.insertImageToEditor = function(input) {
       const file = input.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
         const dataUrl = e.target.result;
@@ -1498,16 +1541,13 @@
       };
       reader.readAsDataURL(file);
     };
-
     window.openLightbox = function(src) {
       document.getElementById('lightboxImg').src = src;
       document.getElementById('lightbox').classList.add('active');
     };
-
     window.closeLightbox = function() {
       document.getElementById('lightbox').classList.remove('active');
     };
-
     window.registerServiceWorker = function() {
       if ('serviceWorker' in navigator) {
         const swCode = `
@@ -1521,7 +1561,6 @@
           .catch(err => console.log('Service Worker registration failed:', err));
       }
     };
-
     window.setupInstallPrompt = function() {
       const manifest = {
         name: 'مدونة زكريا',
@@ -1537,29 +1576,24 @@
           { src: APP_ICON, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
         ]
       };
-
       const link = document.createElement('link');
       link.rel = 'manifest';
       link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
       document.head.appendChild(link);
-
       const appleIcon = document.createElement('link');
       appleIcon.rel = 'apple-touch-icon';
       appleIcon.href = APP_ICON;
       document.head.appendChild(appleIcon);
-
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
         document.getElementById('installPrompt').classList.add('show');
       });
-
       window.addEventListener('appinstalled', () => {
         deferredPrompt = null;
         document.getElementById('installPrompt').classList.remove('show');
       });
     };
-
     window.installApp = function() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
@@ -1572,10 +1606,20 @@
         });
       }
     };
-
     window.dismissInstall = function() {
       document.getElementById('installPrompt').classList.remove('show');
     };
+    // Handle hash-based navigation on page load
+    window.addEventListener('load', function() {
+      if (window.location.hash.startsWith('#post-')) {
+        const postId = window.location.hash.replace('#post-', '');
+        setTimeout(() => {
+          if (blogPosts.find(p => p.id === postId)) {
+            window.navigateTo('post', postId);
+          }
+        }, 500);
+      }
+    });
   </script>
 </body>
 </html>

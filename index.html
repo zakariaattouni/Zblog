@@ -797,7 +797,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
-    import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    
     const firebaseConfig = {
       apiKey: "AIzaSyDaxCW0tvWgsLfxujQJcjsfezBpHe_qzHo",
       authDomain: "zblog-5ec1e.firebaseapp.com",
@@ -808,10 +809,11 @@
       appId: "1:4075480522:web:97d376f4c334c0de685b33",
       measurementId: "G-JGTPVDDD0W"
     };
+    
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
-    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC04MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+    
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
       subtitle: "ملاحظات وقراءات شخصية",
@@ -820,6 +822,7 @@
       aboutBody: "أهلاً بك في مدونتي الشخصية. هنا أشارك بعض القراءات والملاحظات والأفكار الفكرية والعلمية في مساحة هادئة بعيدة عن ضوضاء وسائل التواصل الاجتماعي.",
       aboutImage: ""
     };
+    
     let blogSettings = { ...DEFAULT_SETTINGS };
     let blogPosts = [];
     let isAdminLoggedIn = false;
@@ -933,11 +936,12 @@
           ...data[key],
           id: key
         }));
-        // Sort posts by date (newest first)
+        
+        // Sort posts by timestamp or date (newest first)
         blogPosts.sort((a, b) => {
-          const dateA = new Date(a.updatedAt || a.date || 0);
-          const dateB = new Date(b.updatedAt || b.date || 0);
-          return dateB - dateA;
+          const timeA = typeof a.updatedAt === 'number' ? a.updatedAt : new Date(a.updatedAt || a.date || 0).getTime();
+          const timeB = typeof b.updatedAt === 'number' ? b.updatedAt : new Date(b.updatedAt || b.date || 0).getTime();
+          return timeB - timeA;
         });
       } else {
         blogPosts = [];
@@ -1001,7 +1005,6 @@
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
       document.title = blogSettings.title;
       
-      // Update Open Graph meta tags
       document.querySelector('meta[property="og:title"]').setAttribute('content', blogSettings.title);
       document.querySelector('meta[property="og:description"]').setAttribute('content', blogSettings.subtitle);
       
@@ -1080,12 +1083,10 @@
       window.renderHomePosts(filtered);
     };
 
-    // Get post URL for sharing
     window.getPostUrl = function(postId) {
       return window.location.origin + window.location.pathname + '#post-' + postId;
     };
 
-    // Share blog function
     window.shareBlog = function() {
       const shareData = {
         title: blogSettings.title,
@@ -1101,7 +1102,6 @@
       }
     };
 
-    // Share to Facebook
     window.shareToFacebook = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1111,7 +1111,6 @@
       window.open(fbUrl, '_blank', 'width=600,height=400');
     };
 
-    // Share to Twitter
     window.shareToTwitter = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1120,7 +1119,6 @@
       window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=600,height=400');
     };
 
-    // Share to WhatsApp
     window.shareToWhatsApp = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1129,7 +1127,6 @@
       window.open(`https://api.whatsapp.com/send?text=${title}%20${url}`, '_blank');
     };
 
-    // Share to Telegram
     window.shareToTelegram = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1138,7 +1135,6 @@
       window.open(`https://t.me/share/url?url=${url}&text=${title}`, '_blank');
     };
 
-    // Copy link
     window.copyLink = function(postId) {
       const url = window.getPostUrl(postId);
       window.copyToClipboard(url);
@@ -1515,30 +1511,56 @@
       if (tabName === 'comments') window.renderAdminCommentsList();
     };
 
-    window.savePost = function(status) {
+    // الدالة المعدلة للحفظ والتعديل بالنشر مع الحفاظ على البيانات وبناء المعرف الصحيح
+    window.savePost = async function(status) {
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
       const content = document.getElementById('postContentInput').value.trim();
       const cover = document.getElementById('postCoverUrlInput').value.trim();
       const editId = document.getElementById('editPostId').value;
+
       if (!title || !content) {
         alert('يرجى كتابة العنوان والنص على الأقل.');
         return;
       }
-      const postId = editId ? editId : 'post-' + Date.now();
-      const postData = {
-        title: title,
-        category: category,
-        content: content,
-        cover: cover,
-        status: status,
-        date: new Date().toISOString().split('T')[0],
-        updatedAt: new Date().toISOString()
-      };
-      set(ref(db, 'posts/' + postId), postData);
-      window.resetEditor();
-      window.showToast(status === 'published' ? 'تم نشر المقال بنجاح!' : 'تم حفظ المسودة.');
-      window.switchAdminTab('posts');
+
+      const currentDate = new Date().toISOString().split('T')[0];
+      const currentTimestamp = Date.now();
+
+      try {
+        if (editId) {
+          // تحديث بيانات المقال فقط لمنع مسح التعليقات والمكونات الأخرى
+          const postRef = ref(db, 'posts/' + editId);
+          await update(postRef, {
+            title: title,
+            category: category,
+            content: content,
+            cover: cover,
+            status: status,
+            updatedAt: currentTimestamp
+          });
+        } else {
+          // إضافة مقال جديد مع إنتاج معرف فريد
+          const postsRef = ref(db, 'posts');
+          const newPostRef = push(postsRef);
+          await set(newPostRef, {
+            title: title,
+            category: category,
+            content: content,
+            cover: cover,
+            status: status,
+            date: currentDate,
+            updatedAt: currentTimestamp
+          });
+        }
+
+        window.resetEditor();
+        window.showToast(status === 'published' ? 'تم نشر المقال بنجاح!' : 'تم حفظ المسودة.');
+        window.switchAdminTab('posts');
+      } catch (err) {
+        console.error("خطأ أثناء النشر:", err);
+        alert('تعذر نشر المقال: ' + (err.message || err));
+      }
     };
 
     window.resetEditor = function() {

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جاري التحميل...</title>
+<meta property="og:type" content="article">
+<meta property="og:title" id="ogTitle" content="مدونة زكريا">
+<meta property="og:description" id="ogDescription" content="ملاحظات وقراءات شخصية">
+<meta property="og:image" id="ogImage" content="">
+<meta property="og:url" id="ogUrl" content="">
+<meta property="og:site_name" content="مدونة زكريا">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" id="twTitle" content="">
+<meta name="twitter:description" id="twDescription" content="">
+<meta name="twitter:image" id="twImage" content="">
+<link rel="canonical" id="canonicalUrl" href="">
+<style>
+body{font-family:'Noto Naskh Arabic',system-ui,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f7f7f6;color:#2b2b2b;text-align:center;padding:20px}
+.box{max-width:520px;background:#fff;padding:28px;border-radius:10px;border:1px solid #e5e5e3;width:100%}
+.box img{width:100%;border-radius:8px;margin-bottom:16px;display:block}
+h1{font-family:'Amiri',serif;font-size:1.6rem;margin:0 0 10px}
+p{color:#555;line-height:1.9;margin:0 0 16px}
+.btn{display:inline-block;background:#3b5249;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600}
+.spinner{width:38px;height:38px;border:3px solid #e5e5e3;border-top-color:#3b5249;border-radius:50%;margin:24px auto;animation:s 1s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="box" id="box">
+<div class="spinner"></div>
+<p>جاري تحميل المقال...</p>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyDaxCW0tvWgsLfxujQJcjsfezBpHe_qzHo",authDomain:"zblog-5ec1e.firebaseapp.com",databaseURL:"https://zblog-5ec1e-default-rtdb.firebaseio.com",projectId:"zblog-5ec1e",storageBucket:"zblog-5ec1e.firebasestorage.app",messagingSenderId:"4075480522",appId:"1:4075480522:web:97d376f4c334c0de685b33"};
+const app=initializeApp(firebaseConfig);
+const db=getDatabase(app);
+const pid=new URLSearchParams(location.search).get('post');
+const base=location.origin+location.pathname.replace(/share\.html.*$/,'');
+const box=document.getElementById('box');
+if(!pid){box.innerHTML='<h1>رابط غير صحيح</h1><p>لم يتم تحديد المقال</p>';}
+else{
+try{
+const[ps,ss]=await Promise.all([get(ref(db,'posts/'+pid)),get(ref(db,'settings'))]);
+const s=ss.val()||{};const p=ps.val();
+if(!p||p.status!=='published'){box.innerHTML='<h1>المقال غير موجود</h1><p>ربما تم حذفه أو لم يُنشر بعد</p>';}
+else{
+const txt=(p.content||'').replace(/<[^>]*>?/gm,'').trim();
+const desc=txt.substring(0,200)+(txt.length>200?'...':'');
+const title=p.title||'مقال';
+const img=p.cover||s.headerCover||'';
+const url=location.href;
+const appUrl=base+'?post='+pid;
+document.title=title+' - '+(s.title||'مدونة زكريا');
+document.getElementById('ogTitle').setAttribute('content',title);
+document.getElementById('ogDescription').setAttribute('content',desc||s.subtitle||'');
+document.getElementById('ogImage').setAttribute('content',img);
+document.getElementById('ogUrl').setAttribute('content',url);
+document.getElementById('twTitle').setAttribute('content',title);
+document.getElementById('twDescription').setAttribute('content',desc||'');
+document.getElementById('twImage').setAttribute('content',img);
+document.getElementById('canonicalUrl').setAttribute('href',url);
+box.innerHTML=`
+${img?`<img src="${img}" alt="${title}">`:''}
+<h1>${title}</h1>
+<p>${desc||s.subtitle||''}</p>
+<a class="btn" href="${appUrl}">قراءة المقال كاملاً ←</a>
+`;
+}
+}catch(e){console.error(e);box.innerHTML='<h1>حدث خطأ</h1><p>تعذر تحميل المقال</p>';}
+}
+</script>
+</body>
+</html>

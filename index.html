@@ -285,7 +285,6 @@
       font-size: 0.9rem;
       font-weight: 600;
     }
-    /* Post item share buttons */
     .post-item-actions {
       display: flex;
       align-items: center;
@@ -550,6 +549,22 @@
       border-radius: 6px;
       background-color: var(--paper-color);
     }
+    .form-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      background: #f9f9f8;
+      padding: 8px 10px;
+      border-radius: 4px;
+      border-right: 3px solid var(--accent-color);
+    }
+    .image-preview {
+      max-height: 140px;
+      margin-top: 10px;
+      display: none;
+      border-radius: var(--radius);
+      border: 1px solid var(--border-color);
+    }
     .admin-post-list {
       display: flex;
       flex-direction: column;
@@ -723,19 +738,26 @@
           <input type="text" id="postCategoryInput" placeholder="مثال: قراءات، طب، ثقافة...">
         </div>
         <div class="form-group">
-          <label>صورة المقال الرئيسية</label>
-          <input type="file" id="postCoverInput" accept="image/*" onchange="window.handleImageUpload(this, 'postCoverPreview')">
+          <label>رابط صورة المقال الرئيسية</label>
+          <input type="url" id="postCoverInputUrl" placeholder="https://example.com/image.jpg"
+                 oninput="window.previewCover(this.value)">
           <input type="hidden" id="postCoverData">
-          <img id="postCoverPreview" src="" style="max-height: 120px; margin-top: 10px; display: none;">
+          <img id="postCoverPreview" class="image-preview" src="" alt="معاينة">
+          <div class="form-hint">
+            💡 <strong>كيف أحصل على رابط صورة؟</strong><br>
+            1. اذهب لموقع <a href="https://postimages.org" target="_blank">postimages.org</a> (مجاني)<br>
+            2. ارفع صورتك هناك<br>
+            3. انسخ الرابط المباشر (Direct link)<br>
+            4. الصقه في الحقل أعلاه
+          </div>
         </div>
         <div class="form-group">
           <label>نص المقال</label>
-          <textarea id="postContentInput" rows="10" placeholder="اكتب النص هنا..."></textarea>
+          <textarea id="postContentInput" rows="12" placeholder="اكتب النص هنا...&#10;&#10;لإضافة صورة داخل النص، اكتب وسم HTML هكذا:&#10;&lt;img src=&quot;رابط الصورة&quot;&gt;"></textarea>
         </div>
-        <div class="form-group">
-          <label>إضافة صور داخل النص</label>
-          <input type="file" accept="image/*" onchange="window.insertImageToEditor(this)">
-          <small style="color: var(--text-muted);">اختيار صورة سينشئ مكاناً لها في النص تلقائياً.</small>
+        <div class="form-hint">
+          💡 <strong>لإدراج صورة داخل النص:</strong> انسخ هذا الوسم والصقه في مكانه المناسب:
+          <code style="display:block; background:#eee; padding:4px 8px; margin-top:5px; border-radius:3px; direction:ltr; text-align:left;">&lt;img src="رابط الصورة"&gt;</code>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <button class="btn" onclick="window.savePost('published')">نشر المقال</button>
@@ -754,7 +776,7 @@
       </div>
       <!-- Settings -->
       <div id="admin-tab-settings" class="admin-tab-content" style="display: none;">
-        <h3 style="margin-bottom: 15px;">إعدادات العامة والترويسة</h3>
+        <h3 style="margin-bottom: 15px;">إعدادات عامة والترويسة</h3>
         
         <div class="form-group">
           <label>عنوان المدونة</label>
@@ -765,9 +787,10 @@
           <input type="text" id="settingSubtitle">
         </div>
         <div class="form-group">
-          <label>صورة الترويسة (الغلاف)</label>
-          <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'headerCoverPreview', window.saveHeaderCover)">
-          <img id="headerCoverPreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
+          <label>رابط صورة الترويسة (الغلاف)</label>
+          <input type="url" id="settingHeaderCoverUrl" placeholder="https://example.com/cover.jpg"
+                 oninput="window.previewSettingImage('headerCoverPreview', this.value)">
+          <img id="headerCoverPreview" class="image-preview" src="" alt="معاينة الغلاف">
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
         <h3 style="margin-bottom: 15px;">محتوى صفحة "عن زكريا"</h3>
@@ -776,12 +799,13 @@
           <input type="text" id="settingAboutTitle">
         </div>
         <div class="form-group">
-          <label>الصورة الشخصية</label>
-          <input type="file" accept="image/*" onchange="window.handleImageUpload(this, 'aboutImagePreview', window.saveAboutImage)">
-          <img id="aboutImagePreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
+          <label>رابط الصورة الشخصية</label>
+          <input type="url" id="settingAboutImageUrl" placeholder="https://example.com/me.jpg"
+                 oninput="window.previewSettingImage('aboutImagePreview', this.value)">
+          <img id="aboutImagePreview" class="image-preview" src="" alt="معاينة الصورة">
         </div>
         <div class="form-group">
-          <label>النص التعريفى</label>
+          <label>النص التعريفي</label>
           <textarea id="settingAboutBody" rows="6"></textarea>
         </div>
         <button class="btn" onclick="window.saveBlogSettings()">حفظ الإعدادات</button>
@@ -921,11 +945,6 @@
       
       if (blogSettings.headerCover) {
         document.getElementById('headerCoverImg').src = blogSettings.headerCover;
-        document.querySelector('meta[property="og:image"]')?.remove();
-        const ogImage = document.createElement('meta');
-        ogImage.setAttribute('property', 'og:image');
-        ogImage.setAttribute('content', blogSettings.headerCover);
-        document.head.appendChild(ogImage);
       }
     };
     window.renderAboutPage = function() {
@@ -950,7 +969,7 @@
       }
       posts.forEach(post => {
         const excerpt = post.content.replace(/<[^>]*>?/gm, '').substring(0, 140) + '...';
-        const coverHTML = post.cover ? `<div class="post-item-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
+        const coverHTML = post.cover ? `<div class="post-item-cover"><img src="${post.cover}" alt="${post.title}" loading="lazy"></div>` : '';
         const item = document.createElement('article');
         item.className = 'post-item';
         item.innerHTML = `
@@ -1015,7 +1034,6 @@
       if (!post) return;
       const url = encodeURIComponent(window.getPostUrl(postId));
       const title = encodeURIComponent(post.title);
-      const excerpt = encodeURIComponent(post.content.replace(/<[^>]*>?/gm, '').substring(0, 200));
       let fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`;
       window.open(fbUrl, '_blank', 'width=600,height=400');
     };
@@ -1073,21 +1091,6 @@
         alert('تعذر النسخ: ' + text);
       }
       document.body.removeChild(textarea);
-    };
-    // Native share for single post
-    window.nativeShare = function(postId) {
-      const post = blogPosts.find(p => p.id === postId);
-      if (!post) return;
-      const shareData = {
-        title: post.title,
-        text: post.content.replace(/<[^>]*>?/gm, '').substring(0, 150) + '...',
-        url: window.getPostUrl(postId)
-      };
-      if (navigator.share) {
-        navigator.share(shareData).catch(() => {});
-      } else {
-        window.copyToClipboard(shareData.url);
-      }
     };
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
@@ -1397,6 +1400,20 @@
       document.getElementById('settingSubtitle').value = blogSettings.subtitle || '';
       document.getElementById('settingAboutTitle').value = blogSettings.aboutTitle || '';
       document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
+      document.getElementById('settingHeaderCoverUrl').value = blogSettings.headerCover || '';
+      document.getElementById('settingAboutImageUrl').value = blogSettings.aboutImage || '';
+      
+      // معاينات
+      if (blogSettings.headerCover) {
+        const prev = document.getElementById('headerCoverPreview');
+        prev.src = blogSettings.headerCover;
+        prev.style.display = 'block';
+      }
+      if (blogSettings.aboutImage) {
+        const prev = document.getElementById('aboutImagePreview');
+        prev.src = blogSettings.aboutImage;
+        prev.style.display = 'block';
+      }
     };
     window.switchAdminTab = function(tabName, evt) {
       document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
@@ -1406,11 +1423,44 @@
       if (targetTab) targetTab.style.display = 'block';
       if (tabName === 'comments') window.renderAdminCommentsList();
     };
+    
+    // دوال المعاينة الفورية للصور
+    window.previewCover = function(url) {
+      const img = document.getElementById('postCoverPreview');
+      const dataInput = document.getElementById('postCoverData');
+      if (url && url.trim()) {
+        img.src = url.trim();
+        img.style.display = 'block';
+        dataInput.value = url.trim();
+        img.onerror = () => {
+          img.style.display = 'none';
+          img.onerror = null;
+        };
+      } else {
+        img.style.display = 'none';
+        dataInput.value = '';
+      }
+    };
+    
+    window.previewSettingImage = function(previewId, url) {
+      const img = document.getElementById(previewId);
+      if (url && url.trim()) {
+        img.src = url.trim();
+        img.style.display = 'block';
+        img.onerror = () => {
+          img.style.display = 'none';
+          img.onerror = null;
+        };
+      } else {
+        img.style.display = 'none';
+      }
+    };
+    
     window.savePost = function(status) {
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
       const content = document.getElementById('postContentInput').value.trim();
-      const cover = document.getElementById('postCoverData').value;
+      const cover = document.getElementById('postCoverData').value.trim();
       const editId = document.getElementById('editPostId').value;
       if (!title || !content) {
         alert('يرجى كتابة العنوان والنص على الأقل.');
@@ -1437,6 +1487,7 @@
       document.getElementById('postCategoryInput').value = '';
       document.getElementById('postContentInput').value = '';
       document.getElementById('postCoverData').value = '';
+      document.getElementById('postCoverInputUrl').value = '';
       document.getElementById('postCoverPreview').style.display = 'none';
       document.getElementById('editorFormTitle').innerText = 'إنشاء مقال جديد';
     };
@@ -1448,12 +1499,16 @@
       document.getElementById('postCategoryInput').value = post.category || '';
       document.getElementById('postContentInput').value = post.content;
       document.getElementById('postCoverData').value = post.cover || '';
+      document.getElementById('postCoverInputUrl').value = post.cover || '';
       
       if (post.cover) {
         const prev = document.getElementById('postCoverPreview');
         prev.src = post.cover;
         prev.style.display = 'block';
+      } else {
+        document.getElementById('postCoverPreview').style.display = 'none';
       }
+      
       document.getElementById('editorFormTitle').innerText = 'تعديل المقال';
       window.switchAdminTab('editor');
     };
@@ -1496,50 +1551,11 @@
         subtitle: document.getElementById('settingSubtitle').value.trim(),
         aboutTitle: document.getElementById('settingAboutTitle').value.trim(),
         aboutBody: document.getElementById('settingAboutBody').value.trim(),
-        headerCover: blogSettings.headerCover || "",
-        aboutImage: blogSettings.aboutImage || ""
+        headerCover: document.getElementById('settingHeaderCoverUrl').value.trim(),
+        aboutImage: document.getElementById('settingAboutImageUrl').value.trim()
       };
       set(ref(db, 'settings'), newSettings);
       window.showToast('تم حفظ الإعدادات بنجاح!');
-    };
-    window.handleImageUpload = function(input, previewId, callback) {
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const dataUrl = e.target.result;
-        
-        if (previewId) {
-          const img = document.getElementById(previewId);
-          img.src = dataUrl;
-          img.style.display = 'block';
-        }
-        if (previewId === 'postCoverPreview') {
-          document.getElementById('postCoverData').value = dataUrl;
-        }
-        if (callback) callback(dataUrl);
-      };
-      reader.readAsDataURL(file);
-    };
-    window.saveHeaderCover = function(dataUrl) {
-      blogSettings.headerCover = dataUrl;
-      set(ref(db, 'settings'), blogSettings);
-    };
-    window.saveAboutImage = function(dataUrl) {
-      blogSettings.aboutImage = dataUrl;
-      set(ref(db, 'settings'), blogSettings);
-    };
-    window.insertImageToEditor = function(input) {
-      const file = input.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const dataUrl = e.target.result;
-        const textarea = document.getElementById('postContentInput');
-        const imgTag = `\n<img src="${dataUrl}" alt="صورة مدرجة">\n`;
-        textarea.value += imgTag;
-      };
-      reader.readAsDataURL(file);
     };
     window.openLightbox = function(src) {
       document.getElementById('lightboxImg').src = src;
@@ -1551,7 +1567,7 @@
     window.registerServiceWorker = function() {
       if ('serviceWorker' in navigator) {
         const swCode = `
-          const CACHE_NAME = 'zakaria-blog-v1';
+          const CACHE_NAME = 'zakaria-blog-v2';
           self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['/']))));
           self.addEventListener('fetch', (e) => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
         `;

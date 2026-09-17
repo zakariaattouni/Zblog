@@ -62,12 +62,7 @@ document.getElementById('twTitle').setAttribute('content',title);
 document.getElementById('twDescription').setAttribute('content',desc||'');
 document.getElementById('twImage').setAttribute('content',img);
 document.getElementById('canonicalUrl').setAttribute('href',url);
-box.innerHTML=`
-${img?`<img src="${img}" alt="${title}">`:''}
-<h1>${title}</h1>
-<p>${desc||s.subtitle||''}</p>
-<a class="btn" href="${appUrl}">قراءة المقال كاملاً ←</a>
-`;
+box.innerHTML=`${img?`<img src="${img}" alt="${title}">`:''}<h1>${title}</h1><p>${desc||s.subtitle||''}</p><a class="btn" href="${appUrl}">قراءة المقال كاملاً ←</a>`;
 }
 }catch(e){console.error(e);box.innerHTML='<h1>حدث خطأ</h1><p>تعذر تحميل المقال</p>';}
 }

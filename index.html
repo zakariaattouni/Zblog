@@ -549,22 +549,6 @@
       border-radius: 6px;
       background-color: var(--paper-color);
     }
-    .form-hint {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-      background: #f9f9f8;
-      padding: 8px 10px;
-      border-radius: 4px;
-      border-right: 3px solid var(--accent-color);
-    }
-    .image-preview {
-      max-height: 140px;
-      margin-top: 10px;
-      display: none;
-      border-radius: var(--radius);
-      border: 1px solid var(--border-color);
-    }
     .admin-post-list {
       display: flex;
       flex-direction: column;
@@ -739,25 +723,20 @@
         </div>
         <div class="form-group">
           <label>رابط صورة المقال الرئيسية</label>
-          <input type="url" id="postCoverInputUrl" placeholder="https://example.com/image.jpg"
-                 oninput="window.previewCover(this.value)">
-          <input type="hidden" id="postCoverData">
-          <img id="postCoverPreview" class="image-preview" src="" alt="معاينة">
-          <div class="form-hint">
-            💡 <strong>كيف أحصل على رابط صورة؟</strong><br>
-            1. اذهب لموقع <a href="https://postimages.org" target="_blank">postimages.org</a> (مجاني)<br>
-            2. ارفع صورتك هناك<br>
-            3. انسخ الرابط المباشر (Direct link)<br>
-            4. الصقه في الحقل أعلاه
-          </div>
+          <input type="url" id="postCoverUrlInput" placeholder="https://example.com/image.jpg" oninput="window.previewImageUrl(this.value, 'postCoverPreview')">
+          <img id="postCoverPreview" src="" style="max-height: 120px; margin-top: 10px; display: none;">
         </div>
         <div class="form-group">
           <label>نص المقال</label>
-          <textarea id="postContentInput" rows="12" placeholder="اكتب النص هنا...&#10;&#10;لإضافة صورة داخل النص، اكتب وسم HTML هكذا:&#10;&lt;img src=&quot;رابط الصورة&quot;&gt;"></textarea>
+          <textarea id="postContentInput" rows="10" placeholder="اكتب النص هنا..."></textarea>
         </div>
-        <div class="form-hint">
-          💡 <strong>لإدراج صورة داخل النص:</strong> انسخ هذا الوسم والصقه في مكانه المناسب:
-          <code style="display:block; background:#eee; padding:4px 8px; margin-top:5px; border-radius:3px; direction:ltr; text-align:left;">&lt;img src="رابط الصورة"&gt;</code>
+        <div class="form-group">
+          <label>إضافة صورة داخل النص عبر الرابط</label>
+          <div style="display: flex; gap: 8px;">
+            <input type="url" id="inlineImageUrlInput" placeholder="https://example.com/image.jpg" style="flex: 1;">
+            <button class="btn btn-secondary" onclick="window.insertImageUrlToEditor()">إدراج الصورة</button>
+          </div>
+          <small style="color: var(--text-muted);">أدخل رابط الصورة ثم اضغط إدراج ليتم إضافتها للنص تلقائياً.</small>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
           <button class="btn" onclick="window.savePost('published')">نشر المقال</button>
@@ -776,7 +755,7 @@
       </div>
       <!-- Settings -->
       <div id="admin-tab-settings" class="admin-tab-content" style="display: none;">
-        <h3 style="margin-bottom: 15px;">إعدادات عامة والترويسة</h3>
+        <h3 style="margin-bottom: 15px;">إعدادات العامة والترويسة</h3>
         
         <div class="form-group">
           <label>عنوان المدونة</label>
@@ -788,9 +767,8 @@
         </div>
         <div class="form-group">
           <label>رابط صورة الترويسة (الغلاف)</label>
-          <input type="url" id="settingHeaderCoverUrl" placeholder="https://example.com/cover.jpg"
-                 oninput="window.previewSettingImage('headerCoverPreview', this.value)">
-          <img id="headerCoverPreview" class="image-preview" src="" alt="معاينة الغلاف">
+          <input type="url" id="settingHeaderCoverUrl" placeholder="https://example.com/cover.jpg" oninput="window.previewImageUrl(this.value, 'headerCoverPreview')">
+          <img id="headerCoverPreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
         </div>
         <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border-color);">
         <h3 style="margin-bottom: 15px;">محتوى صفحة "عن زكريا"</h3>
@@ -800,12 +778,11 @@
         </div>
         <div class="form-group">
           <label>رابط الصورة الشخصية</label>
-          <input type="url" id="settingAboutImageUrl" placeholder="https://example.com/me.jpg"
-                 oninput="window.previewSettingImage('aboutImagePreview', this.value)">
-          <img id="aboutImagePreview" class="image-preview" src="" alt="معاينة الصورة">
+          <input type="url" id="settingAboutImageUrl" placeholder="https://example.com/avatar.jpg" oninput="window.previewImageUrl(this.value, 'aboutImagePreview')">
+          <img id="aboutImagePreview" src="" style="max-height: 100px; margin-top: 10px; display: none;">
         </div>
         <div class="form-group">
-          <label>النص التعريفي</label>
+          <label>النص التعريفى</label>
           <textarea id="settingAboutBody" rows="6"></textarea>
         </div>
         <button class="btn" onclick="window.saveBlogSettings()">حفظ الإعدادات</button>
@@ -834,7 +811,7 @@
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getDatabase(app);
-    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC04MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
+    const APP_ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImdyYWQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPjxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMzYjUyNDk7c3RvcC1vcGFjaXR5OjEiIC8+PHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojMmEzYzM1O3N0b3Atb3BhY2l0eToxIiAvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiBmaWxsPSJ1cmwoI2dyYWQpIiByeD0iMTEyIi8+PHBhdGggZD0iTTI1NiAxNjBjLTQ0LjIgMC04MCAzNS44LTgwIDgwczM1LjggODAgODAgODAgODAtMzUuOSA4MC04MC0zNS44LTgwLTgwLTgwem0wIDE0MGMtMzMuMSAwLTYwLTI2LjktNjAtNjBzMjQueTktNjAgNjAtNjAgNjAgMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjQueTkgNjAtNjAtNjAtNjAtMjYuOSA2MC02MC020i02MC02MHptMCAxNDBjLTIyLjEgMC00MC0xNy45LTQwLTR1czE3LjktNDAgNDAtNDAgNDAgMTcuOSA0MCA0MC0xNy45IDQwLTQgNDB6IiBmaWxsPSIjZmZmIi8+PGNpcmNsZSBjeD0iMjU2IiBjeT0iMjU2IiByPSIyMCIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==';
     const DEFAULT_SETTINGS = {
       title: "مدونة زكريا",
       subtitle: "ملاحظات وقراءات شخصية",
@@ -848,6 +825,7 @@
     let isAdminLoggedIn = false;
     let deferredPrompt = null;
     window.currentViewPostId = null;
+    
     // Toast notification helper
     window.showToast = function(message) {
       const toast = document.getElementById('toast');
@@ -857,6 +835,84 @@
         toast.classList.remove('show');
       }, 2500);
     };
+
+    // Image URL Preview Helper
+    window.previewImageUrl = function(url, previewImgId) {
+      const previewImg = document.getElementById(previewImgId);
+      if (url && url.trim() !== '') {
+        previewImg.src = url.trim();
+        previewImg.style.display = 'block';
+      } else {
+        previewImg.src = '';
+        previewImg.style.display = 'none';
+      }
+    };
+
+    // Insert Image URL to Article Content
+    window.insertImageUrlToEditor = function() {
+      const urlInput = document.getElementById('inlineImageUrlInput');
+      const url = urlInput ? urlInput.value.trim() : '';
+      if (!url) {
+        alert('يرجى إدخال رابط الصورة أولاً');
+        return;
+      }
+      const textarea = document.getElementById('postContentInput');
+      const imageTag = `\n<img src="${url}" alt="صورة">\n`;
+      textarea.value += imageTag;
+      urlInput.value = '';
+      window.showToast('تم إدراج رابط الصورة في النص');
+    };
+
+    // Lightbox Helpers
+    window.openLightbox = function(src) {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightboxImg');
+      lightboxImg.src = src;
+      lightbox.classList.add('active');
+    };
+    window.closeLightbox = function() {
+      document.getElementById('lightbox').classList.remove('active');
+    };
+
+    // PWA & Service Worker Logic
+    window.registerServiceWorker = function() {
+      if ('serviceWorker' in navigator) {
+        const swCode = `
+          const CACHE_NAME = 'zblog-v1';
+          self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+          self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+          self.addEventListener('fetch', e => {
+            if (e.request.method !== 'GET') return;
+            e.respondWith(
+              fetch(e.request).catch(() => caches.match(e.request))
+            );
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).catch(err => console.log('SW registration failed:', err));
+      }
+    };
+    window.setupInstallPrompt = function() {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        document.getElementById('installPrompt').classList.add('show');
+      });
+    };
+    window.installApp = function() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          document.getElementById('installPrompt').classList.remove('show');
+        });
+      }
+    };
+    window.dismissInstall = function() {
+      document.getElementById('installPrompt').classList.remove('show');
+    };
+
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
@@ -868,6 +924,7 @@
       window.applySettings();
       window.renderAboutPage();
     });
+
     // Realtime Listener to Posts
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
@@ -899,15 +956,18 @@
         if (post) window.listenToComments(post.id);
       }
     });
+
     document.addEventListener("DOMContentLoaded", function() {
       window.registerServiceWorker();
       window.setupInstallPrompt();
     });
+
     window.toggleNav = function(show) {
       const nav = document.getElementById('navOverlay');
       if (show) nav.classList.add('active');
       else nav.classList.remove('active');
     };
+
     window.navigateTo = function(pageId, param = null) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const target = document.getElementById(`page-${pageId}`);
@@ -931,9 +991,11 @@
         else window.renderAdminPanel();
       }
     };
+
     window.getPublishedPosts = function() {
       return blogPosts.filter(p => p.status === 'published');
     };
+
     window.applySettings = function() {
       document.getElementById('siteTitle').innerText = blogSettings.title;
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
@@ -945,8 +1007,14 @@
       
       if (blogSettings.headerCover) {
         document.getElementById('headerCoverImg').src = blogSettings.headerCover;
+        document.querySelector('meta[property="og:image"]')?.remove();
+        const ogImage = document.createElement('meta');
+        ogImage.setAttribute('property', 'og:image');
+        ogImage.setAttribute('content', blogSettings.headerCover);
+        document.head.appendChild(ogImage);
       }
     };
+
     window.renderAboutPage = function() {
       document.getElementById('aboutTitle').innerText = blogSettings.aboutTitle || "عن زكريا";
       document.getElementById('aboutBody').innerText = blogSettings.aboutBody || "";
@@ -960,6 +1028,7 @@
         imgContainer.style.display = 'none';
       }
     };
+
     window.renderHomePosts = function(posts) {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
@@ -969,7 +1038,7 @@
       }
       posts.forEach(post => {
         const excerpt = post.content.replace(/<[^>]*>?/gm, '').substring(0, 140) + '...';
-        const coverHTML = post.cover ? `<div class="post-item-cover"><img src="${post.cover}" alt="${post.title}" loading="lazy"></div>` : '';
+        const coverHTML = post.cover ? `<div class="post-item-cover"><img src="${post.cover}" alt="${post.title}"></div>` : '';
         const item = document.createElement('article');
         item.className = 'post-item';
         item.innerHTML = `
@@ -996,6 +1065,7 @@
         container.appendChild(item);
       });
     };
+
     window.handleSearch = function() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
       if (!query) {
@@ -1009,10 +1079,12 @@
       );
       window.renderHomePosts(filtered);
     };
+
     // Get post URL for sharing
     window.getPostUrl = function(postId) {
       return window.location.origin + window.location.pathname + '#post-' + postId;
     };
+
     // Share blog function
     window.shareBlog = function() {
       const shareData = {
@@ -1028,6 +1100,7 @@
         window.copyToClipboard(shareData.url);
       }
     };
+
     // Share to Facebook
     window.shareToFacebook = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
@@ -1037,6 +1110,7 @@
       let fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`;
       window.open(fbUrl, '_blank', 'width=600,height=400');
     };
+
     // Share to Twitter
     window.shareToTwitter = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
@@ -1045,6 +1119,7 @@
       const title = encodeURIComponent(post.title);
       window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=600,height=400');
     };
+
     // Share to WhatsApp
     window.shareToWhatsApp = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
@@ -1053,6 +1128,7 @@
       const title = encodeURIComponent(post.title);
       window.open(`https://api.whatsapp.com/send?text=${title}%20${url}`, '_blank');
     };
+
     // Share to Telegram
     window.shareToTelegram = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
@@ -1061,11 +1137,13 @@
       const title = encodeURIComponent(post.title);
       window.open(`https://t.me/share/url?url=${url}&text=${title}`, '_blank');
     };
+
     // Copy link
     window.copyLink = function(postId) {
       const url = window.getPostUrl(postId);
       window.copyToClipboard(url);
     };
+
     window.copyToClipboard = function(text) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
@@ -1077,6 +1155,7 @@
         window.fallbackCopy(text);
       }
     };
+
     window.fallbackCopy = function(text) {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -1092,6 +1171,7 @@
       }
       document.body.removeChild(textarea);
     };
+
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
@@ -1106,7 +1186,6 @@
         return `<p>${p.replace(/\n/g, '<br>')}</p>`;
       }).join('');
       
-      // Build share buttons
       const shareButtons = `
         <div class="article-share">
           <div class="article-share-title">شارك المقال على:</div>
@@ -1166,6 +1245,7 @@
         img.addEventListener('click', () => window.openLightbox(img.src));
       });
     };
+
     // Realtime Listener for Post's Comments
     window.listenToComments = function(postId) {
       const commentsRef = ref(db, `posts/${postId}/comments`);
@@ -1174,6 +1254,7 @@
         window.renderCommentsUI(postId, commentsData);
       });
     };
+
     window.renderCommentsUI = function(postId, commentsData) {
       const container = document.getElementById('commentsList');
       if (!container) return;
@@ -1224,6 +1305,7 @@
         container.appendChild(card);
       });
     };
+
     window.addComment = async function(e, postId) {
       if (e && e.preventDefault) e.preventDefault();
       const authorInput = document.getElementById('commentAuthorInput');
@@ -1250,6 +1332,7 @@
         alert('تعذر إرسال التعليق:\n' + (err.message || err));
       }
     };
+
     window.deleteComment = async function(postId, commentId) {
       if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
       try {
@@ -1260,6 +1343,7 @@
         alert('تعذر حذف التعليق: ' + (err.message || err));
       }
     };
+
     window.deleteReply = async function(postId, commentId, replyId) {
       if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
       try {
@@ -1270,10 +1354,12 @@
         alert('تعذر حذف الرد: ' + (err.message || err));
       }
     };
+
     window.showReplyForm = function(commentId) {
       const el = document.getElementById(`replyForm-${commentId}`);
       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     };
+
     window.addReply = async function(e, postId, commentId) {
       if (e && e.preventDefault) e.preventDefault();
       const authorInput = document.getElementById(`replyAuthor-${commentId}`);
@@ -1298,6 +1384,7 @@
         alert('حدث خطأ أثناء إرسال الرد:\n' + (err.message || err));
       }
     };
+
     window.renderAdminCommentsList = function() {
       const container = document.getElementById('adminCommentsList');
       if (!container) return;
@@ -1347,6 +1434,7 @@
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد أي تعليقات في الوقت الحالي.</p>';
       }
     };
+
     window.renderCategories = function() {
       const container = document.getElementById('categoriesList');
       container.innerHTML = '';
@@ -1363,6 +1451,7 @@
         container.appendChild(chip);
       });
     };
+
     window.filterByCategory = function(cat) {
       const filtered = window.getPublishedPosts().filter(p => p.category === cat);
       const container = document.getElementById('categoryPostsResult');
@@ -1379,6 +1468,7 @@
         container.appendChild(item);
       });
     };
+
     window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
       if (pass === 'salem1959') {
@@ -1389,10 +1479,12 @@
         alert('كلمة المرور غير صحيحة');
       }
     };
+
     window.logoutAdmin = function() {
       isAdminLoggedIn = false;
       window.navigateTo('home');
     };
+
     window.renderAdminPanel = function() {
       window.renderAdminPostsList();
       window.renderAdminCommentsList();
@@ -1400,21 +1492,20 @@
       document.getElementById('settingSubtitle').value = blogSettings.subtitle || '';
       document.getElementById('settingAboutTitle').value = blogSettings.aboutTitle || '';
       document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
-      document.getElementById('settingHeaderCoverUrl').value = blogSettings.headerCover || '';
-      document.getElementById('settingAboutImageUrl').value = blogSettings.aboutImage || '';
       
-      // معاينات
-      if (blogSettings.headerCover) {
-        const prev = document.getElementById('headerCoverPreview');
-        prev.src = blogSettings.headerCover;
-        prev.style.display = 'block';
+      const headerUrlInput = document.getElementById('settingHeaderCoverUrl');
+      if (headerUrlInput) {
+        headerUrlInput.value = blogSettings.headerCover || '';
+        window.previewImageUrl(blogSettings.headerCover || '', 'headerCoverPreview');
       }
-      if (blogSettings.aboutImage) {
-        const prev = document.getElementById('aboutImagePreview');
-        prev.src = blogSettings.aboutImage;
-        prev.style.display = 'block';
+      
+      const aboutUrlInput = document.getElementById('settingAboutImageUrl');
+      if (aboutUrlInput) {
+        aboutUrlInput.value = blogSettings.aboutImage || '';
+        window.previewImageUrl(blogSettings.aboutImage || '', 'aboutImagePreview');
       }
     };
+
     window.switchAdminTab = function(tabName, evt) {
       document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
@@ -1423,44 +1514,12 @@
       if (targetTab) targetTab.style.display = 'block';
       if (tabName === 'comments') window.renderAdminCommentsList();
     };
-    
-    // دوال المعاينة الفورية للصور
-    window.previewCover = function(url) {
-      const img = document.getElementById('postCoverPreview');
-      const dataInput = document.getElementById('postCoverData');
-      if (url && url.trim()) {
-        img.src = url.trim();
-        img.style.display = 'block';
-        dataInput.value = url.trim();
-        img.onerror = () => {
-          img.style.display = 'none';
-          img.onerror = null;
-        };
-      } else {
-        img.style.display = 'none';
-        dataInput.value = '';
-      }
-    };
-    
-    window.previewSettingImage = function(previewId, url) {
-      const img = document.getElementById(previewId);
-      if (url && url.trim()) {
-        img.src = url.trim();
-        img.style.display = 'block';
-        img.onerror = () => {
-          img.style.display = 'none';
-          img.onerror = null;
-        };
-      } else {
-        img.style.display = 'none';
-      }
-    };
-    
+
     window.savePost = function(status) {
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
       const content = document.getElementById('postContentInput').value.trim();
-      const cover = document.getElementById('postCoverData').value.trim();
+      const cover = document.getElementById('postCoverUrlInput').value.trim();
       const editId = document.getElementById('editPostId').value;
       if (!title || !content) {
         alert('يرجى كتابة العنوان والنص على الأقل.');
@@ -1481,16 +1540,18 @@
       window.showToast(status === 'published' ? 'تم نشر المقال بنجاح!' : 'تم حفظ المسودة.');
       window.switchAdminTab('posts');
     };
+
     window.resetEditor = function() {
       document.getElementById('editPostId').value = '';
       document.getElementById('postTitleInput').value = '';
       document.getElementById('postCategoryInput').value = '';
       document.getElementById('postContentInput').value = '';
-      document.getElementById('postCoverData').value = '';
-      document.getElementById('postCoverInputUrl').value = '';
+      document.getElementById('postCoverUrlInput').value = '';
+      document.getElementById('inlineImageUrlInput').value = '';
       document.getElementById('postCoverPreview').style.display = 'none';
       document.getElementById('editorFormTitle').innerText = 'إنشاء مقال جديد';
     };
+
     window.editPost = function(id) {
       const post = blogPosts.find(p => p.id === id);
       if (!post) return;
@@ -1498,26 +1559,24 @@
       document.getElementById('postTitleInput').value = post.title;
       document.getElementById('postCategoryInput').value = post.category || '';
       document.getElementById('postContentInput').value = post.content;
-      document.getElementById('postCoverData').value = post.cover || '';
-      document.getElementById('postCoverInputUrl').value = post.cover || '';
+      document.getElementById('postCoverUrlInput').value = post.cover || '';
       
       if (post.cover) {
-        const prev = document.getElementById('postCoverPreview');
-        prev.src = post.cover;
-        prev.style.display = 'block';
+        window.previewImageUrl(post.cover, 'postCoverPreview');
       } else {
         document.getElementById('postCoverPreview').style.display = 'none';
       }
-      
       document.getElementById('editorFormTitle').innerText = 'تعديل المقال';
       window.switchAdminTab('editor');
     };
+
     window.deletePost = function(id) {
       if (confirm('هل أنت متأكد من حذف هذا المقال؟')) {
         remove(ref(db, 'posts/' + id));
         window.showToast('تم حذف المقال.');
       }
     };
+
     window.renderAdminPostsList = function() {
       const container = document.getElementById('adminPostsList');
       container.innerHTML = '';
@@ -1545,6 +1604,7 @@
         container.appendChild(item);
       });
     };
+
     window.saveBlogSettings = function() {
       const newSettings = {
         title: document.getElementById('settingTitle').value.trim(),
@@ -1557,85 +1617,6 @@
       set(ref(db, 'settings'), newSettings);
       window.showToast('تم حفظ الإعدادات بنجاح!');
     };
-    window.openLightbox = function(src) {
-      document.getElementById('lightboxImg').src = src;
-      document.getElementById('lightbox').classList.add('active');
-    };
-    window.closeLightbox = function() {
-      document.getElementById('lightbox').classList.remove('active');
-    };
-    window.registerServiceWorker = function() {
-      if ('serviceWorker' in navigator) {
-        const swCode = `
-          const CACHE_NAME = 'zakaria-blog-v2';
-          self.addEventListener('install', (e) => e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(['/']))));
-          self.addEventListener('fetch', (e) => e.respondWith(caches.match(e.request).then(r => r || fetch(e.request))));
-        `;
-        const blob = new Blob([swCode], { type: 'application/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(blob))
-          .then(() => console.log('Service Worker registered'))
-          .catch(err => console.log('Service Worker registration failed:', err));
-      }
-    };
-    window.setupInstallPrompt = function() {
-      const manifest = {
-        name: 'مدونة زكريا',
-        short_name: 'مدونة زكريا',
-        description: 'ملاحظات وقراءات شخصية',
-        start_url: './',
-        display: 'standalone',
-        background_color: '#f7f7f6',
-        theme_color: '#3b5249',
-        orientation: 'portrait',
-        icons: [
-          { src: APP_ICON, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
-          { src: APP_ICON, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' }
-        ]
-      };
-      const link = document.createElement('link');
-      link.rel = 'manifest';
-      link.href = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
-      document.head.appendChild(link);
-      const appleIcon = document.createElement('link');
-      appleIcon.rel = 'apple-touch-icon';
-      appleIcon.href = APP_ICON;
-      document.head.appendChild(appleIcon);
-      window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        document.getElementById('installPrompt').classList.add('show');
-      });
-      window.addEventListener('appinstalled', () => {
-        deferredPrompt = null;
-        document.getElementById('installPrompt').classList.remove('show');
-      });
-    };
-    window.installApp = function() {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-          }
-          deferredPrompt = null;
-          document.getElementById('installPrompt').classList.remove('show');
-        });
-      }
-    };
-    window.dismissInstall = function() {
-      document.getElementById('installPrompt').classList.remove('show');
-    };
-    // Handle hash-based navigation on page load
-    window.addEventListener('load', function() {
-      if (window.location.hash.startsWith('#post-')) {
-        const postId = window.location.hash.replace('#post-', '');
-        setTimeout(() => {
-          if (blogPosts.find(p => p.id === postId)) {
-            window.navigateTo('post', postId);
-          }
-        }, 500);
-      }
-    });
   </script>
 </body>
 </html>

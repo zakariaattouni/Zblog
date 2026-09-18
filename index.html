@@ -1063,8 +1063,7 @@
       headerCover: "",
       aboutTitle: "عن زكريا",
       aboutBody: "أهلاً بك في مدونتي الشخصية. هنا أشارك بعض القراءات والملاحظات والأفكار الفكرية والعلمية في مساحة هادئة بعيدة عن ضوضاء وسائل التواصل الاجتماعي.",
-      aboutImage: "",
-      notifLastRead: 0
+      aboutImage: ""
     };
     
     let blogSettings = { ...DEFAULT_SETTINGS };
@@ -1199,18 +1198,16 @@
       });
     }
 
-    // إدارة الإشعارات وتحديث القائمة والجرس
+    // إدارة الإشعارات
     window.toggleNotifDropdown = function(e) {
       if (e) e.stopPropagation();
       const dropdown = document.getElementById('notifDropdown');
       const wasHidden = !dropdown.classList.contains('show');
       dropdown.classList.toggle('show');
       
-      // عند فتح القائمة، اعتبر الإشعارات مقروءة بعد ثانيتين
+      // عند فتح القائمة، صفّر العداد فوراً
       if (wasHidden && dropdown.classList.contains('show')) {
-        setTimeout(() => {
-          window.markNotificationsAsRead();
-        }, 2000);
+        window.markNotificationsAsRead();
       }
     };
 
@@ -1221,22 +1218,16 @@
       }
     });
 
-    // حفظ وقت آخر قراءة للإشعارات في Firebase (على مستوى المدونة)
-    window.markNotificationsAsRead = async function() {
+    // تصفير الإشعارات باستخدام localStorage فقط (فوري وموثوق)
+    window.markNotificationsAsRead = function() {
       const now = Date.now();
-      // حفظ محلي فوري
       localStorage.setItem('notif_local_read', now.toString());
-      // حفظ في Firebase لمزامنة الحالة
-      try {
-        await set(ref(db, 'settings/notifLastRead'), now);
-      } catch (err) {
-        console.log('Could not save notif read time:', err);
-      }
+      updateNotificationsUI();
     };
 
     // زر التصفير اليدوي
-    window.clearNotifications = async function() {
-      await window.markNotificationsAsRead();
+    window.clearNotifications = function() {
+      window.markNotificationsAsRead();
       window.showToast('تم تصفير عداد الإشعارات');
     };
 
@@ -1245,10 +1236,8 @@
       const notifBadge = document.getElementById('notifBadge');
       const notifTotalCount = document.getElementById('notifTotalCount');
       
-      // نأخذ الأحدث بين: وقت آخر قراءة من Firebase، ووقت آخر قراءة محلي
-      const firebaseLastRead = blogSettings.notifLastRead || 0;
-      const localLastRead = parseInt(localStorage.getItem('notif_local_read') || '0', 10);
-      const lastRead = Math.max(firebaseLastRead, localLastRead);
+      // نستخدم localStorage فقط لتصفير الجرس
+      const lastRead = parseInt(localStorage.getItem('notif_local_read') || '0', 10);
       
       let allComments = [];
       
@@ -1329,7 +1318,6 @@
       }
       window.applySettings();
       window.renderAboutPage();
-      updateNotificationsUI();
     });
 
     // Realtime Listener to Posts

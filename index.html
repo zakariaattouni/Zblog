@@ -218,6 +218,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 8px;
     }
     .notif-list {
       overflow-y: auto;
@@ -756,6 +757,24 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
     }
+    .notif-new-badge {
+      background: var(--danger-color);
+      color: white;
+      font-size: 0.65rem;
+      padding: 1px 5px;
+      border-radius: 8px;
+      margin-right: 4px;
+      vertical-align: middle;
+    }
+    .notif-clear-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent-color);
+      font-size: 0.75rem;
+      text-decoration: underline;
+      padding: 0;
+    }
     @media (max-width: 600px) {
       .header-content { padding: 16px; }
       .site-title-area h1 { font-size: 1.6rem; }
@@ -805,7 +824,10 @@
         <div id="notifDropdown" class="notif-dropdown" onclick="event.stopPropagation()">
           <div class="notif-header">
             <span>التعليقات والردود الأخيرة</span>
-            <span id="notifTotalCount" style="font-size:0.75rem; color: var(--text-muted);">0 تعليق</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span id="notifTotalCount" style="font-size:0.75rem; color: var(--text-muted);">0 تعليق</span>
+              <button class="notif-clear-btn" onclick="window.clearNotifications()" title="تصفير العداد">تصفير</button>
+            </div>
           </div>
           <div id="notifList" class="notif-list">
             <div class="notif-empty">لا توجد تعليقات حتى الآن.</div>
@@ -1041,7 +1063,8 @@
       headerCover: "",
       aboutTitle: "عن زكريا",
       aboutBody: "أهلاً بك في مدونتي الشخصية. هنا أشارك بعض القراءات والملاحظات والأفكار الفكرية والعلمية في مساحة هادئة بعيدة عن ضوضاء وسائل التواصل الاجتماعي.",
-      aboutImage: ""
+      aboutImage: "",
+      notifLastRead: 0
     };
     
     let blogSettings = { ...DEFAULT_SETTINGS };
@@ -1180,7 +1203,15 @@
     window.toggleNotifDropdown = function(e) {
       if (e) e.stopPropagation();
       const dropdown = document.getElementById('notifDropdown');
+      const wasHidden = !dropdown.classList.contains('show');
       dropdown.classList.toggle('show');
+      
+      // عند فتح القائمة، اعتبر الإشعارات مقروءة بعد ثانيتين
+      if (wasHidden && dropdown.classList.contains('show')) {
+        setTimeout(() => {
+          window.markNotificationsAsRead();
+        }, 2000);
+      }
     };
 
     document.addEventListener('click', () => {
@@ -1190,10 +1221,34 @@
       }
     });
 
+    // حفظ وقت آخر قراءة للإشعارات في Firebase (على مستوى المدونة)
+    window.markNotificationsAsRead = async function() {
+      const now = Date.now();
+      // حفظ محلي فوري
+      localStorage.setItem('notif_local_read', now.toString());
+      // حفظ في Firebase لمزامنة الحالة
+      try {
+        await set(ref(db, 'settings/notifLastRead'), now);
+      } catch (err) {
+        console.log('Could not save notif read time:', err);
+      }
+    };
+
+    // زر التصفير اليدوي
+    window.clearNotifications = async function() {
+      await window.markNotificationsAsRead();
+      window.showToast('تم تصفير عداد الإشعارات');
+    };
+
     function updateNotificationsUI() {
       const notifList = document.getElementById('notifList');
       const notifBadge = document.getElementById('notifBadge');
       const notifTotalCount = document.getElementById('notifTotalCount');
+      
+      // نأخذ الأحدث بين: وقت آخر قراءة من Firebase، ووقت آخر قراءة محلي
+      const firebaseLastRead = blogSettings.notifLastRead || 0;
+      const localLastRead = parseInt(localStorage.getItem('notif_local_read') || '0', 10);
+      const lastRead = Math.max(firebaseLastRead, localLastRead);
       
       let allComments = [];
       
@@ -1201,22 +1256,28 @@
         if (post.comments) {
           Object.keys(post.comments).forEach(commentId => {
             const c = post.comments[commentId];
+            const cTime = c.timestamp || new Date(c.date || 0).getTime();
             allComments.push({
               author: c.author,
               text: c.text,
               date: c.date || '',
+              timestamp: cTime,
               postId: post.id,
-              postTitle: post.title || 'منشور صورة'
+              postTitle: post.title || 'منشور صورة',
+              isNew: cTime > lastRead
             });
             if (c.replies) {
               Object.keys(c.replies).forEach(replyId => {
                 const r = c.replies[replyId];
+                const rTime = r.timestamp || new Date(r.date || 0).getTime();
                 allComments.push({
                   author: r.author,
                   text: `رد: ${r.text}`,
                   date: r.date || '',
+                  timestamp: rTime,
                   postId: post.id,
-                  postTitle: post.title || 'منشور صورة'
+                  postTitle: post.title || 'منشور صورة',
+                  isNew: rTime > lastRead
                 });
               });
             }
@@ -1224,11 +1285,15 @@
         }
       });
 
+      // ترتيب من الأحدث للأقدم
+      allComments.sort((a, b) => b.timestamp - a.timestamp);
+
       const totalCount = allComments.length;
+      const newCount = allComments.filter(c => c.isNew).length;
       
       if (notifBadge) {
-        if (totalCount > 0) {
-          notifBadge.innerText = totalCount;
+        if (newCount > 0) {
+          notifBadge.innerText = newCount;
           notifBadge.classList.add('active');
         } else {
           notifBadge.classList.remove('active');
@@ -1245,7 +1310,7 @@
         } else {
           notifList.innerHTML = allComments.slice(0, 15).map(item => `
             <div class="notif-item" onclick="window.navigateTo('post', '${item.postId}'); document.getElementById('notifDropdown').classList.remove('show');">
-              <div class="notif-item-author">${item.author}</div>
+              <div class="notif-item-author">${item.author} ${item.isNew ? '<span class="notif-new-badge">جديد</span>' : ''}</div>
               <div class="notif-item-text">${item.text}</div>
               <div class="notif-item-meta">على: ${item.postTitle} • ${item.date}</div>
             </div>
@@ -1264,6 +1329,7 @@
       }
       window.applySettings();
       window.renderAboutPage();
+      updateNotificationsUI();
     });
 
     // Realtime Listener to Posts
@@ -1704,7 +1770,8 @@
         await push(commentsRef, {
           author: author,
           text: text,
-          date: new Date().toISOString().split('T')[0]
+          date: new Date().toISOString().split('T')[0],
+          timestamp: Date.now()
         });
         if (authorInput) authorInput.value = '';
         textInput.value = '';
@@ -1758,7 +1825,8 @@
         await push(repliesRef, {
           author: author,
           text: text,
-          date: new Date().toISOString().split('T')[0]
+          date: new Date().toISOString().split('T')[0],
+          timestamp: Date.now()
         });
         window.showToast('تم إضافة الرد بنجاح!');
       } catch (err) {
@@ -1964,6 +2032,7 @@
 
     window.saveBlogSettings = async function() {
       const updated = {
+        ...blogSettings,
         title: document.getElementById('settingTitle').value.trim() || DEFAULT_SETTINGS.title,
         subtitle: document.getElementById('settingSubtitle').value.trim() || DEFAULT_SETTINGS.subtitle,
         headerCover: document.getElementById('settingHeaderCoverUrl').value.trim(),

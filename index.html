@@ -847,6 +847,20 @@
       display: none;
     }
     .tts-status.show { display: inline-block; }
+    .tts-loading {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--border-color);
+      border-top-color: var(--accent-color);
+      border-radius: 50%;
+      animation: ttsSpin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+    @keyframes ttsSpin {
+      to { transform: rotate(360deg); }
+    }
     @media (max-width: 600px) {
       .header-content { padding: 16px; }
       .site-title-area h1 { font-size: 1.6rem; }
@@ -1244,7 +1258,6 @@
       const visitsRef = ref(db, 'stats/visits');
       const hasVisitedKey = 'zblog_visited_session';
       
-      // عداد زوار حقيقي: يزيد مرة واحدة فقط لكل جلسة متصفح
       if (!sessionStorage.getItem(hasVisitedKey)) {
         runTransaction(visitsRef, (currentVisits) => {
           if (currentVisits === null || currentVisits === undefined) {
@@ -1262,7 +1275,6 @@
         if (el) el.innerText = count || 0;
       });
       
-      // عداد المتواجدين الآن حقيقي: يعتمد فقط على عدد الاتصالات النشطة في presence
       const connectedRef = ref(db, '.info/connected');
       const presenceRef = ref(db, 'stats/online');
       
@@ -1767,7 +1779,6 @@
       document.querySelectorAll('#articleBody img').forEach(img => {
         img.addEventListener('click', () => window.openLightbox(img.src));
       });
-      // تفعيل زر الأنثى افتراضياً
       setTimeout(updateTTSButtonsUI, 100);
     };
     // Realtime Listener for Post's Comments
@@ -2142,44 +2153,19 @@
     let ttsIsPlaying = false;
     let ttsIsPaused = false;
     let ttsCurrentVoiceGender = 'female';
-    let ttsVoices = [];
     let ttsChunks = [];
     let ttsCurrentChunk = 0;
     let ttsIsCancelled = false;
-    let ttsKeepAliveTimer = null;
+    let ttsAudio = null;
+    let ttsPrefetchedAudio = null;
+    let ttsPrefetchChunkIndex = -1;
+    let ttsPrefetchPromise = null;
 
-    function loadVoices() {
-      ttsVoices = window.speechSynthesis.getVoices();
-    }
-    loadVoices();
-    if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
-    }
-    
-    function pickArabicVoice(gender) {
-      if (!ttsVoices.length) ttsVoices = window.speechSynthesis.getVoices();
-      
-      const arabicVoices = ttsVoices.filter(v => 
-        v.lang && (v.lang.toLowerCase().startsWith('ar') || v.lang.toLowerCase().includes('ar-'))
-      );
-      
-      if (!arabicVoices.length) return null;
-      
-      const maleKeywords = ['male', 'man', 'majed', 'maged', 'tarik', 'hamza', 'khalid', 'naayf', 'shakir', 'raed', 'ذكر'];
-      const femaleKeywords = ['female', 'woman', 'laila', 'layla', 'hala', 'salma', 'zariyah', 'amany', 'sana', 'maryam', 'hoda', 'أنثى'];
-      
-      const isMale = (v) => maleKeywords.some(k => v.name.toLowerCase().includes(k));
-      const isFemale = (v) => femaleKeywords.some(k => v.name.toLowerCase().includes(k));
-      
-      let selected = null;
-      if (gender === 'male') {
-        selected = arabicVoices.find(v => isMale(v));
-      } else {
-        selected = arabicVoices.find(v => isFemale(v));
-      }
-      if (!selected) selected = arabicVoices[0];
-      return selected;
-    }
+    // أصوات عربية عالية الجودة (Amazon Polly عبر StreamElements)
+    const TTS_VOICES = {
+      female: 'ar-SA-Standard-A',   // صوت أنثى عربي فصيح
+      male: 'ar-SA-Standard-B'      // صوت ذكر عربي فصيح
+    };
     
     function updateTTSButtonsUI() {
       const maleBtn = document.getElementById('ttsVoiceMale');
@@ -2191,15 +2177,14 @@
     window.setTTSVoice = function(gender) {
       ttsCurrentVoiceGender = gender;
       updateTTSButtonsUI();
-      const voice = pickArabicVoice(gender);
-      if (!voice) {
-        window.showToast('لا يوجد صوت عربي متوفر على جهازك. سيتم استخدام الصوت الافتراضي.');
-      } else {
-        window.showToast(gender === 'male' ? 'تم اختيار صوت ذكر: ' + voice.name : 'تم اختيار صوت أنثى: ' + voice.name);
-      }
+      window.showToast(gender === 'male' ? 'تم اختيار الصوت الذكري' : 'تم اختيار الصوت الأنثوي');
       if (ttsIsPlaying) {
+        const resumeFrom = ttsCurrentChunk;
         window.stopTTS();
-        setTimeout(() => window.startTTS(), 300);
+        setTimeout(() => {
+          window.startTTS();
+          setTimeout(() => { ttsCurrentChunk = resumeFrom; }, 50);
+        }, 300);
       }
     };
     
@@ -2207,40 +2192,38 @@
     function extractArticleText() {
       const parts = [];
       
-      // 1. العنوان
       const titleEl = document.querySelector('.article-title');
       if (titleEl && titleEl.textContent.trim()) {
         parts.push(titleEl.textContent.trim());
       }
       
-      // 2. محتوى المقال
       const body = document.getElementById('articleBody');
       if (body) {
         const clone = body.cloneNode(true);
         clone.querySelectorAll('img').forEach(el => el.remove());
         
-        clone.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, div, br').forEach(el => {
+        clone.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, br').forEach(el => {
           el.appendChild(document.createTextNode(' . '));
         });
         
         let text = clone.textContent || '';
-        text = text.replace(/\s+/g, ' ').replace(/\s\.\s/g, '. ').replace(/\s{2,}/g, ' ').trim();
+        text = text.replace(/\s+/g, ' ').replace(/\s{2,}/g, ' ').trim();
         if (text) parts.push(text);
       }
       
       return parts.join(' . ');
     }
     
-    // تقسيم النص إلى جمل (chunks) لتفادي توقف Chrome
+    // تقسيم النص إلى chunks بحجم ~200 حرف
     function splitIntoChunks(text) {
       const rawParts = text
-        .split(/(?<=[.!?؟।\n])\s+/)
+        .split(/(?<=[.!?؟।\n،؛:])\s+/)
         .map(s => s.trim())
         .filter(s => s.length > 0);
       
       const chunks = [];
       let current = '';
-      const MAX_LEN = 180;
+      const MAX_LEN = 200;
       
       for (const part of rawParts) {
         if ((current + ' ' + part).length <= MAX_LEN) {
@@ -2258,8 +2241,7 @@
                 temp = w;
               }
             }
-            if (temp) current = temp;
-            else current = '';
+            current = temp;
           } else {
             current = part;
           }
@@ -2270,26 +2252,46 @@
       return chunks.filter(c => c.trim().length > 0);
     }
     
-    window.startTTS = function() {
-      if (!('speechSynthesis' in window)) {
-        alert('متصفحك لا يدعم القراءة الصوتية');
-        return;
+    // بناء رابط StreamElements
+    function buildTTSUrl(text, gender) {
+      const voice = TTS_VOICES[gender] || TTS_VOICES.female;
+      return `https://api.streamelements.com/kappa/v2/speech?voice=${encodeURIComponent(voice)}&text=${encodeURIComponent(text)}`;
+    }
+    
+    // جلب صوت قطعة واحدة كـ Blob URL
+    async function fetchChunkAudio(chunkText, gender) {
+      const url = buildTTSUrl(chunkText, gender);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('فشل جلب الصوت: ' + response.status);
+      const blob = await response.blob();
+      return URL.createObjectURL(blob);
+    }
+    
+    // prefetch المقطع التالي
+    async function prefetchChunk(index) {
+      if (index >= ttsChunks.length) return;
+      if (ttsPrefetchChunkIndex === index && ttsPrefetchedAudio) return;
+      try {
+        const audioUrl = await fetchChunkAudio(ttsChunks[index], ttsCurrentVoiceGender);
+        ttsPrefetchedAudio = { index, url: audioUrl };
+        ttsPrefetchChunkIndex = index;
+      } catch (err) {
+        console.warn('Prefetch failed:', err);
       }
-      
+    }
+    
+    window.startTTS = async function() {
       const text = extractArticleText();
       if (!text || text.length < 3) {
         window.showToast('لا يوجد نص لقراءته');
         return;
       }
       
-      // إلغاء أي قراءة سابقة
-      window.speechSynthesis.cancel();
-      clearInterval(ttsKeepAliveTimer);
+      window.stopTTS();
+      ttsIsCancelled = false;
       
-      // تقسيم النص إلى قطع
       ttsChunks = splitIntoChunks(text);
       ttsCurrentChunk = 0;
-      ttsIsCancelled = false;
       ttsIsPaused = false;
       
       if (ttsChunks.length === 0) {
@@ -2300,66 +2302,69 @@
       ttsIsPlaying = true;
       updateTTSPlayUI(true);
       
-      // بدء قراءة أول قطعة
-      speakChunk();
-      
-      // حل مشكلة توقف Chrome تلقائيًا: استمر في "استئناف" المحرك كل 10 ثوان
-      ttsKeepAliveTimer = setInterval(() => {
-        if (ttsIsPlaying && !ttsIsPaused && window.speechSynthesis.speaking) {
-          window.speechSynthesis.pause();
-          window.speechSynthesis.resume();
-        }
-      }, 10000);
+      await playChunk(0);
+      prefetchChunk(1);
     };
     
-    function speakChunk() {
+    async function playChunk(index) {
       if (ttsIsCancelled) return;
-      if (ttsCurrentChunk >= ttsChunks.length) {
+      if (index >= ttsChunks.length) {
         ttsIsPlaying = false;
         ttsIsPaused = false;
-        clearInterval(ttsKeepAliveTimer);
         updateTTSPlayUI(false);
         return;
       }
       
-      if (!ttsVoices.length) loadVoices();
+      ttsCurrentChunk = index;
       
-      const chunkText = ttsChunks[ttsCurrentChunk];
-      const utt = new SpeechSynthesisUtterance(chunkText);
-      utt.lang = 'ar-SA';
-      utt.rate = parseFloat(document.getElementById('ttsSpeed')?.value) || 1;
-      utt.pitch = ttsCurrentVoiceGender === 'male' ? 0.85 : 1.15;
-      utt.volume = 1;
-      
-      const voice = pickArabicVoice(ttsCurrentVoiceGender);
-      if (voice) {
-        utt.voice = voice;
-        utt.lang = voice.lang;
-      }
-      
-      utt.onend = () => {
-        if (ttsIsCancelled) return;
-        ttsCurrentChunk++;
-        setTimeout(() => {
-          if (!ttsIsCancelled && ttsIsPlaying && !ttsIsPaused) {
-            speakChunk();
-          }
-        }, 120);
-      };
-      
-      utt.onerror = (e) => {
-        console.warn('TTS chunk error:', e);
-        if (!ttsIsCancelled) {
-          ttsCurrentChunk++;
-          setTimeout(() => {
-            if (!ttsIsCancelled && ttsIsPlaying && !ttsIsPaused) {
-              speakChunk();
-            }
-          }, 200);
+      try {
+        let audioUrl;
+        if (ttsPrefetchedAudio && ttsPrefetchedAudio.index === index) {
+          audioUrl = ttsPrefetchedAudio.url;
+          ttsPrefetchedAudio = null;
+          ttsPrefetchChunkIndex = -1;
+        } else {
+          audioUrl = await fetchChunkAudio(ttsChunks[index], ttsCurrentVoiceGender);
         }
-      };
-      
-      window.speechSynthesis.speak(utt);
+        
+        if (ttsIsCancelled) {
+          URL.revokeObjectURL(audioUrl);
+          return;
+        }
+        
+        if (ttsAudio) {
+          try { ttsAudio.pause(); } catch(e) {}
+          if (ttsAudio.src && ttsAudio.src.startsWith('blob:')) {
+            URL.revokeObjectURL(ttsAudio.src);
+          }
+        }
+        ttsAudio = new Audio(audioUrl);
+        
+        const speed = parseFloat(document.getElementById('ttsSpeed')?.value) || 1;
+        ttsAudio.playbackRate = speed;
+        
+        ttsAudio.onended = () => {
+          if (ttsIsCancelled) return;
+          if (ttsAudio && ttsAudio.src && ttsAudio.src.startsWith('blob:')) {
+            URL.revokeObjectURL(ttsAudio.src);
+          }
+          playChunk(index + 1);
+          prefetchChunk(index + 2);
+        };
+        
+        ttsAudio.onerror = (e) => {
+          console.warn('Audio error:', e);
+          if (!ttsIsCancelled) playChunk(index + 1);
+        };
+        
+        await ttsAudio.play();
+        
+      } catch (err) {
+        console.warn('Chunk playback failed:', err);
+        if (!ttsIsCancelled) {
+          setTimeout(() => playChunk(index + 1), 200);
+        }
+      }
     }
     
     function updateTTSPlayUI(playing) {
@@ -2384,27 +2389,18 @@
     }
     
     window.toggleTTS = function() {
-      if (!('speechSynthesis' in window)) {
-        alert('متصفحك لا يدعم القراءة الصوتية');
-        return;
-      }
-      
-      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-        window.speechSynthesis.pause();
+      if (ttsIsPlaying && ttsAudio && !ttsAudio.paused) {
+        ttsAudio.pause();
         ttsIsPaused = true;
         updateTTSPlayUI(false);
         const pt = document.getElementById('ttsPlayText');
         if (pt) pt.textContent = 'استئناف';
-      } else if (window.speechSynthesis.paused) {
-        window.speechSynthesis.resume();
+      } else if (ttsIsPaused && ttsAudio) {
+        ttsAudio.play();
         ttsIsPaused = false;
         updateTTSPlayUI(true);
       } else {
-        if (ttsCurrentChunk >= ttsChunks.length || !ttsIsPlaying) {
-          window.startTTS();
-        } else {
-          speakChunk();
-        }
+        window.startTTS();
       }
     };
     
@@ -2414,10 +2410,20 @@
       ttsIsPaused = false;
       ttsCurrentChunk = 0;
       ttsChunks = [];
-      clearInterval(ttsKeepAliveTimer);
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
+      
+      if (ttsAudio) {
+        try { ttsAudio.pause(); } catch(e) {}
+        if (ttsAudio.src && ttsAudio.src.startsWith('blob:')) {
+          URL.revokeObjectURL(ttsAudio.src);
+        }
+        ttsAudio = null;
       }
+      if (ttsPrefetchedAudio && ttsPrefetchedAudio.url) {
+        URL.revokeObjectURL(ttsPrefetchedAudio.url);
+      }
+      ttsPrefetchedAudio = null;
+      ttsPrefetchChunkIndex = -1;
+      
       updateTTSPlayUI(false);
     };
     
@@ -2429,25 +2435,20 @@
     
     document.addEventListener('change', (e) => {
       if (e.target && e.target.id === 'ttsSpeed' && ttsIsPlaying) {
-        const resumeFrom = ttsCurrentChunk;
-        window.stopTTS();
-        setTimeout(() => {
-          window.startTTS();
-          setTimeout(() => {
-            ttsCurrentChunk = resumeFrom;
-          }, 100);
-        }, 250);
+        if (ttsAudio) {
+          ttsAudio.playbackRate = parseFloat(e.target.value) || 1;
+        }
       }
     });
     
     window.addEventListener('beforeunload', () => {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      window.stopTTS();
     });
     
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
         updateTTSButtonsUI();
-      }, 500);
+      }, 300);
     });
     // ====================================================
   </script>

@@ -436,67 +436,6 @@
     }
     .article-content p { margin-bottom: 20px; }
     .article-content img { margin: 25px 0; cursor: pointer; }
-    
-    /* شريط قارئ الصوت الاحترافي */
-    .audio-player-box {
-      background: var(--paper-color);
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius);
-      padding: 15px 20px;
-      margin: 20px 0;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-    .audio-player-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--accent-color);
-    }
-    .audio-controls {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-    }
-    .audio-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      color: var(--text-main);
-      transition: all 0.2s ease;
-    }
-    .audio-btn:hover {
-      background: var(--accent-color);
-      color: white;
-      border-color: var(--accent-color);
-    }
-    .audio-btn.active {
-      background: var(--accent-color);
-      color: white;
-    }
-    .audio-select {
-      padding: 7px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
-      background: var(--bg-color);
-      font-size: 0.85rem;
-      outline: none;
-      cursor: pointer;
-      max-width: 200px;
-    }
-
     .article-share {
       margin-top: 30px;
       padding: 20px;
@@ -546,6 +485,73 @@
     .share-btn.tg { color: #0088cc; border-color: #0088cc; }
     .share-btn.tg:hover { background: #0088cc; color: white; }
     .share-btn.copy:hover { background: var(--accent-color); color: white; }
+    
+    /* ====== أنماط زر ومشغل الصوت ====== */
+    .share-btn.listen {
+      color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    .share-btn.listen:hover {
+      background: var(--accent-color);
+      color: white;
+    }
+    #audioPlayer {
+      margin-top: 15px;
+      padding: 15px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      background-color: #f9f9f8;
+      display: none;
+    }
+    #audioPlayer.show {
+      display: block;
+    }
+    #audioPlayer .controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    #audioPlayer label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    #audioPlayer select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background-color: var(--paper-color);
+      cursor: pointer;
+    }
+    #audioPlayer button {
+      padding: 8px 18px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    #audioPlayer .play-btn {
+      background-color: var(--accent-color);
+      color: white;
+    }
+    #audioPlayer .play-btn:hover {
+      background-color: var(--accent-hover);
+    }
+    #audioPlayer .stop-btn {
+      background-color: var(--danger-color);
+      color: white;
+      display: none;
+    }
+    #audioPlayer .stop-btn:hover {
+      background-color: #8a3a38;
+    }
+    #audioPlayer .stop-btn.show {
+      display: inline-block;
+    }
+    /* ================================ */
+    
     .comments-container {
       margin-top: 40px;
       padding-top: 30px;
@@ -1231,8 +1237,10 @@
       const visitsRef = ref(db, 'stats/visits');
       const hasVisitedKey = 'zblog_visited_session';
       
+      // عداد زوار حقيقي: يزيد مرة واحدة فقط لكل جلسة متصفح
       if (!sessionStorage.getItem(hasVisitedKey)) {
         runTransaction(visitsRef, (currentVisits) => {
+          // إذا كان العداد غير موجود أو صفر نبدأ من 1، وإلا نزيد واحداً
           if (currentVisits === null || currentVisits === undefined) {
             return 1;
           }
@@ -1248,6 +1256,7 @@
         if (el) el.innerText = count || 0;
       });
       
+      // عداد المتواجدين الآن حقيقي: يعتمد فقط على عدد الاتصالات النشطة في presence
       const connectedRef = ref(db, '.info/connected');
       const presenceRef = ref(db, 'stats/online');
       
@@ -1265,193 +1274,7 @@
         if (el) el.innerText = count;
       });
     }
-
     // =====================================
-    // محرك القراءة الصوتية الذكي بالكامل (Text-to-Speech Engine)
-    // =====================================
-    window.ttsEngine = {
-      synth: window.speechSynthesis,
-      voices: [],
-      chunks: [],
-      currentChunkIndex: 0,
-      isPlaying: false,
-      isPaused: false,
-      rate: 1.0,
-      selectedVoice: null,
-
-      init: function() {
-        if (!('speechSynthesis' in window)) return;
-        this.loadVoices();
-        if (this.synth.onvoiceschanged !== undefined) {
-          this.synth.onvoiceschanged = () => this.loadVoices();
-        }
-      },
-
-      loadVoices: function() {
-        this.voices = this.synth.getVoices();
-        const voiceSelect = document.getElementById('ttsVoiceSelect');
-        if (!voiceSelect) return;
-        
-        voiceSelect.innerHTML = '';
-        
-        // فلترة الأوصوات المتوفرة (العربية أولاً ثم باقي اللغات)
-        const arVoices = this.voices.filter(v => v.lang.startsWith('ar'));
-        const otherVoices = this.voices.filter(v => !v.lang.startsWith('ar'));
-
-        const sortedVoices = [...arVoices, ...otherVoices];
-
-        if (sortedVoices.length === 0) {
-          voiceSelect.innerHTML = '<option value="">الصوت الافتراضي للجهاز</option>';
-          return;
-        }
-
-        sortedVoices.forEach((voice) => {
-          const option = document.createElement('option');
-          option.value = voice.name;
-          let label = voice.name + ` (${voice.lang})`;
-          if (voice.lang.startsWith('ar')) {
-            label = `🇸🇦 ${voice.name}`;
-          }
-          option.textContent = label;
-          voiceSelect.appendChild(option);
-        });
-
-        // تحديد صوت عربي كافتراضي إن وجد
-        if (arVoices.length > 0) {
-          voiceSelect.value = arVoices[0].name;
-          this.selectedVoice = arVoices[0];
-        }
-      },
-
-      prepareChunks: function(text) {
-        // تنظيف النص وتقطيعه إلى أجزاء صغيرة لضمان عدم توقف المتصفح
-        const cleanText = text.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
-        // تقسيم النص اعتماداً على علامات الترقيم والجمل
-        const rawChunks = cleanText.match(/[^.؛!؟\n]+[.؛!؟\n]+/g) || [cleanText];
-        
-        this.chunks = [];
-        rawChunks.forEach(chunk => {
-          if (chunk.length > 150) {
-            // تقطيع إضافي للمقاطع الطويلة جداً
-            const sub = chunk.match(/.{1,150}(\s|$)/g) || [chunk];
-            this.chunks.push(...sub);
-          } else {
-            this.chunks.push(chunk);
-          }
-        });
-      },
-
-      play: function() {
-        if (this.isPaused) {
-          this.synth.resume();
-          this.isPlaying = true;
-          this.isPaused = false;
-          this.updateUI();
-          return;
-        }
-
-        const articleBody = document.getElementById('articleBody');
-        const articleTitle = document.querySelector('.article-title');
-        
-        if (!articleBody && !articleTitle) return;
-
-        const fullText = (articleTitle ? articleTitle.innerText + '. ' : '') + (articleBody ? articleBody.innerText : '');
-        
-        if (!fullText.trim()) {
-          window.showToast('لا يوجد نص للقراءة');
-          return;
-        }
-
-        this.stop();
-        this.prepareChunks(fullText);
-
-        const voiceSelect = document.getElementById('ttsVoiceSelect');
-        if (voiceSelect && voiceSelect.value) {
-          this.selectedVoice = this.voices.find(v => v.name === voiceSelect.value) || null;
-        }
-
-        const speedSelect = document.getElementById('ttsSpeedSelect');
-        if (speedSelect) {
-          this.rate = parseFloat(speedSelect.value) || 1.0;
-        }
-
-        this.currentChunkIndex = 0;
-        this.isPlaying = true;
-        this.isPaused = false;
-        this.speakNextChunk();
-        this.updateUI();
-      },
-
-      speakNextChunk: function() {
-        if (!this.isPlaying || this.currentChunkIndex >= this.chunks.length) {
-          this.stop();
-          return;
-        }
-
-        const chunkText = this.chunks[this.currentChunkIndex];
-        const utterance = new SpeechSynthesisUtterance(chunkText);
-        
-        if (this.selectedVoice) {
-          utterance.voice = this.selectedVoice;
-          utterance.lang = this.selectedVoice.lang;
-        } else {
-          utterance.lang = 'ar-SA';
-        }
-
-        utterance.rate = this.rate;
-
-        utterance.onend = () => {
-          this.currentChunkIndex++;
-          if (this.isPlaying) {
-            this.speakNextChunk();
-          }
-        };
-
-        utterance.onerror = (e) => {
-          console.log('TTS Error:', e);
-          this.currentChunkIndex++;
-          if (this.isPlaying) {
-            this.speakNextChunk();
-          }
-        };
-
-        this.synth.speak(utterance);
-      },
-
-      pause: function() {
-        if (this.isPlaying && !this.isPaused) {
-          this.synth.pause();
-          this.isPaused = true;
-          this.isPlaying = false;
-          this.updateUI();
-        }
-      },
-
-      stop: function() {
-        this.synth.cancel();
-        this.isPlaying = false;
-        this.isPaused = false;
-        this.currentChunkIndex = 0;
-        this.chunks = [];
-        this.updateUI();
-      },
-
-      updateUI: function() {
-        const btnPlay = document.getElementById('ttsBtnPlay');
-        const btnPause = document.getElementById('ttsBtnPause');
-        
-        if (btnPlay && btnPause) {
-          if (this.isPlaying) {
-            btnPlay.style.display = 'none';
-            btnPause.style.display = 'inline-flex';
-          } else {
-            btnPlay.style.display = 'inline-flex';
-            btnPause.style.display = 'none';
-          }
-        }
-      }
-    };
-
     // إدارة الإشعارات
     window.toggleNotifDropdown = function(e) {
       if (e) e.stopPropagation();
@@ -1459,6 +1282,7 @@
       const wasHidden = !dropdown.classList.contains('show');
       dropdown.classList.toggle('show');
       
+      // عند فتح القائمة، صفّر العداد فوراً
       if (wasHidden && dropdown.classList.contains('show')) {
         window.markNotificationsAsRead();
       }
@@ -1469,24 +1293,25 @@
         dropdown.classList.remove('show');
       }
     });
-
+    // تصفير الإشعارات باستخدام localStorage فقط (فوري وموثوق)
     window.markNotificationsAsRead = function() {
       const now = Date.now();
       localStorage.setItem('notif_local_read', now.toString());
       updateNotificationsUI();
     };
-
+    // زر التصفير اليدوي
     window.clearNotifications = function() {
       window.markNotificationsAsRead();
       window.showToast('تم تصفير عداد الإشعارات');
     };
-
     function updateNotificationsUI() {
       const notifList = document.getElementById('notifList');
       const notifBadge = document.getElementById('notifBadge');
       const notifTotalCount = document.getElementById('notifTotalCount');
       
+      // نستخدم localStorage فقط لتصفير الجرس
       const lastRead = parseInt(localStorage.getItem('notif_local_read') || '0', 10);
+      
       let allComments = [];
       
       blogPosts.forEach(post => {
@@ -1521,7 +1346,7 @@
           });
         }
       });
-
+      // ترتيب من الأحدث للأقدم
       allComments.sort((a, b) => b.timestamp - a.timestamp);
       const totalCount = allComments.length;
       const newCount = allComments.filter(c => c.isNew).length;
@@ -1551,7 +1376,6 @@
         }
       }
     }
-
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
@@ -1563,7 +1387,6 @@
       window.applySettings();
       window.renderAboutPage();
     });
-
     // Realtime Listener to Posts
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
@@ -1596,24 +1419,17 @@
         if (post) window.listenToComments(post.id);
       }
     });
-
     document.addEventListener("DOMContentLoaded", function() {
       window.registerServiceWorker();
       window.setupInstallPrompt();
       setupFooterCounters();
-      window.ttsEngine.init();
     });
-
     window.toggleNav = function(show) {
       const nav = document.getElementById('navOverlay');
       if (show) nav.classList.add('active');
       else nav.classList.remove('active');
     };
-
     window.navigateTo = function(pageId, param = null) {
-      // عند التنقل بين الصفحات يتم إيقاف القارئ الصوتي تلقائياً
-      window.ttsEngine.stop();
-      
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const target = document.getElementById(`page-${pageId}`);
       if (target) target.classList.add('active');
@@ -1636,11 +1452,9 @@
         else window.renderAdminPanel();
       }
     };
-
     window.getPublishedPosts = function() {
       return blogPosts.filter(p => p.status === 'published');
     };
-
     window.applySettings = function() {
       document.getElementById('siteTitle').innerText = blogSettings.title;
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
@@ -1658,7 +1472,6 @@
         document.head.appendChild(ogImage);
       }
     };
-
     window.renderAboutPage = function() {
       document.getElementById('aboutTitle').innerText = blogSettings.aboutTitle || "عن زكريا";
       document.getElementById('aboutBody').innerText = blogSettings.aboutBody || "";
@@ -1672,7 +1485,6 @@
         imgContainer.style.display = 'none';
       }
     };
-
     window.renderHomePosts = function(posts) {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
@@ -1714,7 +1526,6 @@
         container.appendChild(item);
       });
     };
-
     window.handleSearch = function() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
       if (!query) {
@@ -1728,11 +1539,9 @@
       );
       window.renderHomePosts(filtered);
     };
-
     window.getPostUrl = function(postId) {
       return window.location.origin + window.location.pathname + '#post-' + postId;
     };
-
     window.shareBlog = function() {
       const shareData = {
         title: blogSettings.title,
@@ -1747,7 +1556,6 @@
         window.copyToClipboard(shareData.url);
       }
     };
-
     window.shareToFacebook = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1756,7 +1564,6 @@
       let fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`;
       window.open(fbUrl, '_blank', 'width=600,height=400');
     };
-
     window.shareToTwitter = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1764,7 +1571,6 @@
       const title = encodeURIComponent(post.title || blogSettings.title);
       window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=600,height=400');
     };
-
     window.shareToWhatsApp = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1772,7 +1578,6 @@
       const title = encodeURIComponent(post.title || blogSettings.title);
       window.open(`https://api.whatsapp.com/send?text=${title}%20${url}`, '_blank');
     };
-
     window.shareToTelegram = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1780,12 +1585,10 @@
       const title = encodeURIComponent(post.title || blogSettings.title);
       window.open(`https://t.me/share/url?url=${url}&text=${title}`, '_blank');
     };
-
     window.copyLink = function(postId) {
       const url = window.getPostUrl(postId);
       window.copyToClipboard(url);
     };
-
     window.copyToClipboard = function(text) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
@@ -1797,7 +1600,6 @@
         window.fallbackCopy(text);
       }
     };
-
     window.fallbackCopy = function(text) {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -1813,7 +1615,6 @@
       }
       document.body.removeChild(textarea);
     };
-
     window.renderCategories = function() {
       const container = document.getElementById('categoriesList');
       if (!container) return;
@@ -1833,7 +1634,6 @@
         container.appendChild(chip);
       });
     };
-
     window.filterByCategory = function(category) {
       const filtered = window.getPublishedPosts().filter(p => p.category === category);
       const resContainer = document.getElementById('categoryPostsResult');
@@ -1853,7 +1653,6 @@
         subList.appendChild(item);
       });
     };
-
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
@@ -1863,50 +1662,19 @@
       }
       const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title || 'صورة'}" onclick="window.openLightbox('${post.cover}')"></div>` : '';
       
+      // تم تحسين عرض المحتوى ليدعم HTML المنسق مباشرة دون تدمير الهيكل
       let formattedContent = '';
       if (post.content) {
+        // إذا كان المحتوى يحتوي على وسوم HTML (مثل <p> أو <h2>) نعرضه كما هو
         if (/(<([^>]+)>)/i.test(post.content)) {
           formattedContent = post.content;
         } else {
+          // نص عادي: نقسمه لفقرات
           formattedContent = post.content.split('\n\n').map(p => {
             return `<p>${p.replace(/\n/g, '<br>')}</p>`;
           }).join('');
         }
       }
-
-      // شريط القارئ الصوتي المدمج
-      const audioPlayerHTML = `
-        <div class="audio-player-box">
-          <div class="audio-player-header">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
-            <span>الاستماع إلى المقال (قراءة صوتية)</span>
-          </div>
-          <div class="audio-controls">
-            <button id="ttsBtnPlay" class="audio-btn" onclick="window.ttsEngine.play()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-              <span>تشغيل</span>
-            </button>
-            <button id="ttsBtnPause" class="audio-btn" style="display:none;" onclick="window.ttsEngine.pause()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
-              <span>إيقاف مؤقت</span>
-            </button>
-            <button class="audio-btn" onclick="window.ttsEngine.stop()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"></rect></svg>
-              <span>إيقاف</span>
-            </button>
-            
-            <select id="ttsVoiceSelect" class="audio-select" title="اختر الصوت المفضل"></select>
-            
-            <select id="ttsSpeedSelect" class="audio-select" title="سرعة القراءة">
-              <option value="0.85">بطيء</option>
-              <option value="1.0" selected>سرعة طبيعية</option>
-              <option value="1.25">سريع (1.25x)</option>
-              <option value="1.5">سريع جداً (1.5x)</option>
-            </select>
-          </div>
-        </div>
-      `;
-
       const contentSection = formattedContent ? `<div class="article-content" id="articleBody">${formattedContent}</div>` : '';
       const titleHTML = post.title ? `<h1 class="article-title">${post.title}</h1>` : '';
       
@@ -1914,6 +1682,10 @@
         <div class="article-share">
           <div class="article-share-title">شارك المنشور على:</div>
           <div class="article-share-buttons">
+            <button class="share-btn listen" onclick="window.toggleListenPlayer('${post.id}')" id="listenBtn-${post.id}" title="استمع للمقال">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              <span>استمع للمقال</span>
+            </button>
             <button class="share-btn fb" onclick="window.shareToFacebook('${post.id}')">
               <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               <span>فيسبوك</span>
@@ -1931,391 +1703,658 @@
               <span>تليجرام</span>
             </button>
             <button class="share-btn copy" onclick="window.copyLink('${post.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               <span>نسخ الرابط</span>
             </button>
           </div>
         </div>
       `;
-
-      const commentsSection = `
-        <div class="comments-container">
-          <h3 class="comments-title">التعليقات</h3>
-          <div id="commentsList"></div>
-          <form class="comment-form" onsubmit="window.submitComment(event, '${post.id}')">
-            <h4>أضف تعليقاً</h4>
-            <input type="text" id="commentAuthor" placeholder="الاسم" required>
-            <textarea id="commentText" rows="3" placeholder="اكتب تعليقك هنا..." required></textarea>
-            <button type="submit" class="btn">نشر التعليق</button>
-          </form>
-        </div>
-      `;
-
+      
       container.innerHTML = `
         <article>
-          <div class="post-item-meta">
-            <span>${post.date}</span>
-            ${post.category ? `<span class="post-item-category">${post.category}</span>` : ''}
+          <div class="article-header">
+            <div class="post-item-meta">
+              <span>${post.date}</span>
+              ${post.category ? `<span class="post-item-category">${post.category}</span>` : ''}
+            </div>
+            ${titleHTML}
           </div>
-          ${titleHTML}
           ${coverHTML}
           ${contentSection}
-          ${audioPlayerHTML}
+          <div id="audioPlayer" class="audio-player">
+            <div class="controls">
+              <label for="voiceSelect">اختر الصوت:</label>
+              <select id="voiceSelect" onchange="window.changeVoice()">
+                <option value="">جاري تحميل الأصوات...</option>
+              </select>
+              <button class="play-btn" onclick="window.playCurrentPost()" id="playBtn">▶ تشغيل</button>
+              <button class="stop-btn" onclick="window.stopReading()" id="stopBtn">⏹ إيقاف</button>
+            </div>
+          </div>
           ${shareButtons}
-          ${commentsSection}
         </article>
+        <section class="comments-container">
+          <h3 class="comments-title">التعليقات</h3>
+          <div id="commentsList"></div>
+          <div class="comment-form">
+            <h4 style="font-size: 1rem;">أضف تعليقاً</h4>
+            <input type="text" id="commentAuthorInput" placeholder="الاسم">
+            <textarea id="commentTextInput" rows="3" placeholder="اكتب تعليقك هنا..."></textarea>
+            <button class="btn" onclick="window.addComment(event, '${post.id}')">إرسال التعليق</button>
+          </div>
+        </section>
       `;
-
-      // إعادة تحميل الأصوات في القائمة المنسدلة عند فتح المقال
-      setTimeout(() => window.ttsEngine.loadVoices(), 100);
-
-      window.listenToComments(post.id);
+      window.listenToComments(postId);
+      document.querySelectorAll('#articleBody img').forEach(img => {
+        img.addEventListener('click', () => window.openLightbox(img.src));
+      });
+      
+      // تهيئة مشغل الصوت
+      window.initAudioPlayer(post);
     };
-
+    // Realtime Listener for Post's Comments
     window.listenToComments = function(postId) {
       const commentsRef = ref(db, `posts/${postId}/comments`);
       onValue(commentsRef, (snapshot) => {
-        const comments = snapshot.val() || {};
-        const commentsListEl = document.getElementById('commentsList');
-        if (!commentsListEl) return;
-        
-        commentsListEl.innerHTML = '';
-        const commentKeys = Object.keys(comments);
-        if (commentKeys.length === 0) {
-          commentsListEl.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">لا توجد تعليقات بعد. كن أول من يعلق!</p>';
-          return;
-        }
-
-        commentKeys.forEach(cId => {
-          const c = comments[cId];
-          const commentCard = document.createElement('div');
-          commentCard.className = 'comment-card';
-          
-          let repliesHTML = '';
-          if (c.replies) {
-            repliesHTML = '<div class="replies-list">';
-            Object.keys(c.replies).forEach(rId => {
-              const r = c.replies[rId];
-              repliesHTML += `
-                <div style="margin-bottom: 8px;">
+        const commentsData = snapshot.val();
+        window.renderCommentsUI(postId, commentsData);
+      });
+    };
+    window.renderCommentsUI = function(postId, commentsData) {
+      const container = document.getElementById('commentsList');
+      if (!container) return;
+      container.innerHTML = '';
+      if (!commentsData) {
+        container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">لا توجد تعليقات بعد.</p>';
+        return;
+      }
+      Object.keys(commentsData).forEach(commentId => {
+        const c = commentsData[commentId];
+        const card = document.createElement('div');
+        card.className = 'comment-card';
+        let repliesHTML = '';
+        if (c.replies) {
+          repliesHTML = `<div class="replies-list">` + 
+            Object.keys(c.replies).map(replyId => {
+              const r = c.replies[replyId];
+              return `
+                <div style="margin-top: 8px;">
                   <div class="comment-header">
                     <span class="comment-author">${r.author}</span>
                     <span>${r.date}</span>
                   </div>
                   <div class="comment-body">${r.text}</div>
+                  ${isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteReply('${postId}', '${commentId}', '${replyId}')">حذف الرد</button>` : ''}
                 </div>
               `;
-            });
-            repliesHTML += '</div>';
-          }
-
-          commentCard.innerHTML = `
-            <div class="comment-header">
-              <span class="comment-author">${c.author}</span>
-              <span>${c.date}</span>
-            </div>
-            <div class="comment-body">${c.text}</div>
-            <button class="reply-btn" onclick="window.showReplyForm('${postId}', '${cId}')">رد</button>
-            ${isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteComment('${postId}', '${cId}')">حذف</button>` : ''}
-            <div id="replyFormContainer-${cId}"></div>
-            ${repliesHTML}
-          `;
-          commentsListEl.appendChild(commentCard);
-        });
+            }).join('') + `</div>`;
+        }
+        const deleteBtnHTML = isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteComment('${postId}', '${commentId}')">حذف التعليق</button>` : '';
+        card.innerHTML = `
+          <div class="comment-header">
+            <span class="comment-author">${c.author}</span>
+            <span>${c.date}</span>
+          </div>
+          <div class="comment-body">${c.text}</div>
+          <div>
+            <button class="reply-btn" onclick="window.showReplyForm('${commentId}')">رد</button>
+            ${deleteBtnHTML}
+          </div>
+          <div id="replyForm-${commentId}" style="display:none; margin-top:10px;">
+            <input type="text" id="replyAuthor-${commentId}" placeholder="الاسم" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+            <textarea id="replyText-${commentId}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
+            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="window.addReply(event, '${postId}', '${commentId}')">إرسال الرد</button>
+          </div>
+          ${repliesHTML}
+        `;
+        container.appendChild(card);
       });
     };
-
-    window.submitComment = function(e, postId) {
-      e.preventDefault();
-      const author = document.getElementById('commentAuthor').value.trim();
-      const text = document.getElementById('commentText').value.trim();
-      if (!author || !text) return;
-
-      const newCommentRef = push(ref(db, `posts/${postId}/comments`));
-      const now = new Date();
-      set(newCommentRef, {
-        author: author,
-        text: text,
-        date: now.toLocaleDateString('ar-EG') + ' ' + now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-        timestamp: Date.now()
-      }).then(() => {
-        document.getElementById('commentText').value = '';
-        window.showToast('تم إرسال تعليقك بنجاح');
-      });
-    };
-
-    window.showReplyForm = function(postId, commentId) {
-      const container = document.getElementById(`replyFormContainer-${commentId}`);
-      if (!container) return;
-      if (container.innerHTML !== '') {
-        container.innerHTML = '';
+    window.addComment = async function(e, postId) {
+      if (e && e.preventDefault) e.preventDefault();
+      const authorInput = document.getElementById('commentAuthorInput');
+      const textInput = document.getElementById('commentTextInput');
+      if (!textInput) return;
+      const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
+      const text = textInput.value.trim();
+      if (!text) {
+        alert('يرجى كتابة نص التعليق أولاً');
         return;
       }
-
-      container.innerHTML = `
-        <form class="comment-form" style="margin-top: 10px;" onsubmit="window.submitReply(event, '${postId}', '${commentId}')">
-          <input type="text" id="replyAuthor-${commentId}" placeholder="الاسم" required>
-          <textarea id="replyText-${commentId}" rows="2" placeholder="اكتب ردك..." required></textarea>
-          <div style="display: flex; gap: 8px;">
-            <button type="submit" class="btn" style="padding: 6px 12px; font-size: 0.85rem;">إرسال الرد</button>
-            <button type="button" class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="document.getElementById('replyFormContainer-${commentId}').innerHTML=''">إلغاء</button>
-          </div>
-        </form>
-      `;
+      try {
+        const commentsRef = ref(db, `posts/${postId}/comments`);
+        await push(commentsRef, {
+          author: author,
+          text: text,
+          date: new Date().toISOString().split('T')[0],
+          timestamp: Date.now()
+        });
+        if (authorInput) authorInput.value = '';
+        textInput.value = '';
+        window.showToast('تم إضافة التعليق بنجاح!');
+      } catch (err) {
+        console.error("خطأ تفصيلي:", err);
+        alert('تعذر إرسال التعليق:\n' + (err.message || err));
+      }
     };
-
-    window.submitReply = function(e, postId, commentId) {
-      e.preventDefault();
-      const author = document.getElementById(`replyAuthor-${commentId}`).value.trim();
-      const text = document.getElementById(`replyText-${commentId}`).value.trim();
-      if (!author || !text) return;
-
-      const newReplyRef = push(ref(db, `posts/${postId}/comments/${commentId}/replies`));
-      const now = new Date();
-      set(newReplyRef, {
-        author: author,
-        text: text,
-        date: now.toLocaleDateString('ar-EG') + ' ' + now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }),
-        timestamp: Date.now()
-      }).then(() => {
-        document.getElementById(`replyFormContainer-${commentId}`).innerHTML = '';
-        window.showToast('تم إضافة ردك بنجاح');
-      });
+    window.deleteComment = async function(postId, commentId) {
+      if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
+      try {
+        await remove(ref(db, `posts/${postId}/comments/${commentId}`));
+        window.showToast('تم حذف التعليق بنجاح.');
+      } catch (err) {
+        console.error("خطأ في الحذف:", err);
+        alert('تعذر حذف التعليق: ' + (err.message || err));
+      }
     };
-
+    window.deleteReply = async function(postId, commentId, replyId) {
+      if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
+      try {
+        await remove(ref(db, `posts/${postId}/comments/${commentId}/replies/${replyId}`));
+        window.showToast('تم حذف الرد بنجاح.');
+      } catch (err) {
+        console.error("خطأ في حذف الرد:", err);
+        alert('تعذر حذف الرد: ' + (err.message || err));
+      }
+    };
+    window.showReplyForm = function(commentId) {
+      const el = document.getElementById(`replyForm-${commentId}`);
+      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    };
+    window.addReply = async function(e, postId, commentId) {
+      if (e && e.preventDefault) e.preventDefault();
+      const authorInput = document.getElementById(`replyAuthor-${commentId}`);
+      const textInput = document.getElementById(`replyText-${commentId}`);
+      if (!textInput) return;
+      const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
+      const text = textInput.value.trim();
+      if (!text) {
+        alert('يرجى كتابة نص الرد أولاً');
+        return;
+      }
+      try {
+        const repliesRef = ref(db, `posts/${postId}/comments/${commentId}/replies`);
+        await push(repliesRef, {
+          author: author,
+          text: text,
+          date: new Date().toISOString().split('T')[0],
+          timestamp: Date.now()
+        });
+        window.showToast('تم إضافة الرد بنجاح!');
+      } catch (err) {
+        console.error("خطأ في حفظ الرد:", err);
+        alert('حدث خطأ أثناء إرسال الرد:\n' + (err.message || err));
+      }
+    };
+    // Admin Authentication & Control
     window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
-      if (pass === "zakaria123") {
+      if (pass === 'salem1959') {
         isAdminLoggedIn = true;
         document.getElementById('adminPassInput').value = '';
-        window.showToast('تم تسجيل الدخول بنجاح');
+        document.getElementById('adminNavBtn').innerText = 'لوحة الإدارة';
         window.navigateTo('admin-panel');
+        window.showToast('تم تسجيل الدخول بنجاح');
       } else {
         alert('كلمة المرور غير صحيحة');
       }
     };
-
     window.logoutAdmin = function() {
       isAdminLoggedIn = false;
-      window.showToast('تم تسجيل الخروج');
+      document.getElementById('adminNavBtn').innerText = 'دخول الإدارة';
       window.navigateTo('home');
+      window.showToast('تم تسجيل الخروج');
     };
-
     window.switchAdminTab = function(tabName, event) {
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
       if (event && event.target) event.target.classList.add('active');
-
+      
       document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
-      const targetContent = document.getElementById(`admin-tab-${tabName}`);
-      if (targetContent) targetContent.style.display = 'block';
-
+      const target = document.getElementById(`admin-tab-${tabName}`);
+      if (target) target.style.display = 'block';
       if (tabName === 'posts') window.renderAdminPostsList();
       if (tabName === 'comments') window.renderAdminCommentsList();
-      if (tabName === 'settings') window.loadAdminSettingsForm();
+      if (tabName === 'settings') window.loadSettingsToForm();
     };
-
-    window.savePost = function(status) {
-      const editId = document.getElementById('editPostId').value;
+    window.renderAdminPanel = function() {
+      window.switchAdminTab('editor');
+    };
+    window.savePost = async function(status) {
+      const id = document.getElementById('editPostId').value;
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
       const cover = document.getElementById('postCoverUrlInput').value.trim();
       const content = document.getElementById('postContentInput').value.trim();
-
       if (!title && !cover && !content) {
-        alert('يرجى كتابة عنوان أو نص أو إضافة صورة للمقال');
+        alert('يرجى كتابة عنوان أو نص أو إدخال رابط صورة للمقال');
         return;
       }
-
-      const now = new Date();
       const postData = {
-        title: title,
-        category: category,
-        cover: cover,
-        content: content,
-        status: status,
-        updatedAt: Date.now(),
-        date: now.toLocaleDateString('ar-EG')
+        title,
+        category,
+        cover,
+        content,
+        status,
+        date: new Date().toISOString().split('T')[0],
+        updatedAt: Date.now()
       };
-
-      if (editId) {
-        update(ref(db, `posts/${editId}`), postData).then(() => {
-          window.showToast('تم تحديث المقال بنجاح');
-          window.resetEditor();
-          window.switchAdminTab('posts');
-        });
-      } else {
-        const newPostRef = push(ref(db, 'posts'));
-        set(newPostRef, postData).then(() => {
-          window.showToast('تم حفظ المقال بنجاح');
-          window.resetEditor();
-          window.switchAdminTab('posts');
-        });
+      try {
+        if (id) {
+          await update(ref(db, `posts/${id}`), postData);
+          window.showToast('تم تحديث المقال بنجاح!');
+        } else {
+          await push(ref(db, 'posts'), postData);
+          window.showToast('تم حفظ المقال بنجاح!');
+        }
+        window.resetEditor();
+        window.switchAdminTab('posts');
+      } catch (err) {
+        alert('خطأ في حفظ المقال: ' + err.message);
       }
     };
-
-    window.publishBulkPost = function() {
+    // ====== نشر نص جاهز ======
+    window.publishBulkPost = async function() {
       const title = document.getElementById('bulkTitleInput').value.trim();
       const category = document.getElementById('bulkCategoryInput').value.trim();
       const cover = document.getElementById('bulkCoverUrlInput').value.trim();
       const content = document.getElementById('bulkContentInput').value.trim();
-
-      if (!content) {
-        alert('يرجى إدخال النص المنسق');
+      
+      if (!title && !content) {
+        alert('يرجى إدخال عنوان أو نص للمنشور');
         return;
       }
-
-      const now = new Date();
+      
       const postData = {
-        title: title || 'منشور بدون عنوان',
-        category: category,
-        cover: cover,
-        content: content,
+        title: title || 'منشور جديد',
+        category: category || '',
+        cover: cover || '',
+        content: content || '',
         status: 'published',
-        updatedAt: Date.now(),
-        date: now.toLocaleDateString('ar-EG')
+        date: new Date().toISOString().split('T')[0],
+        updatedAt: Date.now()
       };
-
-      const newPostRef = push(ref(db, 'posts'));
-      set(newPostRef, postData).then(() => {
-        window.showToast('تم نشر المنشور مباشرة بنجاح');
+      
+      try {
+        await push(ref(db, 'posts'), postData);
+        window.showToast('تم نشر المنشور الجاهز بنجاح!');
+        // تفريغ الحقول
         document.getElementById('bulkTitleInput').value = '';
         document.getElementById('bulkCategoryInput').value = '';
         document.getElementById('bulkCoverUrlInput').value = '';
-        document.getElementById('bulkContentInput').value = '';
         document.getElementById('bulkCoverPreview').style.display = 'none';
+        document.getElementById('bulkContentInput').value = '';
         window.switchAdminTab('posts');
-      });
+      } catch (err) {
+        alert('خطأ في النشر: ' + err.message);
+      }
     };
-
+    // ==========================
     window.resetEditor = function() {
       document.getElementById('editPostId').value = '';
       document.getElementById('postTitleInput').value = '';
       document.getElementById('postCategoryInput').value = '';
       document.getElementById('postCoverUrlInput').value = '';
-      document.getElementById('postContentInput').value = '';
       document.getElementById('postCoverPreview').style.display = 'none';
+      document.getElementById('postContentInput').value = '';
       document.getElementById('editorFormTitle').innerText = 'إنشاء مقال جديد';
     };
-
     window.editPost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
-
       document.getElementById('editPostId').value = post.id;
       document.getElementById('postTitleInput').value = post.title || '';
       document.getElementById('postCategoryInput').value = post.category || '';
       document.getElementById('postCoverUrlInput').value = post.cover || '';
-      document.getElementById('postContentInput').value = post.content || '';
       window.previewImageUrl(post.cover || '', 'postCoverPreview');
-
+      document.getElementById('postContentInput').value = post.content || '';
       document.getElementById('editorFormTitle').innerText = 'تعديل المقال';
       window.switchAdminTab('editor');
     };
-
-    window.deletePost = function(postId) {
-      if (confirm('هل أنت تأكد من حذف هذا المقال نهائياً؟')) {
-        remove(ref(db, `posts/${postId}`)).then(() => {
-          window.showToast('تم حذف المقال');
-        });
+    window.deletePost = async function(postId) {
+      if (!confirm('هل أنت متأكد من حذف هذا المقال نهائياً؟')) return;
+      try {
+        await remove(ref(db, `posts/${postId}`));
+        window.showToast('تم حذف المقال');
+      } catch (err) {
+        alert('تعذر حذف المقال: ' + err.message);
       }
     };
-
     window.renderAdminPostsList = function() {
       const container = document.getElementById('adminPostsList');
       if (!container) return;
       container.innerHTML = '';
-
       if (blogPosts.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-muted);">لا توجد مقالات بعد.</p>';
+        container.innerHTML = '<p style="color: var(--text-muted);">لا توجد مقالات.</p>';
         return;
       }
-
       blogPosts.forEach(post => {
         const item = document.createElement('div');
         item.className = 'admin-post-item';
-        const isPub = post.status === 'published';
         item.innerHTML = `
           <div>
-            <strong>${post.title || 'منشور بدون عنوان'}</strong>
-            <span class="status-badge ${isPub ? 'published' : 'draft'}">${isPub ? 'منشور' : 'مسودة'}</span>
-            <div style="font-size:0.75rem; color: var(--text-muted);">${post.date}</div>
+            <span class="status-badge ${post.status}">${post.status === 'published' ? 'منشور' : 'مسودة'}</span>
+            <strong>${post.title || 'منشور صورة'}</strong>
+            <span style="font-size:0.8rem; color:#777; margin-right:8px;">(${post.date})</span>
           </div>
-          <div style="display:flex; gap:8px;">
-            <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.8rem;" onclick="window.editPost('${post.id}')">تعديل</button>
-            <button class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem;" onclick="window.deletePost('${post.id}')">حذف</button>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.editPost('${post.id}')">تعديل</button>
+            <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.deletePost('${post.id}')">حذف</button>
           </div>
         `;
         container.appendChild(item);
       });
     };
-
     window.renderAdminCommentsList = function() {
       const container = document.getElementById('adminCommentsList');
       if (!container) return;
       container.innerHTML = '';
-
       let hasComments = false;
       blogPosts.forEach(post => {
         if (post.comments) {
-          Object.keys(post.comments).forEach(cId => {
-            hasComments = true;
-            const c = post.comments[cId];
+          hasComments = true;
+          Object.keys(post.comments).forEach(commentId => {
+            const c = post.comments[commentId];
             const item = document.createElement('div');
             item.className = 'admin-post-item';
             item.style.flexDirection = 'column';
-            item.style.alignItems = 'flex-start';
+            item.style.alignItems = 'stretch';
             item.style.gap = '8px';
-
+            let repliesHTML = '';
+            if (c.replies) {
+              repliesHTML = `<div style="margin-right: 15px; border-right: 2px solid var(--border-color); padding-right: 10px; margin-top: 5px;">` +
+                Object.keys(c.replies).map(replyId => {
+                  const r = c.replies[replyId];
+                  return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; background: #f0f0f0; padding: 6px; border-radius: 4px;">
+                      <div style="font-size: 0.85rem;">
+                        <strong>${r.author}:</strong> ${r.text} <span style="font-size:0.75rem; color:#888;">(${r.date})</span>
+                      </div>
+                      <button class="btn btn-danger" style="padding: 2px 6px; font-size: 0.75rem;" onclick="window.deleteReply('${post.id}', '${commentId}', '${replyId}')">حذف الرد</button>
+                    </div>
+                  `;
+                }).join('') + `</div>`;
+            }
             item.innerHTML = `
-              <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
-                <strong>${c.author} <small style="font-weight:normal; color:var(--text-muted);">على: ${post.title || 'منشور'}</small></strong>
-                <button class="btn btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="window.deleteComment('${post.id}', '${cId}')">حذف التعليق</button>
+              <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed var(--border-color); padding-bottom: 6px;">
+                <span style="font-size: 0.85rem; color: var(--accent-color); font-weight: 600;">المقال: ${post.title || 'منشور صورة'}</span>
+                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 0.8rem;" onclick="window.deleteComment('${post.id}', '${commentId}')">حذف التعليق</button>
               </div>
-              <div style="font-size:0.9rem;">${c.text}</div>
+              <div style="font-size: 0.9rem;">
+                <strong>${c.author}:</strong> ${c.text} <span style="font-size: 0.75rem; color: #888;">(${c.date})</span>
+              </div>
+              ${repliesHTML}
             `;
             container.appendChild(item);
           });
         }
       });
-
       if (!hasComments) {
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد تعليقات حتى الآن.</p>';
       }
     };
-
-    window.deleteComment = function(postId, commentId) {
-      if (confirm('هل ترغب بحذف هذا التعليق؟')) {
-        remove(ref(db, `posts/${postId}/comments/${commentId}`)).then(() => {
-          window.showToast('تم حذف التعليق');
-        });
-      }
-    };
-
-    window.loadAdminSettingsForm = function() {
+    window.loadSettingsToForm = function() {
       document.getElementById('settingTitle').value = blogSettings.title || '';
       document.getElementById('settingSubtitle').value = blogSettings.subtitle || '';
       document.getElementById('settingHeaderCoverUrl').value = blogSettings.headerCover || '';
       window.previewImageUrl(blogSettings.headerCover || '', 'headerCoverPreview');
-
+      
       document.getElementById('settingAboutTitle').value = blogSettings.aboutTitle || '';
       document.getElementById('settingAboutImageUrl').value = blogSettings.aboutImage || '';
       window.previewImageUrl(blogSettings.aboutImage || '', 'aboutImagePreview');
       document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
     };
-
-    window.saveBlogSettings = function() {
-      const updatedSettings = {
-        title: document.getElementById('settingTitle').value.trim(),
-        subtitle: document.getElementById('settingSubtitle').value.trim(),
+    window.saveBlogSettings = async function() {
+      const updated = {
+        ...blogSettings,
+        title: document.getElementById('settingTitle').value.trim() || DEFAULT_SETTINGS.title,
+        subtitle: document.getElementById('settingSubtitle').value.trim() || DEFAULT_SETTINGS.subtitle,
         headerCover: document.getElementById('settingHeaderCoverUrl').value.trim(),
-        aboutTitle: document.getElementById('settingAboutTitle').value.trim(),
+        aboutTitle: document.getElementById('settingAboutTitle').value.trim() || DEFAULT_SETTINGS.aboutTitle,
         aboutImage: document.getElementById('settingAboutImageUrl').value.trim(),
-        aboutBody: document.getElementById('settingAboutBody').value.trim()
+        aboutBody: document.getElementById('settingAboutBody').value.trim() || DEFAULT_SETTINGS.aboutBody
       };
-
-      set(ref(db, 'settings'), updatedSettings).then(() => {
-        window.showToast('تم حفظ الإعدادات بنجاح');
-      });
+      try {
+        await set(ref(db, 'settings'), updated);
+        window.showToast('تم حفظ الإعدادات بنجاح!');
+      } catch (err) {
+        alert('تعذر حفظ الإعدادات: ' + err.message);
+      }
     };
+    
+    // ========== منطق القراءة الصوتية ==========
+    let synth = window.speechSynthesis;
+    let currentUtterance = null;
+    let isReading = false;
+    let currentPostContent = '';
+    let voiceSelect = null;
+    let playBtn = null;
+    let stopBtn = null;
+    
+    window.initAudioPlayer = function(post) {
+      voiceSelect = document.getElementById('voiceSelect');
+      playBtn = document.getElementById('playBtn');
+      stopBtn = document.getElementById('stopBtn');
+      
+      // استخراج نص المقال (بدون وسوم HTML)
+      const titleText = post.title || '';
+      let contentText = '';
+      if (post.content) {
+        // إزالة وسوم HTML وتحويل الكيانات
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = post.content;
+        // إضافة فواصل أسطر بعد العناوين والفقرات
+        tempDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, br').forEach(el => {
+          if (el.tagName === 'BR') {
+            el.after(document.createTextNode('\n'));
+          } else {
+            el.after(document.createTextNode('\n'));
+          }
+        });
+        contentText = tempDiv.textContent || tempDiv.innerText || '';
+      }
+      
+      // دمج النص مع تنظيف
+      currentPostContent = (titleText + '\n\n' + contentText).trim().replace(/\s+/g, ' ').replace(/\n /g, '\n');
+      
+      // تحميل الأصوات
+      window.loadVoices();
+      
+      // مراقبة تغيير الأصوات (في حالة التحميل المتأخر)
+      if (synth.onvoiceschanged !== undefined) {
+        synth.onvoiceschanged = window.loadVoices;
+      }
+      
+      // إعادة تعيين الحالة
+      isReading = false;
+      playBtn.textContent = '▶ تشغيل';
+      stopBtn.classList.remove('show');
+    };
+    
+    window.loadVoices = function() {
+      if (!voiceSelect) return;
+      const voices = synth.getVoices();
+      if (voices.length === 0) {
+        voiceSelect.innerHTML = '<option value="">لا توجد أصوات متاحة</option>';
+        return;
+      }
+      
+      // تصفية الأصوات: نبحث عن الأصوات العربية أولاً
+      const arabicVoices = voices.filter(v => v.lang.startsWith('ar'));
+      // إذا لم توجد أصوات عربية، نستخدم كل الأصوات
+      const voicesToUse = arabicVoices.length > 0 ? arabicVoices : voices;
+      
+      // محاولة تحديد صوت ذكر وأنثى
+      const maleNames = ['male', 'majed', 'naayf', 'hamed', 'karim', 'shakir', 'fahad', 'aziz', 'ahmed', 'mohamed', 'ali', 'omar'];
+      const femaleNames = ['female', 'hoda', 'salma', 'zariyah', 'amina', 'layla', 'fatima', 'maryam', 'noura'];
+      
+      let maleVoice = null;
+      let femaleVoice = null;
+      
+      voicesToUse.forEach(v => {
+        const nameLower = v.name.toLowerCase();
+        if (!maleVoice && maleNames.some(n => nameLower.includes(n))) {
+          maleVoice = v;
+        }
+        if (!femaleVoice && femaleNames.some(n => nameLower.includes(n))) {
+          femaleVoice = v;
+        }
+      });
+      
+      // بناء قائمة الخيارات
+      let optionsHTML = '';
+      const addedVoices = new Set();
+      
+      if (maleVoice) {
+        optionsHTML += `<option value="${maleVoice.name}">👨 صوت ذكر: ${maleVoice.name} (${maleVoice.lang})</option>`;
+        addedVoices.add(maleVoice.name);
+      }
+      if (femaleVoice && femaleVoice.name !== maleVoice?.name) {
+        optionsHTML += `<option value="${femaleVoice.name}">👩 صوت أنثى: ${femaleVoice.name} (${femaleVoice.lang})</option>`;
+        addedVoices.add(femaleVoice.name);
+      }
+      
+      // إضافة باقي الأصوات
+      voicesToUse.forEach(v => {
+        if (!addedVoices.has(v.name)) {
+          const icon = arabicVoices.includes(v) ? '🔊' : '🌐';
+          optionsHTML += `<option value="${v.name}">${icon} ${v.name} (${v.lang})</option>`;
+        }
+      });
+      
+      // إذا لم نجد أي صوت ذكر أو أنثى، نضيف خياراً افتراضياً
+      if (!maleVoice && !femaleVoice && voicesToUse.length > 0) {
+        voiceSelect.innerHTML = optionsHTML || `<option value="${voicesToUse[0].name}">${voicesToUse[0].name} (${voicesToUse[0].lang})</option>`;
+      } else {
+        voiceSelect.innerHTML = optionsHTML;
+      }
+      
+      // حفظ الصوت المحدد سابقاً إن وجد
+      const savedVoice = localStorage.getItem('selectedVoice');
+      if (savedVoice) {
+        const optionExists = Array.from(voiceSelect.options).some(opt => opt.value === savedVoice);
+        if (optionExists) {
+          voiceSelect.value = savedVoice;
+        }
+      }
+    };
+    
+    window.changeVoice = function() {
+      const selectedVoiceName = voiceSelect.value;
+      if (selectedVoiceName) {
+        localStorage.setItem('selectedVoice', selectedVoiceName);
+        if (isReading) {
+          // إعادة التشغيل بالصوت الجديد
+          window.stopReading();
+          setTimeout(() => window.playCurrentPost(), 100);
+        }
+      }
+    };
+    
+    window.toggleListenPlayer = function(postId) {
+      const player = document.getElementById('audioPlayer');
+      if (player) {
+        if (player.classList.contains('show')) {
+          player.classList.remove('show');
+          window.stopReading();
+        } else {
+          player.classList.add('show');
+          // تحديث النص عند الفتح
+          const post = blogPosts.find(p => p.id === postId);
+          if (post) {
+            window.initAudioPlayer(post);
+          }
+        }
+      }
+    };
+    
+    window.playCurrentPost = function() {
+      if (!currentPostContent || currentPostContent.trim() === '') {
+        alert('لا يوجد نص لقراءته في هذا المقال');
+        return;
+      }
+      
+      if (isReading) {
+        window.stopReading();
+        return;
+      }
+      
+      // إيقاف أي قراءة حالية
+      synth.cancel();
+      
+      const utterance = new SpeechSynthesisUtterance(currentPostContent);
+      utterance.lang = 'ar-SA';
+      utterance.rate = 0.9;  // سرعة القراءة (0.1 إلى 10)
+      utterance.pitch = 1;   // نغمة الصوت
+      utterance.volume = 1;  // مستوى الصوت
+      
+      // تحديد الصوت
+      const selectedVoiceName = voiceSelect.value;
+      const voices = synth.getVoices();
+      const selectedVoice = voices.find(v => v.name === selectedVoiceName);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        utterance.lang = selectedVoice.lang;
+      } else {
+        // محاولة العثور على صوت عربي
+        const arabicVoice = voices.find(v => v.lang.startsWith('ar'));
+        if (arabicVoice) {
+          utterance.voice = arabicVoice;
+          utterance.lang = arabicVoice.lang;
+        }
+      }
+      
+      utterance.onstart = () => {
+        isReading = true;
+        playBtn.textContent = '⏸ إيقاف مؤقت';
+        stopBtn.classList.add('show');
+      };
+      
+      utterance.onend = () => {
+        isReading = false;
+        playBtn.textContent = '▶ تشغيل';
+        stopBtn.classList.remove('show');
+        currentUtterance = null;
+      };
+      
+      utterance.onerror = (e) => {
+        // تجاهل أخطاء الإلغاء
+        if (e.error === 'canceled' || e.error === 'interrupted') {
+          return;
+        }
+        console.error('خطأ في القراءة:', e);
+        isReading = false;
+        playBtn.textContent = '▶ تشغيل';
+        stopBtn.classList.remove('show');
+        currentUtterance = null;
+      };
+      
+      currentUtterance = utterance;
+      synth.speak(utterance);
+      
+      // في بعض المتصفحات، قد لا يعمل onstart
+      setTimeout(() => {
+        if (synth.speaking && !isReading) {
+          isReading = true;
+          playBtn.textContent = '⏸ إيقاف مؤقت';
+          stopBtn.classList.add('show');
+        }
+      }, 200);
+    };
+    
+    window.stopReading = function() {
+      synth.cancel();
+      isReading = false;
+      if (playBtn) playBtn.textContent = '▶ تشغيل';
+      if (stopBtn) stopBtn.classList.remove('show');
+      currentUtterance = null;
+    };
+    
+    // إلغاء القراءة عند مغادرة الصفحة
+    window.addEventListener('hashchange', () => {
+      window.stopReading();
+    });
+    // ==========================================
+    
   </script>
 </body>
 </html>

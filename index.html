@@ -689,7 +689,6 @@
       transform: translateX(-50%) translateY(0);
       opacity: 1;
     }
-    /* أنماط الفوتر */
     footer.site-footer {
       background-color: var(--paper-color);
       border-top: 1px solid var(--border-color);
@@ -1083,6 +1082,8 @@
     let deferredPrompt = null;
     window.currentViewPostId = null;
     
+    // ============ أدوات مساعدة ============
+    
     // Toast notification helper
     window.showToast = function(message) {
       const toast = document.getElementById('toast');
@@ -1092,6 +1093,75 @@
         toast.classList.remove('show');
       }, 2500);
     };
+    
+    // ✅ دالة تنظيف المحتوى تلقائياً من وسوم style و script و head وغيرها
+    window.sanitizeContent = function(htmlContent) {
+      if (!htmlContent) return '';
+      
+      let cleaned = String(htmlContent);
+      
+      // 1. إزالة وسوم <style> ومحتواها
+      cleaned = cleaned.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+      
+      // 2. إزالة وسوم <script> ومحتواها
+      cleaned = cleaned.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+      
+      // 3. إزالة وسوم <head> ومحتواها كاملة
+      cleaned = cleaned.replace(/<head[^>]*>[\s\S]*?<\/head>/gi, '');
+      
+      // 4. إزالة وسوم <noscript>, <iframe>, <svg>, <meta>, <link> كاملة
+      cleaned = cleaned.replace(/<(noscript|iframe|svg|meta|link)[^>]*>[\s\S]*?<\/\1>/gi, '');
+      cleaned = cleaned.replace(/<(meta|link)[^>]*\/?>/gi, '');
+      
+      // 5. إزالة التعليقات HTML
+      cleaned = cleaned.replace(/<!--[\s\S]*?-->/g, '');
+      
+      // 6. إزالة وسم <html> و <body> فقط مع الحفاظ على المحتوى داخلهما
+      cleaned = cleaned.replace(/<\/?html[^>]*>/gi, '');
+      cleaned = cleaned.replace(/<\/?body[^>]*>/gi, '');
+      
+      // 7. إزالة خصائص on* (مثل onclick, onload) لأسباب أمنية
+      cleaned = cleaned.replace(/\son\w+="[^"]*"/gi, '');
+      cleaned = cleaned.replace(/\son\w+='[^']*'/gi, '');
+      
+      // 8. تنظيف المسافات الزائدة
+      cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+      cleaned = cleaned.trim();
+      
+      return cleaned;
+    };
+    
+    // ✅ دالة استخراج ملخص نظيف من المحتوى
+    window.getCleanExcerpt = function(htmlContent, maxLength) {
+      if (!htmlContent) return '';
+      
+      // ننظف المحتوى أولاً
+      let cleaned = window.sanitizeContent(htmlContent);
+      
+      // إزالة باقي وسوم HTML
+      cleaned = cleaned.replace(/<[^>]+>/g, ' ');
+      
+      // فك كيانات HTML
+      cleaned = cleaned
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&hellip;/g, '…');
+      
+      // تنظيف المسافات
+      cleaned = cleaned.replace(/\s+/g, ' ').trim();
+      
+      // القص
+      if (cleaned.length > maxLength) {
+        cleaned = cleaned.substring(0, maxLength).trim() + '...';
+      }
+      
+      return cleaned;
+    };
+    
     // Image URL Preview Helper
     window.previewImageUrl = function(url, previewImgId) {
       const previewImg = document.getElementById(previewImgId);
@@ -1103,6 +1173,7 @@
         previewImg.style.display = 'none';
       }
     };
+    
     // Insert Image URL to Article Content
     window.insertImageUrlToEditor = function() {
       const urlInput = document.getElementById('inlineImageUrlInput');
@@ -1117,6 +1188,7 @@
       urlInput.value = '';
       window.showToast('تم إدراج رابط الصورة في النص');
     };
+    
     // Lightbox Helpers
     window.openLightbox = function(src) {
       const lightbox = document.getElementById('lightbox');
@@ -1127,6 +1199,7 @@
     window.closeLightbox = function() {
       document.getElementById('lightbox').classList.remove('active');
     };
+    
     // PWA & Service Worker Logic
     window.registerServiceWorker = function() {
       if ('serviceWorker' in navigator) {
@@ -1165,15 +1238,14 @@
     window.dismissInstall = function() {
       document.getElementById('installPrompt').classList.remove('show');
     };
+    
     // ========== عدادات حقيقية ==========
     function setupFooterCounters() {
       const visitsRef = ref(db, 'stats/visits');
       const hasVisitedKey = 'zblog_visited_session';
       
-      // عداد زوار حقيقي: يزيد مرة واحدة فقط لكل جلسة متصفح
       if (!sessionStorage.getItem(hasVisitedKey)) {
         runTransaction(visitsRef, (currentVisits) => {
-          // إذا كان العداد غير موجود أو صفر نبدأ من 1، وإلا نزيد واحداً
           if (currentVisits === null || currentVisits === undefined) {
             return 1;
           }
@@ -1189,7 +1261,6 @@
         if (el) el.innerText = count || 0;
       });
       
-      // عداد المتواجدين الآن حقيقي: يعتمد فقط على عدد الاتصالات النشطة في presence
       const connectedRef = ref(db, '.info/connected');
       const presenceRef = ref(db, 'stats/online');
       
@@ -1208,6 +1279,7 @@
       });
     }
     // =====================================
+    
     // إدارة الإشعارات
     window.toggleNotifDropdown = function(e) {
       if (e) e.stopPropagation();
@@ -1215,7 +1287,6 @@
       const wasHidden = !dropdown.classList.contains('show');
       dropdown.classList.toggle('show');
       
-      // عند فتح القائمة، صفّر العداد فوراً
       if (wasHidden && dropdown.classList.contains('show')) {
         window.markNotificationsAsRead();
       }
@@ -1226,13 +1297,11 @@
         dropdown.classList.remove('show');
       }
     });
-    // تصفير الإشعارات باستخدام localStorage فقط (فوري وموثوق)
     window.markNotificationsAsRead = function() {
       const now = Date.now();
       localStorage.setItem('notif_local_read', now.toString());
       updateNotificationsUI();
     };
-    // زر التصفير اليدوي
     window.clearNotifications = function() {
       window.markNotificationsAsRead();
       window.showToast('تم تصفير عداد الإشعارات');
@@ -1242,7 +1311,6 @@
       const notifBadge = document.getElementById('notifBadge');
       const notifTotalCount = document.getElementById('notifTotalCount');
       
-      // نستخدم localStorage فقط لتصفير الجرس
       const lastRead = parseInt(localStorage.getItem('notif_local_read') || '0', 10);
       
       let allComments = [];
@@ -1279,7 +1347,6 @@
           });
         }
       });
-      // ترتيب من الأحدث للأقدم
       allComments.sort((a, b) => b.timestamp - a.timestamp);
       const totalCount = allComments.length;
       const newCount = allComments.filter(c => c.isNew).length;
@@ -1309,6 +1376,7 @@
         }
       }
     }
+    
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
@@ -1320,6 +1388,7 @@
       window.applySettings();
       window.renderAboutPage();
     });
+    
     // Realtime Listener to Posts
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
@@ -1352,16 +1421,19 @@
         if (post) window.listenToComments(post.id);
       }
     });
+    
     document.addEventListener("DOMContentLoaded", function() {
       window.registerServiceWorker();
       window.setupInstallPrompt();
       setupFooterCounters();
     });
+    
     window.toggleNav = function(show) {
       const nav = document.getElementById('navOverlay');
       if (show) nav.classList.add('active');
       else nav.classList.remove('active');
     };
+    
     window.navigateTo = function(pageId, param = null) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const target = document.getElementById(`page-${pageId}`);
@@ -1385,9 +1457,11 @@
         else window.renderAdminPanel();
       }
     };
+    
     window.getPublishedPosts = function() {
       return blogPosts.filter(p => p.status === 'published');
     };
+    
     window.applySettings = function() {
       document.getElementById('siteTitle').innerText = blogSettings.title;
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
@@ -1405,6 +1479,7 @@
         document.head.appendChild(ogImage);
       }
     };
+    
     window.renderAboutPage = function() {
       document.getElementById('aboutTitle').innerText = blogSettings.aboutTitle || "عن زكريا";
       document.getElementById('aboutBody').innerText = blogSettings.aboutBody || "";
@@ -1418,6 +1493,8 @@
         imgContainer.style.display = 'none';
       }
     };
+    
+    // ✅ دالة عرض قائمة المقالات (مُصححة لتنظيف المحتوى تلقائياً)
     window.renderHomePosts = function(posts) {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
@@ -1426,8 +1503,8 @@
         return;
       }
       posts.forEach(post => {
-        const rawContent = (post.content || '').replace(/<[^>]*>?/gm, '').trim();
-        const excerpt = rawContent ? (rawContent.substring(0, 140) + (rawContent.length > 140 ? '...' : '')) : '';
+        // ✅ استخدام دالة التنظيف الجديدة
+        const excerpt = window.getCleanExcerpt(post.content, 140);
         const excerptHTML = excerpt ? `<p class="post-item-excerpt">${excerpt}</p>` : '';
         
         const titleHTML = post.title ? `<h2 class="post-item-title"><a href="#" onclick="window.navigateTo('post', '${post.id}'); return false;">${post.title}</a></h2>` : '';
@@ -1459,6 +1536,7 @@
         container.appendChild(item);
       });
     };
+    
     window.handleSearch = function() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
       if (!query) {
@@ -1472,9 +1550,11 @@
       );
       window.renderHomePosts(filtered);
     };
+    
     window.getPostUrl = function(postId) {
       return window.location.origin + window.location.pathname + '#post-' + postId;
     };
+    
     window.shareBlog = function() {
       const shareData = {
         title: blogSettings.title,
@@ -1489,6 +1569,7 @@
         window.copyToClipboard(shareData.url);
       }
     };
+    
     window.shareToFacebook = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1548,6 +1629,7 @@
       }
       document.body.removeChild(textarea);
     };
+    
     window.renderCategories = function() {
       const container = document.getElementById('categoriesList');
       if (!container) return;
@@ -1567,6 +1649,7 @@
         container.appendChild(chip);
       });
     };
+    
     window.filterByCategory = function(category) {
       const filtered = window.getPublishedPosts().filter(p => p.category === category);
       const resContainer = document.getElementById('categoryPostsResult');
@@ -1586,6 +1669,8 @@
         subList.appendChild(item);
       });
     };
+    
+    // ✅ دالة عرض المقال المفرد (مُصححة لتنظيف المحتوى تلقائياً)
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
@@ -1595,15 +1680,14 @@
       }
       const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title || 'صورة'}" onclick="window.openLightbox('${post.cover}')"></div>` : '';
       
-      // تم تحسين عرض المحتوى ليدعم HTML المنسق مباشرة دون تدمير الهيكل
+      // ✅ تنظيف المحتوى تلقائياً من أي كود CSS أو JavaScript
       let formattedContent = '';
       if (post.content) {
-        // إذا كان المحتوى يحتوي على وسوم HTML (مثل <p> أو <h2>) نعرضه كما هو
-        if (/(<([^>]+)>)/i.test(post.content)) {
-          formattedContent = post.content;
+        const sanitized = window.sanitizeContent(post.content);
+        if (/(<([^>]+)>)/i.test(sanitized)) {
+          formattedContent = sanitized;
         } else {
-          // نص عادي: نقسمه لفقرات
-          formattedContent = post.content.split('\n\n').map(p => {
+          formattedContent = sanitized.split('\n\n').map(p => {
             return `<p>${p.replace(/\n/g, '<br>')}</p>`;
           }).join('');
         }
@@ -1668,6 +1752,7 @@
         img.addEventListener('click', () => window.openLightbox(img.src));
       });
     };
+    
     // Realtime Listener for Post's Comments
     window.listenToComments = function(postId) {
       const commentsRef = ref(db, `posts/${postId}/comments`);
@@ -1676,6 +1761,7 @@
         window.renderCommentsUI(postId, commentsData);
       });
     };
+    
     window.renderCommentsUI = function(postId, commentsData) {
       const container = document.getElementById('commentsList');
       if (!container) return;
@@ -1726,6 +1812,7 @@
         container.appendChild(card);
       });
     };
+    
     window.addComment = async function(e, postId) {
       if (e && e.preventDefault) e.preventDefault();
       const authorInput = document.getElementById('commentAuthorInput');
@@ -1753,6 +1840,7 @@
         alert('تعذر إرسال التعليق:\n' + (err.message || err));
       }
     };
+    
     window.deleteComment = async function(postId, commentId) {
       if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
       try {
@@ -1763,6 +1851,7 @@
         alert('تعذر حذف التعليق: ' + (err.message || err));
       }
     };
+    
     window.deleteReply = async function(postId, commentId, replyId) {
       if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
       try {
@@ -1773,10 +1862,12 @@
         alert('تعذر حذف الرد: ' + (err.message || err));
       }
     };
+    
     window.showReplyForm = function(commentId) {
       const el = document.getElementById(`replyForm-${commentId}`);
       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     };
+    
     window.addReply = async function(e, postId, commentId) {
       if (e && e.preventDefault) e.preventDefault();
       const authorInput = document.getElementById(`replyAuthor-${commentId}`);
@@ -1802,6 +1893,7 @@
         alert('حدث خطأ أثناء إرسال الرد:\n' + (err.message || err));
       }
     };
+    
     // Admin Authentication & Control
     window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
@@ -1815,12 +1907,14 @@
         alert('كلمة المرور غير صحيحة');
       }
     };
+    
     window.logoutAdmin = function() {
       isAdminLoggedIn = false;
       document.getElementById('adminNavBtn').innerText = 'دخول الإدارة';
       window.navigateTo('home');
       window.showToast('تم تسجيل الخروج');
     };
+    
     window.switchAdminTab = function(tabName, event) {
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
       if (event && event.target) event.target.classList.add('active');
@@ -1832,15 +1926,20 @@
       if (tabName === 'comments') window.renderAdminCommentsList();
       if (tabName === 'settings') window.loadSettingsToForm();
     };
+    
     window.renderAdminPanel = function() {
       window.switchAdminTab('editor');
     };
+    
+    // ✅ دالة حفظ المقال (مُصححة لتنظيف المحتوى تلقائياً عند الحفظ)
     window.savePost = async function(status) {
       const id = document.getElementById('editPostId').value;
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
       const cover = document.getElementById('postCoverUrlInput').value.trim();
-      const content = document.getElementById('postContentInput').value.trim();
+      // ✅ تنظيف المحتوى تلقائياً قبل الحفظ
+      const content = window.sanitizeContent(document.getElementById('postContentInput').value.trim());
+      
       if (!title && !cover && !content) {
         alert('يرجى كتابة عنوان أو نص أو إدخال رابط صورة للمقال');
         return;
@@ -1868,12 +1967,14 @@
         alert('خطأ في حفظ المقال: ' + err.message);
       }
     };
-    // ====== نشر نص جاهز ======
+    
+    // ✅ نشر نص جاهز (مُصحح لتنظيف المحتوى تلقائياً)
     window.publishBulkPost = async function() {
       const title = document.getElementById('bulkTitleInput').value.trim();
       const category = document.getElementById('bulkCategoryInput').value.trim();
       const cover = document.getElementById('bulkCoverUrlInput').value.trim();
-      const content = document.getElementById('bulkContentInput').value.trim();
+      // ✅ تنظيف المحتوى تلقائياً قبل النشر
+      const content = window.sanitizeContent(document.getElementById('bulkContentInput').value.trim());
       
       if (!title && !content) {
         alert('يرجى إدخال عنوان أو نص للمنشور');
@@ -1893,7 +1994,6 @@
       try {
         await push(ref(db, 'posts'), postData);
         window.showToast('تم نشر المنشور الجاهز بنجاح!');
-        // تفريغ الحقول
         document.getElementById('bulkTitleInput').value = '';
         document.getElementById('bulkCategoryInput').value = '';
         document.getElementById('bulkCoverUrlInput').value = '';
@@ -1904,7 +2004,7 @@
         alert('خطأ في النشر: ' + err.message);
       }
     };
-    // ==========================
+    
     window.resetEditor = function() {
       document.getElementById('editPostId').value = '';
       document.getElementById('postTitleInput').value = '';
@@ -1914,6 +2014,7 @@
       document.getElementById('postContentInput').value = '';
       document.getElementById('editorFormTitle').innerText = 'إنشاء مقال جديد';
     };
+    
     window.editPost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1926,6 +2027,7 @@
       document.getElementById('editorFormTitle').innerText = 'تعديل المقال';
       window.switchAdminTab('editor');
     };
+    
     window.deletePost = async function(postId) {
       if (!confirm('هل أنت متأكد من حذف هذا المقال نهائياً؟')) return;
       try {
@@ -1935,6 +2037,7 @@
         alert('تعذر حذف المقال: ' + err.message);
       }
     };
+    
     window.renderAdminPostsList = function() {
       const container = document.getElementById('adminPostsList');
       if (!container) return;
@@ -1960,6 +2063,7 @@
         container.appendChild(item);
       });
     };
+    
     window.renderAdminCommentsList = function() {
       const container = document.getElementById('adminCommentsList');
       if (!container) return;
@@ -2008,6 +2112,7 @@
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد تعليقات حتى الآن.</p>';
       }
     };
+    
     window.loadSettingsToForm = function() {
       document.getElementById('settingTitle').value = blogSettings.title || '';
       document.getElementById('settingSubtitle').value = blogSettings.subtitle || '';
@@ -2019,6 +2124,7 @@
       window.previewImageUrl(blogSettings.aboutImage || '', 'aboutImagePreview');
       document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
     };
+    
     window.saveBlogSettings = async function() {
       const updated = {
         ...blogSettings,

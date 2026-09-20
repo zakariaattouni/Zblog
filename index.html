@@ -779,6 +779,74 @@
       color: var(--text-muted);
       margin-top: 4px;
     }
+    /* ===== القارئ الصوتي ===== */
+    .tts-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      padding: 14px 16px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+    }
+    .tts-label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tts-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: var(--paper-color);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.88rem;
+      transition: all 0.2s;
+    }
+    .tts-btn:hover {
+      border-color: var(--accent-color);
+      color: var(--accent-color);
+      transform: translateY(-1px);
+    }
+    .tts-btn.active {
+      background: var(--accent-color);
+      color: white;
+      border-color: var(--accent-color);
+    }
+    .tts-btn.play-btn {
+      background: var(--accent-color);
+      color: white;
+      border-color: var(--accent-color);
+    }
+    .tts-btn.play-btn:hover {
+      background: var(--accent-hover);
+    }
+    .tts-btn svg { width: 16px; height: 16px; }
+    .tts-speed {
+      padding: 7px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--paper-color);
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .tts-status {
+      font-size: 0.8rem;
+      color: var(--accent-color);
+      font-weight: 600;
+      display: none;
+    }
+    .tts-status.show { display: inline-block; }
     @media (max-width: 600px) {
       .header-content { padding: 16px; }
       .site-title-area h1 { font-size: 1.6rem; }
@@ -788,6 +856,9 @@
       .share-btn span { display: none; }
       .article-share-buttons { gap: 8px; }
       .notif-dropdown { width: 280px; left: -40px; }
+      .tts-controls { padding: 10px; gap: 6px; }
+      .tts-btn { padding: 6px 10px; font-size: 0.8rem; }
+      .tts-label { width: 100%; }
     }
   </style>
 </head>
@@ -1176,7 +1247,6 @@
       // عداد زوار حقيقي: يزيد مرة واحدة فقط لكل جلسة متصفح
       if (!sessionStorage.getItem(hasVisitedKey)) {
         runTransaction(visitsRef, (currentVisits) => {
-          // إذا كان العداد غير موجود أو صفر نبدأ من 1، وإلا نزيد واحداً
           if (currentVisits === null || currentVisits === undefined) {
             return 1;
           }
@@ -1219,7 +1289,6 @@
       const wasHidden = !dropdown.classList.contains('show');
       dropdown.classList.toggle('show');
       
-      // عند فتح القائمة، صفّر العداد فوراً
       if (wasHidden && dropdown.classList.contains('show')) {
         window.markNotificationsAsRead();
       }
@@ -1230,13 +1299,11 @@
         dropdown.classList.remove('show');
       }
     });
-    // تصفير الإشعارات باستخدام localStorage فقط (فوري وموثوق)
     window.markNotificationsAsRead = function() {
       const now = Date.now();
       localStorage.setItem('notif_local_read', now.toString());
       updateNotificationsUI();
     };
-    // زر التصفير اليدوي
     window.clearNotifications = function() {
       window.markNotificationsAsRead();
       window.showToast('تم تصفير عداد الإشعارات');
@@ -1246,7 +1313,6 @@
       const notifBadge = document.getElementById('notifBadge');
       const notifTotalCount = document.getElementById('notifTotalCount');
       
-      // نستخدم localStorage فقط لتصفير الجرس
       const lastRead = parseInt(localStorage.getItem('notif_local_read') || '0', 10);
       
       let allComments = [];
@@ -1283,7 +1349,6 @@
           });
         }
       });
-      // ترتيب من الأحدث للأقدم
       allComments.sort((a, b) => b.timestamp - a.timestamp);
       const totalCount = allComments.length;
       const newCount = allComments.filter(c => c.isNew).length;
@@ -1599,14 +1664,11 @@
       }
       const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title || 'صورة'}" onclick="window.openLightbox('${post.cover}')"></div>` : '';
       
-      // تم تحسين عرض المحتوى ليدعم HTML المنسق مباشرة دون تدمير الهيكل
       let formattedContent = '';
       if (post.content) {
-        // إذا كان المحتوى يحتوي على وسوم HTML (مثل <p> أو <h2>) نعرضه كما هو
         if (/(<([^>]+)>)/i.test(post.content)) {
           formattedContent = post.content;
         } else {
-          // نص عادي: نقسمه لفقرات
           formattedContent = post.content.split('\n\n').map(p => {
             return `<p>${p.replace(/\n/g, '<br>')}</p>`;
           }).join('');
@@ -1614,6 +1676,39 @@
       }
       const contentSection = formattedContent ? `<div class="article-content" id="articleBody">${formattedContent}</div>` : '';
       const titleHTML = post.title ? `<h1 class="article-title">${post.title}</h1>` : '';
+      
+      const ttsControls = `
+        <div class="tts-controls" id="ttsControls">
+          <span class="tts-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+            استمع للمقال:
+          </span>
+          <button class="tts-btn" id="ttsVoiceMale" onclick="window.setTTSVoice('male')" title="صوت ذكر">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zm7 9a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.92V21a1 1 0 1 0 2 0v-3.08A7 7 0 0 0 19 11z"/></svg>
+            ذكر
+          </button>
+          <button class="tts-btn" id="ttsVoiceFemale" onclick="window.setTTSVoice('female')" title="صوت أنثى">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zm7 9a1 1 0 1 0-2 0 5 5 0 0 1-10 0 1 1 0 1 0-2 0 7 7 0 0 0 6 6.92V21a1 1 0 1 0 2 0v-3.08A7 7 0 0 0 19 11z"/></svg>
+            أنثى
+          </button>
+          <select class="tts-speed" id="ttsSpeed" title="سرعة القراءة">
+            <option value="0.75">بطيء</option>
+            <option value="0.9">عادي</option>
+            <option value="1" selected>طبيعي</option>
+            <option value="1.25">سريع</option>
+            <option value="1.5">أسرع</option>
+          </select>
+          <button class="tts-btn play-btn" id="ttsPlayBtn" onclick="window.toggleTTS()">
+            <svg id="ttsPlayIcon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            <span id="ttsPlayText">تشغيل</span>
+          </button>
+          <button class="tts-btn" id="ttsStopBtn" onclick="window.stopTTS()" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
+            إيقاف
+          </button>
+          <span class="tts-status" id="ttsStatus">🔊 جارٍ القراءة...</span>
+        </div>
+      `;
       
       const shareButtons = `
         <div class="article-share">
@@ -1654,6 +1749,7 @@
           </div>
           ${coverHTML}
           ${contentSection}
+          ${ttsControls}
           ${shareButtons}
         </article>
         <section class="comments-container">
@@ -1671,6 +1767,8 @@
       document.querySelectorAll('#articleBody img').forEach(img => {
         img.addEventListener('click', () => window.openLightbox(img.src));
       });
+      // تفعيل زر الأنثى افتراضياً
+      setTimeout(updateTTSButtonsUI, 100);
     };
     // Realtime Listener for Post's Comments
     window.listenToComments = function(postId) {
@@ -1897,7 +1995,6 @@
       try {
         await push(ref(db, 'posts'), postData);
         window.showToast('تم نشر المنشور الجاهز بنجاح!');
-        // تفريغ الحقول
         document.getElementById('bulkTitleInput').value = '';
         document.getElementById('bulkCategoryInput').value = '';
         document.getElementById('bulkCoverUrlInput').value = '';
@@ -2040,6 +2137,214 @@
         alert('تعذر حفظ الإعدادات: ' + err.message);
       }
     };
+
+    // ==================== القارئ الصوتي ====================
+    let ttsUtterance = null;
+    let ttsIsPlaying = false;
+    let ttsIsPaused = false;
+    let ttsCurrentVoiceGender = 'female';
+    let ttsVoices = [];
+    
+    function loadVoices() {
+      ttsVoices = window.speechSynthesis.getVoices();
+    }
+    loadVoices();
+    if (window.speechSynthesis && window.speechSynthesis.onvoiceschanged !== undefined) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+    
+    function pickArabicVoice(gender) {
+      if (!ttsVoices.length) ttsVoices = window.speechSynthesis.getVoices();
+      
+      const arabicVoices = ttsVoices.filter(v => 
+        v.lang && (v.lang.toLowerCase().startsWith('ar') || v.lang.toLowerCase().includes('ar-'))
+      );
+      
+      if (!arabicVoices.length) return null;
+      
+      const maleKeywords = ['male', 'man', 'majed', 'maged', 'tarik', 'hamza', 'khalid', 'naayf', 'shakir', 'raed', 'ذكر'];
+      const femaleKeywords = ['female', 'woman', 'laila', 'layla', 'hala', 'salma', 'zariyah', 'amany', 'sana', 'maryam', 'hoda', 'أنثى'];
+      
+      const isMale = (v) => maleKeywords.some(k => v.name.toLowerCase().includes(k));
+      const isFemale = (v) => femaleKeywords.some(k => v.name.toLowerCase().includes(k));
+      
+      let selected = null;
+      
+      if (gender === 'male') {
+        selected = arabicVoices.find(v => isMale(v));
+      } else {
+        selected = arabicVoices.find(v => isFemale(v));
+      }
+      
+      if (!selected) selected = arabicVoices[0];
+      
+      return selected;
+    }
+    
+    function updateTTSButtonsUI() {
+      const maleBtn = document.getElementById('ttsVoiceMale');
+      const femaleBtn = document.getElementById('ttsVoiceFemale');
+      if (maleBtn) maleBtn.classList.toggle('active', ttsCurrentVoiceGender === 'male');
+      if (femaleBtn) femaleBtn.classList.toggle('active', ttsCurrentVoiceGender === 'female');
+    }
+    
+    window.setTTSVoice = function(gender) {
+      ttsCurrentVoiceGender = gender;
+      updateTTSButtonsUI();
+      const voice = pickArabicVoice(gender);
+      if (!voice) {
+        window.showToast('لا يوجد صوت عربي متوفر على جهازك. سيتم استخدام الصوت الافتراضي.');
+      } else {
+        window.showToast(gender === 'male' ? 'تم اختيار صوت ذكر: ' + voice.name : 'تم اختيار صوت أنثى: ' + voice.name);
+      }
+      if (ttsIsPlaying) {
+        window.stopTTS();
+        setTimeout(() => window.startTTS(), 200);
+      }
+    };
+    
+    function extractArticleText() {
+      const body = document.getElementById('articleBody');
+      if (!body) return '';
+      
+      const clone = body.cloneNode(true);
+      clone.querySelectorAll('img').forEach(el => el.remove());
+      clone.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, div, br').forEach(el => {
+        el.appendChild(document.createTextNode(' . '));
+      });
+      
+      let text = clone.textContent || '';
+      text = text.replace(/\s+/g, ' ').replace(/\s\.\s/g, '. ').replace(/\s{2,}/g, ' ').trim();
+      return text;
+    }
+    
+    window.startTTS = function() {
+      if (!('speechSynthesis' in window)) {
+        alert('متصفحك لا يدعم القراءة الصوتية');
+        return;
+      }
+      
+      const text = extractArticleText();
+      if (!text || text.length < 5) {
+        window.showToast('لا يوجد نص لقراءته');
+        return;
+      }
+      
+      window.speechSynthesis.cancel();
+      
+      if (!ttsVoices.length) loadVoices();
+      
+      ttsUtterance = new SpeechSynthesisUtterance(text);
+      ttsUtterance.lang = 'ar-SA';
+      ttsUtterance.rate = parseFloat(document.getElementById('ttsSpeed').value) || 1;
+      ttsUtterance.pitch = ttsCurrentVoiceGender === 'male' ? 0.85 : 1.15;
+      ttsUtterance.volume = 1;
+      
+      const voice = pickArabicVoice(ttsCurrentVoiceGender);
+      if (voice) {
+        ttsUtterance.voice = voice;
+        ttsUtterance.lang = voice.lang;
+      }
+      
+      ttsUtterance.onstart = () => {
+        ttsIsPlaying = true;
+        ttsIsPaused = false;
+        updateTTSPlayUI(true);
+      };
+      
+      ttsUtterance.onend = () => {
+        ttsIsPlaying = false;
+        ttsIsPaused = false;
+        updateTTSPlayUI(false);
+      };
+      
+      ttsUtterance.onerror = (e) => {
+        console.warn('TTS error:', e);
+        ttsIsPlaying = false;
+        ttsIsPaused = false;
+        updateTTSPlayUI(false);
+      };
+      
+      ttsUtterance.onpause = () => { ttsIsPaused = true; };
+      ttsUtterance.onresume = () => { ttsIsPaused = false; };
+      
+      window.speechSynthesis.speak(ttsUtterance);
+    };
+    
+    function updateTTSPlayUI(playing) {
+      const playIcon = document.getElementById('ttsPlayIcon');
+      const playText = document.getElementById('ttsPlayText');
+      const stopBtn = document.getElementById('ttsStopBtn');
+      const status = document.getElementById('ttsStatus');
+      
+      if (!playIcon) return;
+      
+      if (playing) {
+        playIcon.innerHTML = '<rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/>';
+        playText.textContent = 'إيقاف مؤقت';
+        if (stopBtn) stopBtn.style.display = 'inline-flex';
+        if (status) status.classList.add('show');
+      } else {
+        playIcon.innerHTML = '<polygon points="6 4 20 12 6 20 6 4"/>';
+        playText.textContent = 'تشغيل';
+        if (stopBtn) stopBtn.style.display = 'none';
+        if (status) status.classList.remove('show');
+      }
+    }
+    
+    window.toggleTTS = function() {
+      if (!('speechSynthesis' in window)) {
+        alert('متصفحك لا يدعم القراءة الصوتية');
+        return;
+      }
+      
+      if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+        window.speechSynthesis.pause();
+        ttsIsPaused = true;
+        updateTTSPlayUI(false);
+        const pt = document.getElementById('ttsPlayText');
+        if (pt) pt.textContent = 'استئناف';
+      } else if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        ttsIsPaused = false;
+        updateTTSPlayUI(true);
+      } else {
+        window.startTTS();
+      }
+    };
+    
+    window.stopTTS = function() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      ttsIsPlaying = false;
+      ttsIsPaused = false;
+      updateTTSPlayUI(false);
+    };
+    
+    const originalNavigateTo = window.navigateTo;
+    window.navigateTo = function(pageId, param) {
+      if (pageId !== 'post') window.stopTTS();
+      return originalNavigateTo.call(this, pageId, param);
+    };
+    
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.id === 'ttsSpeed' && ttsIsPlaying) {
+        window.stopTTS();
+        setTimeout(() => window.startTTS(), 150);
+      }
+    });
+    
+    window.addEventListener('beforeunload', () => {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    });
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => {
+        updateTTSButtonsUI();
+      }, 500);
+    });
+    // ====================================================
   </script>
 </body>
 </html>

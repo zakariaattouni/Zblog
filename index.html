@@ -236,7 +236,6 @@
     .notif-item-text { margin-top: 2px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .notif-item-meta { font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; }
     .notif-empty { padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
-
     .nav-overlay {
       position: fixed;
       top: 0; right: 0; bottom: 0; left: 0;
@@ -775,6 +774,11 @@
       text-decoration: underline;
       padding: 0;
     }
+    .paste-help {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
     @media (max-width: 600px) {
       .header-content { padding: 16px; }
       .site-title-area h1 { font-size: 1.6rem; }
@@ -799,7 +803,6 @@
       <button class="install-btn" onclick="window.installApp()">تثبيت</button>
     </div>
   </div>
-
   <!-- HEADER & COVER SECTION -->
   <header>
     <div class="cover-container" id="coverContainer">
@@ -819,7 +822,6 @@
           </svg>
           <span id="notifBadge" class="notif-badge">0</span>
         </button>
-
         <!-- القائمة المنسدلة للإشعارات -->
         <div id="notifDropdown" class="notif-dropdown" onclick="event.stopPropagation()">
           <div class="notif-header">
@@ -833,7 +835,6 @@
             <div class="notif-empty">لا توجد تعليقات حتى الآن.</div>
           </div>
         </div>
-
         <!-- زر مشاركة المدونة -->
         <button class="menu-btn" onclick="window.shareBlog()" title="مشاركة المدونة" aria-label="مشاركة المدونة">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -844,7 +845,6 @@
             <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
           </svg>
         </button>
-
         <!-- زر القائمة -->
         <button class="menu-btn" onclick="window.toggleNav(true)">
           <span>القائمة</span>
@@ -853,7 +853,6 @@
       </div>
     </div>
   </header>
-
   <!-- NAVIGATION OVERLAY -->
   <div class="nav-overlay" id="navOverlay" onclick="window.toggleNav(false)">
     <div class="nav-drawer" onclick="event.stopPropagation()">
@@ -867,7 +866,6 @@
       </ul>
     </div>
   </div>
-
   <!-- MAIN CONTENT AREA -->
   <main>
     <!-- 1. HOME PAGE -->
@@ -877,19 +875,16 @@
       </div>
       <div id="postsList" class="posts-list"></div>
     </section>
-
     <!-- 2. SINGLE POST PAGE -->
     <section id="page-post" class="page">
       <div id="postSingleContainer"></div>
     </section>
-
     <!-- 3. CATEGORIES PAGE -->
     <section id="page-categories" class="page">
       <h2 style="font-family: var(--font-heading); margin-bottom: 15px;">التصنيفات</h2>
       <div id="categoriesList" class="categories-list"></div>
       <div id="categoryPostsResult" class="posts-list" style="margin-top: 30px;"></div>
     </section>
-
     <!-- 4. ABOUT PAGE -->
     <section id="page-about" class="page">
       <div class="about-card">
@@ -900,7 +895,6 @@
         <div id="aboutBody" style="line-height: 1.9; color: #333;"></div>
       </div>
     </section>
-
     <!-- 5. ADMIN LOGIN -->
     <section id="page-admin-login" class="page">
       <div class="about-card" style="max-width: 400px; margin: 0 auto;">
@@ -913,17 +907,16 @@
         <button class="btn" onclick="window.loginAdmin()">دخول</button>
       </div>
     </section>
-
     <!-- 6. ADMIN PANEL -->
     <section id="page-admin-panel" class="page">
       <div class="admin-nav">
         <button class="admin-tab active" onclick="window.switchAdminTab('editor', event)">مقال جديد / تحرير</button>
+        <button class="admin-tab" onclick="window.switchAdminTab('bulk', event)">إضافة نص جاهز</button>
         <button class="admin-tab" onclick="window.switchAdminTab('posts', event)">إدارة المقالات</button>
         <button class="admin-tab" onclick="window.switchAdminTab('comments', event)">إدارة التعليقات</button>
         <button class="admin-tab" onclick="window.switchAdminTab('settings', event)">إعدادات المدونة</button>
         <button class="admin-tab" onclick="window.logoutAdmin()" style="color: var(--danger-color);">خروج</button>
       </div>
-
       <!-- Editor -->
       <div id="admin-tab-editor" class="admin-tab-content">
         <h3 style="margin-bottom: 15px;" id="editorFormTitle">إنشاء مقال جديد</h3>
@@ -960,18 +953,41 @@
         </div>
       </div>
 
+      <!-- Bulk Paste Tab -->
+      <div id="admin-tab-bulk" class="admin-tab-content" style="display: none;">
+        <h3 style="margin-bottom: 15px;">إضافة نص منسق مسبقاً مع عنوانه</h3>
+        <p class="paste-help">الصق العنوان في الحقل الأول، والنص المنسق (HTML) في الحقل الثاني، وسيتم إنشاء منشور جديد مباشرةً بالعنوان والمحتوى المنسق. يمكنك أيضاً تحديد التصنيف ورابط صورة الغلاف اختيارياً.</p>
+        
+        <div class="form-group">
+          <label>عنوان المنشور</label>
+          <input type="text" id="bulkTitleInput" placeholder="عنوان المنشور الجاهز...">
+        </div>
+        <div class="form-group">
+          <label>تصنيف اختياري</label>
+          <input type="text" id="bulkCategoryInput" placeholder="مثال: قراءات، طب...">
+        </div>
+        <div class="form-group">
+          <label>رابط صورة الغلاف اختياري</label>
+          <input type="url" id="bulkCoverUrlInput" placeholder="https://example.com/image.jpg" oninput="window.previewImageUrl(this.value, 'bulkCoverPreview')">
+          <img id="bulkCoverPreview" src="" style="max-height: 120px; margin-top: 10px; display: none;">
+        </div>
+        <div class="form-group">
+          <label>النص المنسق (HTML)</label>
+          <textarea id="bulkContentInput" rows="12" placeholder="الصق هنا النص المنسق بـ HTML... مثال: <h2>عنوان فرعي</h2><p>فقرة...</p>"></textarea>
+        </div>
+        <button class="btn" onclick="window.publishBulkPost()">نشر المنشور مباشرة</button>
+      </div>
+
       <!-- Posts Management -->
       <div id="admin-tab-posts" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">المقالات والمسودات</h3>
         <div id="adminPostsList" class="admin-post-list"></div>
       </div>
-
       <!-- Comments Management -->
       <div id="admin-tab-comments" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">إدارة جميع التعليقات</h3>
         <div id="adminCommentsList" class="admin-post-list"></div>
       </div>
-
       <!-- Settings -->
       <div id="admin-tab-settings" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">الإعدادات العامة والترويسة</h3>
@@ -1008,7 +1024,6 @@
       </div>
     </section>
   </main>
-
   <!-- FOOTER SECTION -->
   <footer class="site-footer">
     <div class="footer-content">
@@ -1020,22 +1035,20 @@
       <div class="footer-stats">
         <div class="stat-badge">
           <span>الزوار:</span>
-          <strong id="visitorCount">12</strong>
+          <strong id="visitorCount">0</strong>
         </div>
         <div class="stat-badge">
           <span class="online-indicator"></span>
           <span>المتواجدون الآن:</span>
-          <strong id="onlineCount">7</strong>
+          <strong id="onlineCount">0</strong>
         </div>
       </div>
     </div>
   </footer>
-
   <!-- LIGHTBOX FOR IMAGES -->
   <div class="lightbox" id="lightbox" onclick="window.closeLightbox()">
     <img id="lightboxImg" src="" alt="عرض مكبر">
   </div>
-
   <!-- JAVASCRIPT LOGIC & FIREBASE INTERACTION -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -1081,7 +1094,6 @@
         toast.classList.remove('show');
       }, 2500);
     };
-
     // Image URL Preview Helper
     window.previewImageUrl = function(url, previewImgId) {
       const previewImg = document.getElementById(previewImgId);
@@ -1093,7 +1105,6 @@
         previewImg.style.display = 'none';
       }
     };
-
     // Insert Image URL to Article Content
     window.insertImageUrlToEditor = function() {
       const urlInput = document.getElementById('inlineImageUrlInput');
@@ -1108,7 +1119,6 @@
       urlInput.value = '';
       window.showToast('تم إدراج رابط الصورة في النص');
     };
-
     // Lightbox Helpers
     window.openLightbox = function(src) {
       const lightbox = document.getElementById('lightbox');
@@ -1119,7 +1129,6 @@
     window.closeLightbox = function() {
       document.getElementById('lightbox').classList.remove('active');
     };
-
     // PWA & Service Worker Logic
     window.registerServiceWorker = function() {
       if ('serviceWorker' in navigator) {
@@ -1139,7 +1148,6 @@
         navigator.serviceWorker.register(swUrl).catch(err => console.log('SW registration failed:', err));
       }
     };
-
     window.setupInstallPrompt = function() {
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -1160,29 +1168,34 @@
       document.getElementById('installPrompt').classList.remove('show');
     };
 
-    // إحصائيات الفوتر (عداد الزوار وعداد المتواجدين الآن)
+    // ========== عدادات حقيقية ==========
     function setupFooterCounters() {
       const visitsRef = ref(db, 'stats/visits');
+      const hasVisitedKey = 'zblog_visited_session';
       
-      if (!localStorage.getItem('has_visited_zblog')) {
+      // عداد زوار حقيقي: يزيد مرة واحدة فقط لكل جلسة متصفح
+      if (!sessionStorage.getItem(hasVisitedKey)) {
         runTransaction(visitsRef, (currentVisits) => {
-          if (currentVisits === null || currentVisits < 12) {
-            return 12;
+          // إذا كان العداد غير موجود أو صفر نبدأ من 1، وإلا نزيد واحداً
+          if (currentVisits === null || currentVisits === undefined) {
+            return 1;
           }
           return currentVisits + 1;
         }).then(() => {
-          localStorage.setItem('has_visited_zblog', 'true');
+          sessionStorage.setItem(hasVisitedKey, 'true');
         }).catch(err => console.log("Visit count error:", err));
       }
+      
       onValue(visitsRef, (snapshot) => {
         const count = snapshot.val();
-        const displayCount = (count !== null && count >= 12) ? count : 12;
         const el = document.getElementById('visitorCount');
-        if (el) el.innerText = displayCount;
+        if (el) el.innerText = count || 0;
       });
-
+      
+      // عداد المتواجدين الآن حقيقي: يعتمد فقط على عدد الاتصالات النشطة في presence
       const connectedRef = ref(db, '.info/connected');
       const presenceRef = ref(db, 'stats/online');
+      
       onValue(connectedRef, (snap) => {
         if (snap.val() === true) {
           const userPresenceRef = push(presenceRef);
@@ -1190,13 +1203,14 @@
           set(userPresenceRef, true);
         }
       });
+      
       onValue(presenceRef, (snap) => {
         const count = snap.numChildren();
-        const realOnline = Math.max(7, count + 6);
         const el = document.getElementById('onlineCount');
-        if (el) el.innerText = realOnline;
+        if (el) el.innerText = count;
       });
     }
+    // =====================================
 
     // إدارة الإشعارات
     window.toggleNotifDropdown = function(e) {
@@ -1210,27 +1224,23 @@
         window.markNotificationsAsRead();
       }
     };
-
     document.addEventListener('click', () => {
       const dropdown = document.getElementById('notifDropdown');
       if (dropdown && dropdown.classList.contains('show')) {
         dropdown.classList.remove('show');
       }
     });
-
     // تصفير الإشعارات باستخدام localStorage فقط (فوري وموثوق)
     window.markNotificationsAsRead = function() {
       const now = Date.now();
       localStorage.setItem('notif_local_read', now.toString());
       updateNotificationsUI();
     };
-
     // زر التصفير اليدوي
     window.clearNotifications = function() {
       window.markNotificationsAsRead();
       window.showToast('تم تصفير عداد الإشعارات');
     };
-
     function updateNotificationsUI() {
       const notifList = document.getElementById('notifList');
       const notifBadge = document.getElementById('notifBadge');
@@ -1273,10 +1283,8 @@
           });
         }
       });
-
       // ترتيب من الأحدث للأقدم
       allComments.sort((a, b) => b.timestamp - a.timestamp);
-
       const totalCount = allComments.length;
       const newCount = allComments.filter(c => c.isNew).length;
       
@@ -1288,11 +1296,9 @@
           notifBadge.classList.remove('active');
         }
       }
-
       if (notifTotalCount) {
         notifTotalCount.innerText = `${totalCount} تعليق`;
       }
-
       if (notifList) {
         if (totalCount === 0) {
           notifList.innerHTML = '<div class="notif-empty">لا توجد تعليقات حتى الآن.</div>';
@@ -1307,7 +1313,6 @@
         }
       }
     }
-
     // Listen to Settings
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
@@ -1319,7 +1324,6 @@
       window.applySettings();
       window.renderAboutPage();
     });
-
     // Realtime Listener to Posts
     onValue(ref(db, 'posts'), (snapshot) => {
       const data = snapshot.val();
@@ -1339,7 +1343,6 @@
       }
       
       updateNotificationsUI();
-
       const activePage = document.querySelector('.page.active');
       if (activePage && activePage.id === 'page-home') window.renderHomePosts(window.getPublishedPosts());
       if (activePage && activePage.id === 'page-categories') window.renderCategories();
@@ -1353,19 +1356,16 @@
         if (post) window.listenToComments(post.id);
       }
     });
-
     document.addEventListener("DOMContentLoaded", function() {
       window.registerServiceWorker();
       window.setupInstallPrompt();
       setupFooterCounters();
     });
-
     window.toggleNav = function(show) {
       const nav = document.getElementById('navOverlay');
       if (show) nav.classList.add('active');
       else nav.classList.remove('active');
     };
-
     window.navigateTo = function(pageId, param = null) {
       document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
       const target = document.getElementById(`page-${pageId}`);
@@ -1389,11 +1389,9 @@
         else window.renderAdminPanel();
       }
     };
-
     window.getPublishedPosts = function() {
       return blogPosts.filter(p => p.status === 'published');
     };
-
     window.applySettings = function() {
       document.getElementById('siteTitle').innerText = blogSettings.title;
       document.getElementById('siteSubtitle').innerText = blogSettings.subtitle;
@@ -1411,7 +1409,6 @@
         document.head.appendChild(ogImage);
       }
     };
-
     window.renderAboutPage = function() {
       document.getElementById('aboutTitle').innerText = blogSettings.aboutTitle || "عن زكريا";
       document.getElementById('aboutBody').innerText = blogSettings.aboutBody || "";
@@ -1425,7 +1422,6 @@
         imgContainer.style.display = 'none';
       }
     };
-
     window.renderHomePosts = function(posts) {
       const container = document.getElementById('postsList');
       container.innerHTML = '';
@@ -1467,7 +1463,6 @@
         container.appendChild(item);
       });
     };
-
     window.handleSearch = function() {
       const query = document.getElementById('searchInput').value.trim().toLowerCase();
       if (!query) {
@@ -1481,11 +1476,9 @@
       );
       window.renderHomePosts(filtered);
     };
-
     window.getPostUrl = function(postId) {
       return window.location.origin + window.location.pathname + '#post-' + postId;
     };
-
     window.shareBlog = function() {
       const shareData = {
         title: blogSettings.title,
@@ -1500,7 +1493,6 @@
         window.copyToClipboard(shareData.url);
       }
     };
-
     window.shareToFacebook = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1509,7 +1501,6 @@
       let fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`;
       window.open(fbUrl, '_blank', 'width=600,height=400');
     };
-
     window.shareToTwitter = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1517,7 +1508,6 @@
       const title = encodeURIComponent(post.title || blogSettings.title);
       window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=600,height=400');
     };
-
     window.shareToWhatsApp = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1525,7 +1515,6 @@
       const title = encodeURIComponent(post.title || blogSettings.title);
       window.open(`https://api.whatsapp.com/send?text=${title}%20${url}`, '_blank');
     };
-
     window.shareToTelegram = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1533,12 +1522,10 @@
       const title = encodeURIComponent(post.title || blogSettings.title);
       window.open(`https://t.me/share/url?url=${url}&text=${title}`, '_blank');
     };
-
     window.copyLink = function(postId) {
       const url = window.getPostUrl(postId);
       window.copyToClipboard(url);
     };
-
     window.copyToClipboard = function(text) {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
@@ -1550,7 +1537,6 @@
         window.fallbackCopy(text);
       }
     };
-
     window.fallbackCopy = function(text) {
       const textarea = document.createElement('textarea');
       textarea.value = text;
@@ -1566,7 +1552,6 @@
       }
       document.body.removeChild(textarea);
     };
-
     window.renderCategories = function() {
       const container = document.getElementById('categoriesList');
       if (!container) return;
@@ -1578,7 +1563,6 @@
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد تصنيفات حالياً.</p>';
         return;
       }
-
       categories.forEach(cat => {
         const chip = document.createElement('div');
         chip.className = 'category-chip';
@@ -1587,7 +1571,6 @@
         container.appendChild(chip);
       });
     };
-
     window.filterByCategory = function(category) {
       const filtered = window.getPublishedPosts().filter(p => p.category === category);
       const resContainer = document.getElementById('categoryPostsResult');
@@ -1607,7 +1590,6 @@
         subList.appendChild(item);
       });
     };
-
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
@@ -1617,10 +1599,19 @@
       }
       const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title || 'صورة'}" onclick="window.openLightbox('${post.cover}')"></div>` : '';
       
-      const formattedContent = post.content ? post.content.split('\n\n').map(p => {
-        if (p.trim().startsWith('<img')) return p;
-        return `<p>${p.replace(/\n/g, '<br>')}</p>`;
-      }).join('') : '';
+      // تم تحسين عرض المحتوى ليدعم HTML المنسق مباشرة دون تدمير الهيكل
+      let formattedContent = '';
+      if (post.content) {
+        // إذا كان المحتوى يحتوي على وسوم HTML (مثل <p> أو <h2>) نعرضه كما هو
+        if (/(<([^>]+)>)/i.test(post.content)) {
+          formattedContent = post.content;
+        } else {
+          // نص عادي: نقسمه لفقرات
+          formattedContent = post.content.split('\n\n').map(p => {
+            return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+          }).join('');
+        }
+      }
       const contentSection = formattedContent ? `<div class="article-content" id="articleBody">${formattedContent}</div>` : '';
       const titleHTML = post.title ? `<h1 class="article-title">${post.title}</h1>` : '';
       
@@ -1681,7 +1672,6 @@
         img.addEventListener('click', () => window.openLightbox(img.src));
       });
     };
-
     // Realtime Listener for Post's Comments
     window.listenToComments = function(postId) {
       const commentsRef = ref(db, `posts/${postId}/comments`);
@@ -1690,7 +1680,6 @@
         window.renderCommentsUI(postId, commentsData);
       });
     };
-
     window.renderCommentsUI = function(postId, commentsData) {
       const container = document.getElementById('commentsList');
       if (!container) return;
@@ -1741,7 +1730,6 @@
         container.appendChild(card);
       });
     };
-
     window.addComment = async function(e, postId) {
       if (e && e.preventDefault) e.preventDefault();
       const authorInput = document.getElementById('commentAuthorInput');
@@ -1769,7 +1757,6 @@
         alert('تعذر إرسال التعليق:\n' + (err.message || err));
       }
     };
-
     window.deleteComment = async function(postId, commentId) {
       if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
       try {
@@ -1780,7 +1767,6 @@
         alert('تعذر حذف التعليق: ' + (err.message || err));
       }
     };
-
     window.deleteReply = async function(postId, commentId, replyId) {
       if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
       try {
@@ -1791,12 +1777,10 @@
         alert('تعذر حذف الرد: ' + (err.message || err));
       }
     };
-
     window.showReplyForm = function(commentId) {
       const el = document.getElementById(`replyForm-${commentId}`);
       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     };
-
     window.addReply = async function(e, postId, commentId) {
       if (e && e.preventDefault) e.preventDefault();
       const authorInput = document.getElementById(`replyAuthor-${commentId}`);
@@ -1822,7 +1806,6 @@
         alert('حدث خطأ أثناء إرسال الرد:\n' + (err.message || err));
       }
     };
-
     // Admin Authentication & Control
     window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
@@ -1836,14 +1819,12 @@
         alert('كلمة المرور غير صحيحة');
       }
     };
-
     window.logoutAdmin = function() {
       isAdminLoggedIn = false;
       document.getElementById('adminNavBtn').innerText = 'دخول الإدارة';
       window.navigateTo('home');
       window.showToast('تم تسجيل الخروج');
     };
-
     window.switchAdminTab = function(tabName, event) {
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
       if (event && event.target) event.target.classList.add('active');
@@ -1851,28 +1832,23 @@
       document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
       const target = document.getElementById(`admin-tab-${tabName}`);
       if (target) target.style.display = 'block';
-
       if (tabName === 'posts') window.renderAdminPostsList();
       if (tabName === 'comments') window.renderAdminCommentsList();
       if (tabName === 'settings') window.loadSettingsToForm();
     };
-
     window.renderAdminPanel = function() {
       window.switchAdminTab('editor');
     };
-
     window.savePost = async function(status) {
       const id = document.getElementById('editPostId').value;
       const title = document.getElementById('postTitleInput').value.trim();
       const category = document.getElementById('postCategoryInput').value.trim();
       const cover = document.getElementById('postCoverUrlInput').value.trim();
       const content = document.getElementById('postContentInput').value.trim();
-
       if (!title && !cover && !content) {
         alert('يرجى كتابة عنوان أو نص أو إدخال رابط صورة للمقال');
         return;
       }
-
       const postData = {
         title,
         category,
@@ -1882,7 +1858,6 @@
         date: new Date().toISOString().split('T')[0],
         updatedAt: Date.now()
       };
-
       try {
         if (id) {
           await update(ref(db, `posts/${id}`), postData);
@@ -1897,7 +1872,43 @@
         alert('خطأ في حفظ المقال: ' + err.message);
       }
     };
-
+    // ====== نشر نص جاهز ======
+    window.publishBulkPost = async function() {
+      const title = document.getElementById('bulkTitleInput').value.trim();
+      const category = document.getElementById('bulkCategoryInput').value.trim();
+      const cover = document.getElementById('bulkCoverUrlInput').value.trim();
+      const content = document.getElementById('bulkContentInput').value.trim();
+      
+      if (!title && !content) {
+        alert('يرجى إدخال عنوان أو نص للمنشور');
+        return;
+      }
+      
+      const postData = {
+        title: title || 'منشور جديد',
+        category: category || '',
+        cover: cover || '',
+        content: content || '',
+        status: 'published',
+        date: new Date().toISOString().split('T')[0],
+        updatedAt: Date.now()
+      };
+      
+      try {
+        await push(ref(db, 'posts'), postData);
+        window.showToast('تم نشر المنشور الجاهز بنجاح!');
+        // تفريغ الحقول
+        document.getElementById('bulkTitleInput').value = '';
+        document.getElementById('bulkCategoryInput').value = '';
+        document.getElementById('bulkCoverUrlInput').value = '';
+        document.getElementById('bulkCoverPreview').style.display = 'none';
+        document.getElementById('bulkContentInput').value = '';
+        window.switchAdminTab('posts');
+      } catch (err) {
+        alert('خطأ في النشر: ' + err.message);
+      }
+    };
+    // ==========================
     window.resetEditor = function() {
       document.getElementById('editPostId').value = '';
       document.getElementById('postTitleInput').value = '';
@@ -1907,7 +1918,6 @@
       document.getElementById('postContentInput').value = '';
       document.getElementById('editorFormTitle').innerText = 'إنشاء مقال جديد';
     };
-
     window.editPost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
@@ -1920,7 +1930,6 @@
       document.getElementById('editorFormTitle').innerText = 'تعديل المقال';
       window.switchAdminTab('editor');
     };
-
     window.deletePost = async function(postId) {
       if (!confirm('هل أنت متأكد من حذف هذا المقال نهائياً؟')) return;
       try {
@@ -1930,7 +1939,6 @@
         alert('تعذر حذف المقال: ' + err.message);
       }
     };
-
     window.renderAdminPostsList = function() {
       const container = document.getElementById('adminPostsList');
       if (!container) return;
@@ -1956,7 +1964,6 @@
         container.appendChild(item);
       });
     };
-
     window.renderAdminCommentsList = function() {
       const container = document.getElementById('adminCommentsList');
       if (!container) return;
@@ -2005,7 +2012,6 @@
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد تعليقات حتى الآن.</p>';
       }
     };
-
     window.loadSettingsToForm = function() {
       document.getElementById('settingTitle').value = blogSettings.title || '';
       document.getElementById('settingSubtitle').value = blogSettings.subtitle || '';
@@ -2017,7 +2023,6 @@
       window.previewImageUrl(blogSettings.aboutImage || '', 'aboutImagePreview');
       document.getElementById('settingAboutBody').value = blogSettings.aboutBody || '';
     };
-
     window.saveBlogSettings = async function() {
       const updated = {
         ...blogSettings,
@@ -2028,7 +2033,6 @@
         aboutImage: document.getElementById('settingAboutImageUrl').value.trim(),
         aboutBody: document.getElementById('settingAboutBody').value.trim() || DEFAULT_SETTINGS.aboutBody
       };
-
       try {
         await set(ref(db, 'settings'), updated);
         window.showToast('تم حفظ الإعدادات بنجاح!');

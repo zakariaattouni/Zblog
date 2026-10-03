@@ -406,6 +406,7 @@
       background: var(--paper-color); border: 1px solid var(--border-color);
       border-right: 4px solid var(--accent-color);
       border-radius: var(--radius); padding: 22px;
+      position: relative;
     }
     .memory-title { font-family: var(--font-heading); font-size: 1.35rem; margin-bottom: 8px; line-height: 1.4; }
     .memory-meta { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
@@ -434,6 +435,43 @@
     .format-toolbar button:hover { border-color: var(--accent-color); color: var(--accent-color); }
     .section-heading { font-family: var(--font-heading); font-size: 1.7rem; margin-bottom: 8px; }
     .section-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
+
+    /* ===== أدوات القراءة (جديد) ===== */
+    .reading-toolbar {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin-bottom: 18px; padding: 10px 14px;
+      background-color: var(--paper-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .reading-toolbar button {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      background: var(--bg-color); border: 1px solid var(--border-color);
+      border-radius: 6px; padding: 7px 12px; cursor: pointer;
+      font-size: 0.85rem; color: var(--text-main);
+      transition: all 0.2s ease; font-family: inherit;
+    }
+    .reading-toolbar button:hover {
+      border-color: var(--accent-color); color: var(--accent-color);
+      transform: translateY(-1px);
+    }
+    .reading-toolbar button.active {
+      background-color: var(--accent-color); color: #fff; border-color: var(--accent-color);
+    }
+    .reading-toolbar button svg { width: 15px; height: 15px; }
+    .reading-toolbar .toolbar-label {
+      font-size: 0.8rem; color: var(--text-muted); margin-left: auto;
+    }
+    .font-size-indicator {
+      font-size: 0.8rem; font-weight: 700; color: var(--accent-color);
+      min-width: 32px; text-align: center;
+    }
+    /* فئات حجم الخط */
+    .article-content.font-small, .memory-content.font-small { font-size: 0.95rem !important; }
+    .article-content.font-medium, .memory-content.font-medium { font-size: 1.1rem !important; }
+    .article-content.font-large, .memory-content.font-large { font-size: 1.35rem !important; }
+    .article-content.font-xlarge, .memory-content.font-xlarge { font-size: 1.6rem !important; }
 
     /* ===== قسم المشاريع ===== */
     .projects-grid {
@@ -584,6 +622,8 @@
       .cat-chip { padding: 6px 14px; font-size: 0.85rem; }
       .load-more-btn { padding: 12px 16px; font-size: 0.9rem; }
       .projects-grid { grid-template-columns: 1fr; gap: 16px; }
+      .reading-toolbar { padding: 8px 10px; gap: 6px; }
+      .reading-toolbar button { padding: 6px 10px; font-size: 0.78rem; }
     }
   </style>
 </head>
@@ -1636,6 +1676,170 @@
       });
     };
 
+    // ========== أدوات القراءة (جديد) ==========
+    // فئة حجم الخط الافتراضية
+    window.currentFontSize = localStorage.getItem('reading_font_size') || 'medium';
+
+    window.setFontSize = function(size, contentSelector) {
+      // إزالة الفئات القديمة وإضافة الجديدة
+      const elements = document.querySelectorAll(contentSelector);
+      elements.forEach(el => {
+        el.classList.remove('font-small', 'font-medium', 'font-large', 'font-xlarge');
+        el.classList.add('font-' + size);
+      });
+      window.currentFontSize = size;
+      localStorage.setItem('reading_font_size', size);
+      // تحديث مؤشرات حجم الخط النشطة في نفس الشريط
+      document.querySelectorAll('.reading-toolbar').forEach(toolbar => {
+        // إذا كان الشريط هو الشريط الأب للعنصر الحالي
+        if (toolbar.closest('.article-content') || toolbar.nextElementSibling?.querySelector(contentSelector) || toolbar.parentElement.querySelector(contentSelector)) {
+          toolbar.querySelectorAll('.font-size-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.size === size);
+          });
+          const indicator = toolbar.querySelector('.font-size-indicator');
+          if (indicator) {
+            const labels = { small: 'ص', medium: 'م', large: 'ك', xlarge: 'ك+' };
+            indicator.textContent = labels[size] || 'م';
+          }
+        }
+      });
+    };
+
+    window.adjustFontSize = function(delta, contentSelector) {
+      const sizes = ['small', 'medium', 'large', 'xlarge'];
+      let idx = sizes.indexOf(window.currentFontSize);
+      if (idx === -1) idx = 1; // medium
+      idx = Math.max(0, Math.min(sizes.length - 1, idx + delta));
+      window.setFontSize(sizes[idx], contentSelector);
+    };
+
+    // إيقاف القراءة
+    window.stopReading = function() {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+      document.querySelectorAll('.reading-toolbar .listen-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.querySelector('span') && (btn.querySelector('span').textContent = 'استماع');
+      });
+    };
+
+    // بدء القراءة الناطقة
+    window.speakText = function(elementId, btnElement) {
+      if (!('speechSynthesis' in window)) {
+        alert('عذراً، متصفحك لا يدعم القراءة الصوتية.');
+        return;
+      }
+      const el = document.getElementById(elementId);
+      if (!el) return;
+
+      // إيقاف أي قراءة سابقة
+      window.speechSynthesis.cancel();
+
+      const text = el.innerText || el.textContent || '';
+      if (!text.trim()) {
+        window.showToast('لا يوجد نص لقراءته');
+        return;
+      }
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'ar-SA'; // اللغة العربية
+      utterance.rate = 0.85;    // سرعة هادئة
+      utterance.pitch = 0.8;    // نبرة منخفضة قليلاً لصوت رجولي هادئ
+      utterance.volume = 1;
+
+      // محاولة اختيار صوت رجولي عربي
+      const voices = window.speechSynthesis.getVoices();
+      // البحث عن صوت عربي
+      const arabicVoices = voices.filter(v => v.lang.startsWith('ar'));
+      // البحث عن صوت رجولي (غالباً ما يحتوي على كلمة male أو أسماء معروفة)
+      let selectedVoice = arabicVoices.find(v => 
+        v.name.toLowerCase().includes('male') || 
+        v.name.includes('Maged') || 
+        v.name.includes('Tarik') || 
+        v.name.includes('Hamza') || 
+        v.name.includes('Naayf') ||
+        v.name.includes('Majed')
+      );
+      // إن لم نجد، نأخذ أول صوت عربي
+      if (!selectedVoice && arabicVoices.length > 0) {
+        selectedVoice = arabicVoices[0];
+      }
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
+      // إذا كان الزر موجوداً، غيّر حالته
+      if (btnElement) {
+        btnElement.classList.add('active');
+        const span = btnElement.querySelector('span');
+        if (span) span.textContent = 'إيقاف';
+      }
+
+      utterance.onend = () => {
+        if (btnElement) {
+          btnElement.classList.remove('active');
+          const span = btnElement.querySelector('span');
+          if (span) span.textContent = 'استماع';
+        }
+      };
+
+      utterance.onerror = (e) => {
+        console.warn('Speech error:', e);
+        if (btnElement) {
+          btnElement.classList.remove('active');
+          const span = btnElement.querySelector('span');
+          if (span) span.textContent = 'استماع';
+        }
+      };
+
+      window.speechSynthesis.speak(utterance);
+    };
+
+    // جلب الأصوات (بعض المتصفحات تحتاج إلى تفعيلها)
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.getVoices(); // تشغيل الجلب
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+
+    // توليد شريط أدوات القراءة
+    window.buildReadingToolbar = function(contentId, contentSelector) {
+      const currentSize = window.currentFontSize || 'medium';
+      const labels = { small: 'ص', medium: 'م', large: 'ك', xlarge: 'ك+' };
+      return `
+        <div class="reading-toolbar">
+          <button type="button" class="listen-btn" onclick="window.toggleListen('${contentId}', this)" title="استماع">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            </svg>
+            <span>استماع</span>
+          </button>
+          <button type="button" class="font-size-btn ${currentSize==='small'?'active':''}" data-size="small" onclick="window.setFontSize('small','${contentSelector}')" title="تصغير الخط">ص</button>
+          <button type="button" class="font-size-btn ${currentSize==='medium'?'active':''}" data-size="medium" onclick="window.setFontSize('medium','${contentSelector}')" title="حجم عادي">م</button>
+          <button type="button" class="font-size-btn ${currentSize==='large'?'active':''}" data-size="large" onclick="window.setFontSize('large','${contentSelector}')" title="تكبير الخط">ك</button>
+          <button type="button" class="font-size-btn ${currentSize==='xlarge'?'active':''}" data-size="xlarge" onclick="window.setFontSize('xlarge','${contentSelector}')" title="تكبير إضافي">ك+</button>
+          <span class="font-size-indicator">${labels[currentSize] || 'م'}</span>
+          <span class="toolbar-label">قراءة هادئة</span>
+        </div>
+      `;
+    };
+
+    window.toggleListen = function(contentId, btnElement) {
+      if (window.speechSynthesis && window.speechSynthesis.speaking) {
+        // إذا كان يتحدث بالفعل، أوقفه
+        window.speechSynthesis.cancel();
+        btnElement.classList.remove('active');
+        const span = btnElement.querySelector('span');
+        if (span) span.textContent = 'استماع';
+      } else {
+        window.speakText(contentId, btnElement);
+      }
+    };
+
+    // ========== عرض المقال الفردي ==========
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
@@ -1649,7 +1853,12 @@
         if (/(<([^>]+)>)/i.test(sanitized)) formattedContent = sanitized;
         else formattedContent = sanitized.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
       }
-      const contentSection = formattedContent ? `<div class="article-content" id="articleBody">${formattedContent}</div>` : '';
+
+      const toolbar = window.buildReadingToolbar('articleBody', '#articleBody');
+      const contentSection = formattedContent ? `
+        ${toolbar}
+        <div class="article-content" id="articleBody">${formattedContent}</div>
+      ` : '';
       const titleHTML = post.title ? `<h1 class="article-title">${post.title}</h1>` : '';
 
       const shareButtons = `
@@ -1704,6 +1913,11 @@
           </div>
         </section>
       `;
+      // تفعيل فئة حجم الخط المحفوظة
+      const contentEl = document.getElementById('articleBody');
+      if (contentEl) {
+        contentEl.classList.add('font-' + (window.currentFontSize || 'medium'));
+      }
       window.listenToComments(postId);
       document.querySelectorAll('#articleBody img').forEach(img => {
         img.addEventListener('click', () => window.openLightbox(img.src));
@@ -2030,7 +2244,7 @@
     };
 
     // ==================================================
-    // غرفة الذكريات
+    // غرفة الذكريات (تم إضافة أدوات القراءة)
     // ==================================================
     window.renderMemories = function() {
       const container = document.getElementById('memoriesList');
@@ -2040,7 +2254,12 @@
         return;
       }
       container.innerHTML = memories.map(m => {
-        const contentHTML = m.content ? `<div class="memory-content">${window.formatMemoryContent(m.content)}</div>` : '';
+        const contentId = `memory-content-${m.id}`;
+        const contentHTML = m.content ? `
+          <div class="memory-content" id="${contentId}">${window.formatMemoryContent(m.content)}</div>
+        ` : '';
+        // شريط أدوات القراءة لكل ذكرى
+        const toolbar = window.buildReadingToolbar(contentId, `#${contentId}`);
         const imagesHTML = (m.images && m.images.length)
           ? `<div class="memory-images">${m.images.map(u => `<img src="${u}" alt="صورة ذكرى" loading="lazy" onclick="event.stopPropagation(); window.openLightbox('${u}')">`).join('')}</div>`
           : '';
@@ -2048,11 +2267,17 @@
           <article class="memory-card">
             ${m.title ? `<h3 class="memory-title">${m.title}</h3>` : ''}
             ${m.date ? `<div class="memory-meta"><span>📅 ${m.date}</span></div>` : ''}
+            ${toolbar}
             ${contentHTML}
             ${imagesHTML}
           </article>
         `;
       }).join('');
+      // تفعيل فئات حجم الخط المحفوظة على عناصر المحتوى
+      const size = window.currentFontSize || 'medium';
+      document.querySelectorAll('.memory-content').forEach(el => {
+        el.classList.add('font-' + size);
+      });
     };
 
     window.renderAdminMemoriesList = function() {

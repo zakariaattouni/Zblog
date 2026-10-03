@@ -201,6 +201,42 @@
     .mini-share-btn.wa { color: #25d366; }
     .mini-share-btn.tg { color: #0088cc; }
     .mini-share-btn.copy { color: var(--accent-color); }
+
+    /* ===== زاوية من أنا ===== */
+    .about-me-zone {
+      display: flex; gap: 14px; align-items: flex-start;
+      background-color: var(--paper-color); border: 1px solid var(--border-color);
+      border-radius: var(--radius); padding: 16px 18px; margin-bottom: 25px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+    .about-me-zone:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+    .about-me-avatar {
+      width: 60px; height: 60px; min-width: 60px; min-height: 60px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid var(--accent-color);
+      cursor: pointer;
+      background: linear-gradient(135deg, #eef2f0, #f7f7f6);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; color: var(--text-muted);
+      overflow: hidden;
+    }
+    .about-me-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+    .about-me-body { flex: 1; min-width: 0; }
+    .about-me-name {
+      font-family: var(--font-heading); font-size: 1.05rem; font-weight: 700;
+      color: var(--text-main); margin-bottom: 4px;
+    }
+    .about-me-text {
+      font-size: 0.92rem; color: #444; line-height: 1.7;
+      word-wrap: break-word;
+    }
+    .about-me-signature {
+      font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;
+      font-style: italic;
+    }
+
     .article-header { margin-bottom: 25px; }
     .article-title { font-family: var(--font-heading); font-size: 2.1rem; line-height: 1.3; margin-top: 8px; margin-bottom: 12px; }
     .article-cover {
@@ -639,6 +675,8 @@
       .projects-grid { grid-template-columns: 1fr; gap: 16px; }
       .reading-toolbar { padding: 8px 10px; gap: 6px; }
       .reading-toolbar button { padding: 6px 10px; font-size: 0.78rem; }
+      .about-me-zone { padding: 14px; gap: 12px; }
+      .about-me-avatar { width: 52px; height: 52px; min-width: 52px; min-height: 52px; }
     }
   </style>
 </head>
@@ -723,6 +761,18 @@
 
   <main>
     <section id="page-home" class="page active">
+      <!-- زاوية: من أنا -->
+      <div id="aboutMeZone" class="about-me-zone" style="display:none;">
+        <div class="about-me-avatar" id="aboutMeAvatar" onclick="window.openAboutMeImage()">
+          <span id="aboutMeAvatarPlaceholder">🌿</span>
+        </div>
+        <div class="about-me-body">
+          <div class="about-me-name" id="aboutMeName">زكريا</div>
+          <div class="about-me-text" id="aboutMeText"></div>
+          <div class="about-me-signature" id="aboutMeSignature"></div>
+        </div>
+      </div>
+
       <div class="search-box">
         <input type="text" id="searchInput" class="search-input" placeholder="بحث في المقالات..." oninput="window.handleSearch()">
       </div>
@@ -787,6 +837,7 @@
         <button class="admin-tab" onclick="window.switchAdminTab('projects', event)">إدارة المشاريع</button>
         <button class="admin-tab" onclick="window.switchAdminTab('album', event)">إدارة الألبوم</button>
         <button class="admin-tab" onclick="window.switchAdminTab('memories', event)">إدارة الذكريات</button>
+        <button class="admin-tab" onclick="window.switchAdminTab('aboutme', event)">زاوية من أنا</button>
         <button class="admin-tab" onclick="window.switchAdminTab('comments', event)">إدارة التعليقات</button>
         <button class="admin-tab" onclick="window.switchAdminTab('settings', event)">إعدادات المدونة</button>
         <button class="admin-tab" onclick="window.logoutAdmin()" style="color: var(--danger-color);">خروج</button>
@@ -992,6 +1043,45 @@
         <div id="adminMemoriesList" class="admin-post-list"></div>
       </div>
 
+      <!-- ===== إدارة زاوية من أنا ===== -->
+      <div id="admin-tab-aboutme" class="admin-tab-content" style="display: none;">
+        <h3 style="margin-bottom: 10px;">زاوية «من أنا»</h3>
+        <p class="paste-help">هذه بطاقة صغيرة تظهر في أعلى الصفحة الرئيسية بصورتك المستديرة ونصّك الخاص. اكتب ما تشاء وسيظهر مباشرة.</p>
+
+        <div class="form-group">
+          <label>الاسم الظاهر</label>
+          <input type="text" id="aboutMeNameInput" placeholder="مثال: زكريا" maxlength="40">
+        </div>
+
+        <div class="form-group">
+          <label>النص (يدعم HTML بسيط مثل &lt;strong&gt; و &lt;em&gt;)</label>
+          <textarea id="aboutMeTextInput" rows="4" placeholder="اكتب هنا تعريفاً قصيراً عنك... مثال: طبيب وأديب، أكتب ما يخطر في بالي من خواطر وتأملات."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>التوقيع أو السطر السفلي (اختياري)</label>
+          <input type="text" id="aboutMeSignatureInput" placeholder="مثال: دمشق — 2026" maxlength="60">
+        </div>
+
+        <div class="form-group">
+          <label>رابط الصورة المستديرة الصغيرة</label>
+          <input type="url" id="aboutMeImageInput" placeholder="https://example.com/avatar.jpg" oninput="window.previewImageUrl(this.value, 'aboutMeImagePreview')">
+          <img id="aboutMeImagePreview" src="" style="max-height: 120px; margin-top: 10px; display: none; border-radius: 50%;">
+        </div>
+
+        <div class="form-group">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+            <input type="checkbox" id="aboutMeEnabledInput" style="width:auto;">
+            <span>إظهار الزاوية في الصفحة الرئيسية</span>
+          </label>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+          <button class="btn" onclick="window.saveAboutMe()">حفظ</button>
+          <button class="btn btn-secondary" onclick="window.loadAboutMeToForm()">إعادة تحميل الحالي</button>
+        </div>
+      </div>
+
       <div id="admin-tab-comments" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">إدارة جميع التعليقات</h3>
         <div id="adminCommentsList" class="admin-post-list"></div>
@@ -1058,11 +1148,6 @@
     <img id="lightboxImg" src="" alt="عرض مكبر">
   </div>
 
-  <!-- موسيقى الخلفية (أجواء خيالية/سحرية/جبال وضباب) -->
-  <audio id="bgMusic" loop preload="auto">
-    <source src="https://ia800905.us.archive.org/19/items/FREE_background_music_dhalius/ambient_slow.mp3" type="audio/mpeg">
-  </audio>
-
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
@@ -1092,7 +1177,16 @@
       aboutImage: ""
     };
 
+    const DEFAULT_ABOUTME = {
+      enabled: false,
+      name: "زكريا",
+      text: "",
+      signature: "",
+      image: ""
+    };
+
     let blogSettings = { ...DEFAULT_SETTINGS };
+    let aboutMe = { ...DEFAULT_ABOUTME };
     let blogPosts = [];
     let albumItems = [];
     let memories = [];
@@ -1209,58 +1303,155 @@
       document.getElementById('lightbox').classList.remove('active');
     };
 
-    // ========== الموسيقى الخلفية ==========
+    // ========== الموسيقى الخلفية (مولّدة برمجياً - أجواء ضباب وجبال) ==========
     let musicEnabled = false;
-    let currentMusicBtn = null;
-    const bgMusic = document.getElementById('bgMusic');
-    if (bgMusic) {
-      bgMusic.volume = 0.35;
+    let audioContext = null;
+    let musicNodes = [];
+    let musicMasterGain = null;
+    let musicLFOs = [];
+
+    const MUSIC_FREQUENCIES = [
+      110.00, 130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00
+    ];
+
+    function initAudioContext() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      return audioContext;
+    }
+
+    function startAmbientMusic() {
+      const ctx = initAudioContext();
+
+      musicMasterGain = ctx.createGain();
+      musicMasterGain.gain.value = 0;
+      musicMasterGain.connect(ctx.destination);
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 1200;
+      filter.Q.value = 0.5;
+      filter.connect(musicMasterGain);
+
+      const delay = ctx.createDelay();
+      delay.delayTime.value = 0.6;
+      const delayFeedback = ctx.createGain();
+      delayFeedback.gain.value = 0.4;
+      const delayWet = ctx.createGain();
+      delayWet.gain.value = 0.5;
+
+      filter.connect(delay);
+      delay.connect(delayFeedback);
+      delayFeedback.connect(delay);
+      delay.connect(delayWet);
+      delayWet.connect(musicMasterGain);
+
+      const numVoices = 5;
+      const shuffled = [...MUSIC_FREQUENCIES].sort(() => Math.random() - 0.5);
+      const selectedFreqs = shuffled.slice(0, numVoices);
+
+      selectedFreqs.forEach((freq, index) => {
+        const osc = ctx.createOscillator();
+        osc.type = index % 2 === 0 ? 'sine' : 'triangle';
+        osc.frequency.value = freq;
+
+        const lfo = ctx.createOscillator();
+        lfo.type = 'sine';
+        lfo.frequency.value = 0.05 + Math.random() * 0.1;
+        const lfoGain = ctx.createGain();
+        lfoGain.gain.value = freq * 0.005;
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+        lfo.start();
+
+        const voiceGain = ctx.createGain();
+        voiceGain.gain.value = 0;
+
+        const ampLFO = ctx.createOscillator();
+        ampLFO.type = 'sine';
+        ampLFO.frequency.value = 0.03 + Math.random() * 0.07;
+        const ampLFOGain = ctx.createGain();
+        ampLFOGain.gain.value = 0.04;
+        ampLFO.connect(ampLFOGain);
+        ampLFOGain.connect(voiceGain.gain);
+        ampLFO.start();
+
+        osc.connect(voiceGain);
+        voiceGain.connect(filter);
+
+        const baseGain = 0.08 - (index * 0.008);
+        voiceGain.gain.value = baseGain;
+
+        osc.start();
+
+        musicNodes.push(osc);
+        musicLFOs.push(lfo, ampLFO);
+
+        voiceGain.gain.setValueAtTime(baseGain, ctx.currentTime);
+      });
+
+      const now = ctx.currentTime;
+      musicMasterGain.gain.setValueAtTime(0, now);
+      musicMasterGain.gain.linearRampToValueAtTime(0.35, now + 3);
+    }
+
+    function stopAmbientMusic() {
+      if (!audioContext || !musicMasterGain) return;
+      const now = audioContext.currentTime;
+      musicMasterGain.gain.cancelScheduledValues(now);
+      musicMasterGain.gain.setValueAtTime(musicMasterGain.gain.value, now);
+      musicMasterGain.gain.linearRampToValueAtTime(0, now + 1.5);
+
+      setTimeout(() => {
+        musicNodes.forEach(osc => { try { osc.stop(); } catch(e) {} });
+        musicLFOs.forEach(lfo => { try { lfo.stop(); } catch(e) {} });
+        musicNodes = [];
+        musicLFOs = [];
+        musicMasterGain = null;
+      }, 1600);
     }
 
     window.toggleMusic = function(btnElement) {
-      if (!bgMusic) {
-        window.showToast('الموسيقى غير متوفرة');
-        return;
-      }
-
-      if (musicEnabled) {
-        bgMusic.pause();
-        musicEnabled = false;
-        document.querySelectorAll('.reading-toolbar .music-btn').forEach(btn => {
-          btn.classList.remove('active');
-          const span = btn.querySelector('span');
-          if (span) span.textContent = 'أجواء';
-        });
-      } else {
+      try {
+        if (musicEnabled) {
+          stopAmbientMusic();
+          musicEnabled = false;
+          document.querySelectorAll('.reading-toolbar .music-btn').forEach(btn => {
+            btn.classList.remove('active');
+            const span = btn.querySelector('span');
+            if (span) span.textContent = 'أجواء';
+          });
+        } else {
+          if (btnElement) {
+            const span = btnElement.querySelector('span');
+            if (span) span.textContent = '...';
+          }
+          startAmbientMusic();
+          musicEnabled = true;
+          document.querySelectorAll('.reading-toolbar .music-btn').forEach(btn => {
+            btn.classList.add('active');
+            const span = btn.querySelector('span');
+            if (span) span.textContent = 'إيقاف';
+          });
+          window.showToast('🎵 تعمل الموسيقى الآن');
+        }
+      } catch (err) {
+        console.error('Music error:', err);
+        window.showToast('تعذر تشغيل الموسيقى');
         if (btnElement) {
           const span = btnElement.querySelector('span');
-          if (span) span.textContent = '...';
-        }
-
-        const playPromise = bgMusic.play();
-        if (playPromise !== undefined) {
-          playPromise.then(() => {
-            musicEnabled = true;
-            document.querySelectorAll('.reading-toolbar .music-btn').forEach(btn => {
-              btn.classList.add('active');
-              const span = btn.querySelector('span');
-              if (span) span.textContent = 'إيقاف';
-            });
-          }).catch(err => {
-            console.warn('فشل تشغيل الموسيقى:', err);
-            window.showToast('تعذر تشغيل الموسيقى - تحقق من اتصالك بالإنترنت');
-            if (btnElement) {
-              const span = btnElement.querySelector('span');
-              if (span) span.textContent = 'أجواء';
-            }
-          });
+          if (span) span.textContent = 'أجواء';
         }
       }
     };
 
     window.stopMusic = function() {
-      if (bgMusic && !bgMusic.paused) {
-        bgMusic.pause();
+      if (musicEnabled) {
+        stopAmbientMusic();
         musicEnabled = false;
         document.querySelectorAll('.reading-toolbar .music-btn').forEach(btn => {
           btn.classList.remove('active');
@@ -1405,12 +1596,22 @@
       }
     }
 
+    // ========== Firebase Listeners ==========
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
       if (data) blogSettings = { ...DEFAULT_SETTINGS, ...data };
       else set(ref(db, 'settings'), DEFAULT_SETTINGS);
       window.applySettings();
       window.renderAboutPage();
+    });
+
+    // ✅ مستمع زاوية "من أنا"
+    onValue(ref(db, 'aboutMe'), (snapshot) => {
+      const data = snapshot.val();
+      if (data) aboutMe = { ...DEFAULT_ABOUTME, ...data };
+      else aboutMe = { ...DEFAULT_ABOUTME };
+      window.renderAboutMe();
+      if (isAdminLoggedIn) window.loadAboutMeToForm();
     });
 
     onValue(ref(db, 'posts'), (snapshot) => {
@@ -1592,6 +1793,84 @@
         ogImage.setAttribute('content', blogSettings.headerCover);
         document.head.appendChild(ogImage);
       }
+    };
+
+    // ========== زاوية "من أنا" ==========
+    window.renderAboutMe = function() {
+      const zone = document.getElementById('aboutMeZone');
+      if (!zone) return;
+
+      if (!aboutMe.enabled) {
+        zone.style.display = 'none';
+        return;
+      }
+
+      zone.style.display = 'flex';
+
+      const nameEl = document.getElementById('aboutMeName');
+      const textEl = document.getElementById('aboutMeText');
+      const sigEl = document.getElementById('aboutMeSignature');
+      const avatarEl = document.getElementById('aboutMeAvatar');
+
+      if (nameEl) nameEl.textContent = aboutMe.name || 'زكريا';
+
+      if (textEl) {
+        if (aboutMe.text) {
+          // السماح بـ HTML بسيط (strong, em, u, a)
+          const allowed = String(aboutMe.text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/&lt;(\/?)(strong|em|u|b|i|a)(\s[^&]*?)?&gt;/gi, '<$1$2$3>')
+            .replace(/&amp;nbsp;/g, ' ');
+          textEl.innerHTML = allowed;
+        } else {
+          textEl.innerHTML = '';
+        }
+      }
+
+      if (sigEl) sigEl.textContent = aboutMe.signature || '';
+
+      if (avatarEl) {
+        if (aboutMe.image) {
+          avatarEl.innerHTML = `<img src="${aboutMe.image}" alt="${aboutMe.name || 'صورة'}">`;
+        } else {
+          avatarEl.innerHTML = `<span id="aboutMeAvatarPlaceholder">🌿</span>`;
+        }
+      }
+    };
+
+    window.openAboutMeImage = function() {
+      if (aboutMe.image) window.openLightbox(aboutMe.image);
+    };
+
+    window.loadAboutMeToForm = function() {
+      const enabledEl = document.getElementById('aboutMeEnabledInput');
+      const nameEl = document.getElementById('aboutMeNameInput');
+      const textEl = document.getElementById('aboutMeTextInput');
+      const sigEl = document.getElementById('aboutMeSignatureInput');
+      const imgEl = document.getElementById('aboutMeImageInput');
+      if (enabledEl) enabledEl.checked = !!aboutMe.enabled;
+      if (nameEl) nameEl.value = aboutMe.name || '';
+      if (textEl) textEl.value = aboutMe.text || '';
+      if (sigEl) sigEl.value = aboutMe.signature || '';
+      if (imgEl) {
+        imgEl.value = aboutMe.image || '';
+        window.previewImageUrl(aboutMe.image || '', 'aboutMeImagePreview');
+      }
+    };
+
+    window.saveAboutMe = async function() {
+      const enabled = document.getElementById('aboutMeEnabledInput').checked;
+      const name = document.getElementById('aboutMeNameInput').value.trim();
+      const text = document.getElementById('aboutMeTextInput').value.trim();
+      const signature = document.getElementById('aboutMeSignatureInput').value.trim();
+      const image = document.getElementById('aboutMeImageInput').value.trim();
+
+      try {
+        await set(ref(db, 'aboutMe'), { enabled, name, text, signature, image, updatedAt: Date.now() });
+        window.showToast('تم حفظ زاوية «من أنا» بنجاح!');
+      } catch (err) { alert('تعذر الحفظ: ' + (err.message || err)); }
     };
 
     window.renderAboutPage = function() {
@@ -2401,6 +2680,7 @@
       if (tabName === 'projects') window.renderAdminProjectsList();
       if (tabName === 'album') window.renderAdminAlbumList();
       if (tabName === 'memories') window.renderAdminMemoriesList();
+      if (tabName === 'aboutme') window.loadAboutMeToForm();
       if (tabName === 'comments') window.renderAdminCommentsList();
       if (tabName === 'settings') window.loadSettingsToForm();
     };

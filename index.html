@@ -459,9 +459,6 @@
     .reading-toolbar button.active {
       background-color: var(--accent-color); color: #fff; border-color: var(--accent-color);
     }
-    .reading-toolbar .toolbar-label {
-      font-size: 0.8rem; color: var(--text-muted); margin-left: auto;
-    }
     .font-size-indicator {
       font-size: 0.8rem; font-weight: 700; color: var(--accent-color);
       min-width: 32px; text-align: center;
@@ -1084,6 +1081,23 @@
     window.currentViewPostId = null;
     window.currentCategory = null;
 
+    // ============ تصحيح الأخطاء الإملائية الشائعة ============
+    // يحوّل "خواطى" إلى "خواطر" و"مذكرات" (إذا لزم) تلقائياً عند العرض
+    window.fixArabicTypos = function(text) {
+      if (!text) return text;
+      let fixed = String(text);
+      // خواطى ← خواطر (بجميع أشكالها)
+      fixed = fixed.replace(/خواطى/g, 'خواطر');
+      fixed = fixed.replace(/خواطئ/g, 'خواطر');
+      // أخطاء شائعة أخرى
+      fixed = fixed.replace(/إنشاء الله/g, 'إن شاء الله');
+      fixed = fixed.replace(/انشاء الله/g, 'إن شاء الله');
+      fixed = fixed.replace(/لاكن/g, 'لكن');
+      fixed = fixed.replace(/الذى/g, 'الذي');
+      fixed = fixed.replace(/التى/g, 'التي');
+      return fixed;
+    };
+
     // ============ أدوات مساعدة ============
     window.showToast = function(message) {
       const toast = document.getElementById('toast');
@@ -1428,13 +1442,14 @@
       const scroll = document.getElementById('categoriesScroll');
       if (!scroll) return;
       const published = window.getPublishedPosts();
-      const categories = [...new Set(published.map(p => p.category).filter(Boolean))];
+      // استخدام دالة تصحيح الأخطاء عند استخراج التصنيفات
+      const categories = [...new Set(published.map(p => p.category ? window.fixArabicTypos(p.category) : null).filter(Boolean))];
 
       let html = `<button class="cat-chip ${!window.currentCategory ? 'active' : ''}"
                     onclick="window.selectCategory(null)">الكل</button>`;
 
       categories.forEach(cat => {
-        const count = published.filter(p => p.category === cat).length;
+        const count = published.filter(p => p.category && window.fixArabicTypos(p.category) === cat).length;
         const safeCat = String(cat).replace(/'/g, "\\'");
         html += `<button class="cat-chip ${window.currentCategory === cat ? 'active' : ''}"
                    onclick="window.selectCategory('${safeCat}')">
@@ -1454,13 +1469,15 @@
 
     window.getVisibleHomePosts = function() {
       let posts = window.getPublishedPosts();
-      if (window.currentCategory) posts = posts.filter(p => p.category === window.currentCategory);
+      if (window.currentCategory) {
+        posts = posts.filter(p => p.category && window.fixArabicTypos(p.category) === window.currentCategory);
+      }
       const q = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
       if (q) {
         posts = posts.filter(p =>
-          (p.title && p.title.toLowerCase().includes(q)) ||
-          (p.content && p.content.toLowerCase().includes(q)) ||
-          (p.category && p.category.toLowerCase().includes(q))
+          (p.title && window.fixArabicTypos(p.title).toLowerCase().includes(q)) ||
+          (p.content && window.fixArabicTypos(p.content).toLowerCase().includes(q)) ||
+          (p.category && window.fixArabicTypos(p.category).toLowerCase().includes(q))
         );
       }
       return posts;
@@ -1497,15 +1514,17 @@
     window.buildPostItem = function(post) {
       const excerpt = window.getCleanExcerpt(post.content, 140);
       const excerptHTML = excerpt ? `<p class="post-item-excerpt">${excerpt}</p>` : '';
-      const titleHTML = post.title ? `<h2 class="post-item-title"><a href="#" onclick="window.navigateTo('post', '${post.id}'); return false;">${post.title}</a></h2>` : '';
-      const coverHTML = post.cover ? `<div class="post-item-cover"><img src="${post.cover}" alt="${post.title || 'صورة'}" onclick="window.openLightbox('${post.cover}')"></div>` : '';
+      const fixedTitle = post.title ? window.fixArabicTypos(post.title) : '';
+      const fixedCategory = post.category ? window.fixArabicTypos(post.category) : '';
+      const titleHTML = fixedTitle ? `<h2 class="post-item-title"><a href="#" onclick="window.navigateTo('post', '${post.id}'); return false;">${fixedTitle}</a></h2>` : '';
+      const coverHTML = post.cover ? `<div class="post-item-cover"><img src="${post.cover}" alt="${fixedTitle || 'صورة'}" onclick="window.openLightbox('${post.cover}')"></div>` : '';
 
       const item = document.createElement('article');
       item.className = 'post-item';
       item.innerHTML = `
         <div class="post-item-meta">
           <span>${post.date}</span>
-          ${post.category ? `<span class="post-item-category">${post.category}</span>` : ''}
+          ${fixedCategory ? `<span class="post-item-category">${fixedCategory}</span>` : ''}
         </div>
         ${titleHTML}
         ${coverHTML}
@@ -1592,28 +1611,28 @@
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
       const url = encodeURIComponent(window.getPostUrl(postId));
-      const title = encodeURIComponent(post.title || blogSettings.title);
+      const title = encodeURIComponent(window.fixArabicTypos(post.title) || blogSettings.title);
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`, '_blank', 'width=600,height=400');
     };
     window.shareToTwitter = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
       const url = encodeURIComponent(window.getPostUrl(postId));
-      const title = encodeURIComponent(post.title || blogSettings.title);
+      const title = encodeURIComponent(window.fixArabicTypos(post.title) || blogSettings.title);
       window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=600,height=400');
     };
     window.shareToWhatsApp = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
       const url = encodeURIComponent(window.getPostUrl(postId));
-      const title = encodeURIComponent(post.title || blogSettings.title);
+      const title = encodeURIComponent(window.fixArabicTypos(post.title) || blogSettings.title);
       window.open(`https://api.whatsapp.com/send?text=${title}%20${url}`, '_blank');
     };
     window.shareToTelegram = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       if (!post) return;
       const url = encodeURIComponent(window.getPostUrl(postId));
-      const title = encodeURIComponent(post.title || blogSettings.title);
+      const title = encodeURIComponent(window.fixArabicTypos(post.title) || blogSettings.title);
       window.open(`https://t.me/share/url?url=${url}&text=${title}`, '_blank');
     };
     window.copyLink = function(postId) { window.copyToClipboard(window.getPostUrl(postId)); };
@@ -1640,7 +1659,7 @@
       const container = document.getElementById('categoriesList');
       if (!container) return;
       container.innerHTML = '';
-      const categories = [...new Set(window.getPublishedPosts().map(p => p.category).filter(Boolean))];
+      const categories = [...new Set(window.getPublishedPosts().map(p => p.category ? window.fixArabicTypos(p.category) : null).filter(Boolean))];
       if (categories.length === 0) {
         container.innerHTML = '<p style="color: var(--text-muted);">لا توجد تصنيفات حالياً.</p>';
         return;
@@ -1655,7 +1674,7 @@
     };
 
     window.filterByCategory = function(category) {
-      const filtered = window.getPublishedPosts().filter(p => p.category === category);
+      const filtered = window.getPublishedPosts().filter(p => p.category && window.fixArabicTypos(p.category) === category);
       const resContainer = document.getElementById('categoryPostsResult');
       resContainer.innerHTML = `<h3 style="margin-bottom:15px; font-family:var(--font-heading)">المقالات تحت تصنيف: ${category}</h3>`;
       const subList = document.createElement('div');
@@ -1665,7 +1684,7 @@
         const item = document.createElement('article');
         item.className = 'post-item';
         item.innerHTML = `
-          <h2 class="post-item-title"><a href="#" onclick="window.navigateTo('post', '${post.id}'); return false;">${post.title || 'منشور'}</a></h2>
+          <h2 class="post-item-title"><a href="#" onclick="window.navigateTo('post', '${post.id}'); return false;">${window.fixArabicTypos(post.title) || 'منشور'}</a></h2>
           <div class="post-item-meta"><span>${post.date}</span></div>
         `;
         subList.appendChild(item);
@@ -1718,13 +1737,15 @@
       const container = document.getElementById('postSingleContainer');
       if (!post) { container.innerHTML = '<p>المقال غير موجود.</p>'; return; }
 
-      const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${post.title || 'صورة'}" onclick="window.openLightbox('${post.cover}')"></div>` : '';
+      const fixedTitle = post.title ? window.fixArabicTypos(post.title) : '';
+      const fixedCategory = post.category ? window.fixArabicTypos(post.category) : '';
+      const coverHTML = post.cover ? `<div class="article-cover"><img src="${post.cover}" alt="${fixedTitle || 'صورة'}" onclick="window.openLightbox('${post.cover}')"></div>` : '';
 
       let formattedContent = '';
       if (post.content) {
         const sanitized = window.sanitizeContent(post.content);
-        if (/(<([^>]+)>)/i.test(sanitized)) formattedContent = sanitized;
-        else formattedContent = sanitized.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
+        if (/(<([^>]+)>)/i.test(sanitized)) formattedContent = window.fixArabicTypos(sanitized);
+        else formattedContent = window.fixArabicTypos(sanitized).split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
       }
 
       const toolbar = formattedContent ? window.buildReadingToolbar('#articleBody') : '';
@@ -1732,7 +1753,7 @@
         ${toolbar}
         <div class="article-content" id="articleBody">${formattedContent}</div>
       ` : '';
-      const titleHTML = post.title ? `<h1 class="article-title">${post.title}</h1>` : '';
+      const titleHTML = fixedTitle ? `<h1 class="article-title">${fixedTitle}</h1>` : '';
 
       const shareButtons = `
         <div class="article-share">
@@ -1767,7 +1788,7 @@
           <div class="article-header">
             <div class="post-item-meta">
               <span>${post.date}</span>
-              ${post.category ? `<span class="post-item-category">${post.category}</span>` : ''}
+              ${fixedCategory ? `<span class="post-item-category">${fixedCategory}</span>` : ''}
             </div>
             ${titleHTML}
           </div>
@@ -2127,8 +2148,9 @@
       }
       container.innerHTML = memories.map(m => {
         const contentId = `memory-content-${m.id}`;
+        const fixedTitle = m.title ? window.fixArabicTypos(m.title) : '';
         const contentHTML = m.content ? `
-          <div class="memory-content" id="${contentId}">${window.formatMemoryContent(m.content)}</div>
+          <div class="memory-content" id="${contentId}">${window.fixArabicTypos(window.formatMemoryContent(m.content))}</div>
         ` : '';
         const toolbar = m.content ? window.buildReadingToolbar(`#${contentId}`) : '';
         const imagesHTML = (m.images && m.images.length)
@@ -2136,7 +2158,7 @@
           : '';
         return `
           <article class="memory-card">
-            ${m.title ? `<h3 class="memory-title">${m.title}</h3>` : ''}
+            ${fixedTitle ? `<h3 class="memory-title">${fixedTitle}</h3>` : ''}
             ${m.date ? `<div class="memory-meta"><span>📅 ${m.date}</span></div>` : ''}
             ${toolbar}
             ${contentHTML}

@@ -436,7 +436,7 @@
     .section-heading { font-family: var(--font-heading); font-size: 1.7rem; margin-bottom: 8px; }
     .section-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    /* ===== شريط حجم الخط ===== */
+    /* ===== شريط حجم الخط + الموسيقى ===== */
     .reading-toolbar {
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       margin-bottom: 18px; padding: 10px 14px;
@@ -458,6 +458,32 @@
     }
     .reading-toolbar button.active {
       background-color: var(--accent-color); color: #fff; border-color: var(--accent-color);
+    }
+    .reading-toolbar button.music-btn {
+      background: linear-gradient(135deg, #4a3b6b, #3b5249);
+      color: #fff; border-color: transparent;
+    }
+    .reading-toolbar button.music-btn:hover {
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 3px 10px rgba(74, 59, 107, 0.35);
+    }
+    .reading-toolbar button.music-btn.active {
+      background: linear-gradient(135deg, #6b5a95, #4a6b5e);
+      box-shadow: 0 0 0 2px rgba(107, 90, 149, 0.3);
+    }
+    .reading-toolbar button.music-btn svg {
+      animation: musicPulse 2s ease-in-out infinite;
+    }
+    .reading-toolbar button.music-btn.active svg {
+      animation: musicSpin 3s linear infinite;
+    }
+    @keyframes musicPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+    @keyframes musicSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
     .font-size-indicator {
       font-size: 0.8rem; font-weight: 700; color: var(--accent-color);
@@ -800,8 +826,21 @@
           <img id="postCoverPreview" src="" style="max-height: 120px; margin-top: 10px; display: none;">
         </div>
         <div class="form-group">
-          <label>نص المقال</label>
-          <textarea id="postContentInput" rows="10" placeholder="اكتب النص هنا... (اختياري في حال نشر صورة فقط)"></textarea>
+          <label>نص المقال (يقبل HTML منسقاً)</label>
+          <div class="format-toolbar" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:6px;">
+            <button type="button" onclick="window.wrapPostSelection('<h2>','</h2>')">عنوان فرعي</button>
+            <button type="button" onclick="window.wrapPostSelection('<h3>','</h3>')">عنوان صغير</button>
+            <button type="button" onclick="window.wrapPostSelection('<strong>','</strong>')">غامق</button>
+            <button type="button" onclick="window.wrapPostSelection('<em>','</em>')">مائل</button>
+            <button type="button" onclick="window.wrapPostSelection('<u>','</u>')">تحته خط</button>
+            <button type="button" onclick="window.wrapPostSelection('<p>','</p>')">فقرة</button>
+            <button type="button" onclick="window.wrapPostSelection('<blockquote>','</blockquote>')">اقتباس</button>
+            <button type="button" onclick="window.wrapPostSelection('<ul>\n<li>','</li>\n</ul>')">قائمة</button>
+            <button type="button" onclick="window.wrapPostSelection('<a href=&quot;URL&quot;>','</a>')">رابط</button>
+            <button type="button" onclick="window.insertPostLineBreak()">سطر فاصل</button>
+          </div>
+          <textarea id="postContentInput" rows="12" placeholder="اكتب النص هنا... يمكنك لصق HTML مباشرة أو استخدام أزرار التنسيق أعلاه."></textarea>
+          <small style="color: var(--text-muted); font-size:0.78rem;">💡 المحرر يقبل HTML منسقاً: ألصق الكود المنسق وسيظهر مباشرة عند العرض.</small>
         </div>
         <div class="form-group">
           <label>إضافة صورة داخل النص عبر الرابط</label>
@@ -1042,6 +1081,11 @@
     <img id="lightboxImg" src="" alt="عرض مكبر">
   </div>
 
+  <!-- موسيقى الخلفية (أجواء خيالية/سحرية/جبال وضباب) -->
+  <audio id="bgMusic" loop preload="none">
+    <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_5f0b8a7fb1.mp3?filename=mystical-ambient-124146.mp3" type="audio/mpeg">
+  </audio>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
@@ -1082,14 +1126,11 @@
     window.currentCategory = null;
 
     // ============ تصحيح الأخطاء الإملائية الشائعة ============
-    // يحوّل "خواطى" إلى "خواطر" و"مذكرات" (إذا لزم) تلقائياً عند العرض
     window.fixArabicTypos = function(text) {
       if (!text) return text;
       let fixed = String(text);
-      // خواطى ← خواطر (بجميع أشكالها)
       fixed = fixed.replace(/خواطى/g, 'خواطر');
       fixed = fixed.replace(/خواطئ/g, 'خواطر');
-      // أخطاء شائعة أخرى
       fixed = fixed.replace(/إنشاء الله/g, 'إن شاء الله');
       fixed = fixed.replace(/انشاء الله/g, 'إن شاء الله');
       fixed = fixed.replace(/لاكن/g, 'لكن');
@@ -1140,6 +1181,7 @@
     window.formatMemoryContent = function(content) {
       if (!content) return '';
       const sanitized = window.sanitizeContent(content);
+      // إذا احتوى على HTML نعرضه كما هو، وإلا نحول الأسطر لفقرات
       if (/(<([^>]+)>)/i.test(sanitized)) return sanitized;
       return sanitized.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
     };
@@ -1166,12 +1208,78 @@
       window.showToast('تم إدراج رابط الصورة في النص');
     };
 
+    // ========== أدوات التنسيق للمحرر العادي (جديد) ==========
+    window.wrapPostSelection = function(openTag, closeTag) {
+      const ta = document.getElementById('postContentInput');
+      if (!ta) return;
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const selected = ta.value.substring(start, end);
+      const insert = openTag + (selected || 'النص') + closeTag;
+      ta.value = ta.value.substring(0, start) + insert + ta.value.substring(end);
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = start + insert.length;
+    };
+
+    window.insertPostLineBreak = function() {
+      const ta = document.getElementById('postContentInput');
+      if (!ta) return;
+      ta.value += '\n<hr>\n';
+      ta.focus();
+    };
+
     window.openLightbox = function(src) {
       document.getElementById('lightboxImg').src = src;
       document.getElementById('lightbox').classList.add('active');
     };
     window.closeLightbox = function() {
       document.getElementById('lightbox').classList.remove('active');
+    };
+
+    // ========== الموسيقى الخلفية (جديد) ==========
+    let musicEnabled = false;
+    let musicInitialized = false;
+    const bgMusic = document.getElementById('bgMusic');
+    if (bgMusic) {
+      bgMusic.volume = 0.35; // مستوى هادئ
+    }
+
+    window.toggleMusic = function(btnElement) {
+      if (!bgMusic) return;
+      if (musicEnabled) {
+        bgMusic.pause();
+        musicEnabled = false;
+        if (btnElement) {
+          btnElement.classList.remove('active');
+          const span = btnElement.querySelector('span');
+          if (span) span.textContent = 'أجواء';
+        }
+      } else {
+        bgMusic.play().then(() => {
+          musicEnabled = true;
+          musicInitialized = true;
+          if (btnElement) {
+            btnElement.classList.add('active');
+            const span = btnElement.querySelector('span');
+            if (span) span.textContent = 'إيقاف';
+          }
+        }).catch(err => {
+          console.warn('تعذر تشغيل الموسيقى:', err);
+          window.showToast('تعذر تشغيل الموسيقى - تحقق من اتصالك');
+        });
+      }
+    };
+
+    window.stopMusic = function() {
+      if (bgMusic && !bgMusic.paused) {
+        bgMusic.pause();
+        musicEnabled = false;
+        document.querySelectorAll('.reading-toolbar .music-btn').forEach(btn => {
+          btn.classList.remove('active');
+          const span = btn.querySelector('span');
+          if (span) span.textContent = 'أجواء';
+        });
+      }
     };
 
     window.registerServiceWorker = function() {
@@ -1404,6 +1512,11 @@
       if (target) target.classList.add('active');
       window.scrollTo(0, 0);
 
+      // إيقاف الموسيقى عند مغادرة صفحات القراءة
+      if (pageId !== 'post' && pageId !== 'memories') {
+        window.stopMusic();
+      }
+
       if (pageId === 'home') {
         window.currentViewPostId = null;
         window.renderCategoryBar();
@@ -1442,7 +1555,6 @@
       const scroll = document.getElementById('categoriesScroll');
       if (!scroll) return;
       const published = window.getPublishedPosts();
-      // استخدام دالة تصحيح الأخطاء عند استخراج التصنيفات
       const categories = [...new Set(published.map(p => p.category ? window.fixArabicTypos(p.category) : null).filter(Boolean))];
 
       let html = `<button class="cat-chip ${!window.currentCategory ? 'active' : ''}"
@@ -1715,7 +1827,7 @@
       });
     };
 
-    // توليد شريط حجم الخط
+    // توليد شريط حجم الخط + زر الموسيقى
     window.buildReadingToolbar = function(contentSelector) {
       const currentSize = window.currentFontSize || 'medium';
       const labels = { small: 'ص', medium: 'م', large: 'ك', xlarge: 'ك+' };
@@ -1727,6 +1839,14 @@
           <button type="button" class="font-size-btn ${currentSize==='large'?'active':''}" data-size="large" onclick="window.setFontSize('large','${contentSelector}')" title="تكبير الخط">ك</button>
           <button type="button" class="font-size-btn ${currentSize==='xlarge'?'active':''}" data-size="xlarge" onclick="window.setFontSize('xlarge','${contentSelector}')" title="تكبير إضافي">ك+</button>
           <span class="font-size-indicator">${labels[currentSize] || 'م'}</span>
+          <button type="button" class="music-btn" onclick="window.toggleMusic(this)" title="موسيقى خلفية هادئة">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+              <path d="M9 18V5l12-2v13"></path>
+              <circle cx="6" cy="18" r="3"></circle>
+              <circle cx="18" cy="16" r="3"></circle>
+            </svg>
+            <span>أجواء</span>
+          </button>
         </div>
       `;
     };
@@ -1744,6 +1864,7 @@
       let formattedContent = '';
       if (post.content) {
         const sanitized = window.sanitizeContent(post.content);
+        // المحرر يقبل HTML مباشرة الآن، لذا نعرض المحتوى كما هو إذا احتوى على وسوم
         if (/(<([^>]+)>)/i.test(sanitized)) formattedContent = window.fixArabicTypos(sanitized);
         else formattedContent = window.fixArabicTypos(sanitized).split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
       }
@@ -1853,6 +1974,17 @@
             }).join('') + `</div>`;
         }
         const deleteBtnHTML = isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteComment('${postId}', '${commentId}')">حذف التعليق</button>` : '';
+        // ✅ زر الرد للمدير فقط
+        const replyBtnHTML = isAdminLoggedIn ? `<button class="reply-btn" onclick="window.showReplyForm('${commentId}')">رد</button>` : '';
+        // نموذج الرد للمدير فقط
+        const replyFormHTML = isAdminLoggedIn ? `
+          <div id="replyForm-${commentId}" style="display:none; margin-top:10px;">
+            <input type="text" id="replyAuthor-${commentId}" placeholder="الاسم" value="د. زكريا محمد عطوني" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
+            <textarea id="replyText-${commentId}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
+            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="window.addReply(event, '${postId}', '${commentId}')">إرسال الرد</button>
+          </div>
+        ` : '';
+
         card.innerHTML = `
           <div class="comment-header">
             <span class="comment-author">${c.author}</span>
@@ -1860,14 +1992,10 @@
           </div>
           <div class="comment-body">${c.text}</div>
           <div>
-            <button class="reply-btn" onclick="window.showReplyForm('${commentId}')">رد</button>
+            ${replyBtnHTML}
             ${deleteBtnHTML}
           </div>
-          <div id="replyForm-${commentId}" style="display:none; margin-top:10px;">
-            <input type="text" id="replyAuthor-${commentId}" placeholder="الاسم" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
-            <textarea id="replyText-${commentId}" rows="2" placeholder="الرد..." style="width:100%; padding:6px; border:1px solid #ccc; border-radius:4px;"></textarea>
-            <button class="btn" style="padding:4px 10px; font-size:0.8rem; margin-top:4px;" onclick="window.addReply(event, '${postId}', '${commentId}')">إرسال الرد</button>
-          </div>
+          ${replyFormHTML}
           ${repliesHTML}
         `;
         container.appendChild(card);
@@ -1909,16 +2037,18 @@
     };
 
     window.showReplyForm = function(commentId) {
+      if (!isAdminLoggedIn) return;
       const el = document.getElementById(`replyForm-${commentId}`);
       if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     };
 
     window.addReply = async function(e, postId, commentId) {
+      if (!isAdminLoggedIn) { alert('الردود مخصصة للمدير فقط'); return; }
       if (e && e.preventDefault) e.preventDefault();
       const authorInput = document.getElementById(`replyAuthor-${commentId}`);
       const textInput = document.getElementById(`replyText-${commentId}`);
       if (!textInput) return;
-      const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'زائر';
+      const author = authorInput && authorInput.value.trim() ? authorInput.value.trim() : 'د. زكريا محمد عطوني';
       const text = textInput.value.trim();
       if (!text) { alert('يرجى كتابة نص الرد أولاً'); return; }
       try {
@@ -2284,6 +2414,10 @@
         document.getElementById('adminNavBtn').innerText = 'لوحة الإدارة';
         window.navigateTo('admin-panel');
         window.showToast('تم تسجيل الدخول بنجاح');
+        // إعادة عرض التعليقات لتظهر أزرار الرد
+        if (window.currentViewPostId) {
+          window.renderSinglePost(window.currentViewPostId);
+        }
       } else alert('كلمة المرور غير صحيحة');
     };
 

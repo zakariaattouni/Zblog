@@ -204,36 +204,191 @@
 
     /* ===== زاوية من أنا ===== */
     .about-me-zone {
-      display: flex; gap: 14px; align-items: flex-start;
-      background-color: var(--paper-color); border: 1px solid var(--border-color);
-      border-radius: var(--radius); padding: 16px 18px; margin-bottom: 25px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background-color: var(--paper-color);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 22px 20px;
+      margin-bottom: 25px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-      position: relative;
-      transition: transform 0.2s ease;
+      transition: box-shadow 0.25s ease;
     }
-    .about-me-zone:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
-    .about-me-avatar {
-      width: 60px; height: 60px; min-width: 60px; min-height: 60px;
-      border-radius: 50%; object-fit: cover;
-      border: 2px solid var(--accent-color);
+    .about-me-zone:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.07); }
+
+    .about-me-avatar-btn {
+      width: 90px; height: 90px;
+      border-radius: 50%;
+      border: 3px solid var(--accent-color);
+      overflow: hidden;
       cursor: pointer;
       background: linear-gradient(135deg, #eef2f0, #f7f7f6);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem; color: var(--text-muted);
+      font-size: 2.2rem; color: var(--text-muted);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      margin-bottom: 12px;
+      padding: 0;
+      position: relative;
+    }
+    .about-me-avatar-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 18px rgba(59, 82, 73, 0.25);
+    }
+    .about-me-avatar-btn::after {
+      content: '👁';
+      position: absolute;
+      bottom: -4px; right: -4px;
+      background: var(--accent-color);
+      color: #fff;
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem;
+      border: 2px solid var(--paper-color);
+    }
+    .about-me-avatar-btn img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .about-me-name {
+      font-family: var(--font-heading);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+    .about-me-excerpt {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .about-me-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    .about-me-body { flex: 1; min-width: 0; }
-    .about-me-name {
-      font-family: var(--font-heading); font-size: 1.05rem; font-weight: 700;
-      color: var(--text-main); margin-bottom: 4px;
+    .about-me-read-more {
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      padding: 7px 20px;
+      border-radius: 20px;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .about-me-text {
-      font-size: 0.92rem; color: #444; line-height: 1.7;
-      word-wrap: break-word;
+    .about-me-read-more:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(59, 82, 73, 0.25);
     }
     .about-me-signature {
-      font-size: 0.75rem; color: var(--text-muted); margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* ===== نافذة من أنا الكاملة ===== */
+    .about-me-modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 2500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+      animation: fadeModal 0.25s ease;
+    }
+    .about-me-modal.active { display: flex; }
+    @keyframes fadeModal { from { opacity: 0; } to { opacity: 1; } }
+
+    .about-me-modal-content {
+      background: var(--paper-color);
+      border-radius: 14px;
+      max-width: 620px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px 24px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideModal 0.3s ease;
+      text-align: right;
+    }
+    @keyframes slideModal { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .about-me-modal-close {
+      position: absolute;
+      top: 12px; left: 12px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .about-me-modal-close:hover {
+      background: var(--danger-color);
+      color: #fff;
+      border-color: var(--danger-color);
+    }
+
+    .about-me-modal-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .about-me-modal-avatar {
+      width: 110px; height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent-color);
+      margin-bottom: 12px;
+      box-shadow: 0 6px 20px rgba(59, 82, 73, 0.2);
+    }
+    .about-me-modal-name {
+      font-family: var(--font-heading);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+    .about-me-modal-body {
+      font-size: 1rem;
+      line-height: 1.9;
+      color: #333;
+    }
+    .about-me-modal-body p { margin-bottom: 14px; }
+    .about-me-modal-body h2, .about-me-modal-body h3 {
+      font-family: var(--font-heading);
+      margin: 16px 0 10px;
+      color: var(--text-main);
+    }
+    .about-me-modal-body strong { color: var(--accent-color); }
+    .about-me-modal-signature {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--border-color);
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
       font-style: italic;
     }
 
@@ -675,8 +830,11 @@
       .projects-grid { grid-template-columns: 1fr; gap: 16px; }
       .reading-toolbar { padding: 8px 10px; gap: 6px; }
       .reading-toolbar button { padding: 6px 10px; font-size: 0.78rem; }
-      .about-me-zone { padding: 14px; gap: 12px; }
-      .about-me-avatar { width: 52px; height: 52px; min-width: 52px; min-height: 52px; }
+      .about-me-avatar-btn { width: 80px; height: 80px; }
+      .about-me-modal { padding: 12px; }
+      .about-me-modal-content { padding: 22px 18px; }
+      .about-me-modal-avatar { width: 90px; height: 90px; }
+      .about-me-modal-name { font-size: 1.3rem; }
     }
   </style>
 </head>
@@ -763,14 +921,16 @@
     <section id="page-home" class="page active">
       <!-- زاوية: من أنا -->
       <div id="aboutMeZone" class="about-me-zone" style="display:none;">
-        <div class="about-me-avatar" id="aboutMeAvatar" onclick="window.openAboutMeImage()">
+        <button class="about-me-avatar-btn" id="aboutMeAvatarBtn" onclick="window.openAboutMeModal()" title="اضغط لقراءة المزيد">
           <span id="aboutMeAvatarPlaceholder">🌿</span>
-        </div>
-        <div class="about-me-body">
-          <div class="about-me-name" id="aboutMeName">زكريا</div>
-          <div class="about-me-text" id="aboutMeText"></div>
-          <div class="about-me-signature" id="aboutMeSignature"></div>
-        </div>
+        </button>
+        <div class="about-me-name" id="aboutMeName">زكريا</div>
+        <div class="about-me-excerpt" id="aboutMeExcerpt"></div>
+        <button class="about-me-read-more" onclick="window.openAboutMeModal()">
+          اقرأ المزيد
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </button>
+        <div class="about-me-signature" id="aboutMeSignature"></div>
       </div>
 
       <div class="search-box">
@@ -1043,10 +1203,9 @@
         <div id="adminMemoriesList" class="admin-post-list"></div>
       </div>
 
-      <!-- ===== إدارة زاوية من أنا ===== -->
       <div id="admin-tab-aboutme" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 10px;">زاوية «من أنا»</h3>
-        <p class="paste-help">هذه بطاقة صغيرة تظهر في أعلى الصفحة الرئيسية بصورتك المستديرة ونصّك الخاص. اكتب ما تشاء وسيظهر مباشرة.</p>
+        <p class="paste-help">هذه بطاقة صغيرة تظهر في أعلى الصفحة الرئيسية بصورتك المستديرة ونصّك الخاص. اكتب ما تشاء (يدعم HTML) وسيظهر مباشرة.</p>
 
         <div class="form-group">
           <label>الاسم الظاهر</label>
@@ -1054,8 +1213,8 @@
         </div>
 
         <div class="form-group">
-          <label>النص (يدعم HTML بسيط مثل &lt;strong&gt; و &lt;em&gt;)</label>
-          <textarea id="aboutMeTextInput" rows="4" placeholder="اكتب هنا تعريفاً قصيراً عنك... مثال: طبيب وأديب، أكتب ما يخطر في بالي من خواطر وتأملات."></textarea>
+          <label>النص (يدعم HTML)</label>
+          <textarea id="aboutMeTextInput" rows="6" placeholder="اكتب هنا تعريفاً قصيراً عنك... يمكنك استخدام وسوم HTML مثل <p> و <strong> و <h2>."></textarea>
         </div>
 
         <div class="form-group">
@@ -1146,6 +1305,19 @@
 
   <div class="lightbox" id="lightbox" onclick="window.closeLightbox()">
     <img id="lightboxImg" src="" alt="عرض مكبر">
+  </div>
+
+  <!-- نافذة من أنا الكاملة -->
+  <div class="about-me-modal" id="aboutMeModal" onclick="window.closeAboutMeModal(event)">
+    <div class="about-me-modal-content" onclick="event.stopPropagation()">
+      <button class="about-me-modal-close" onclick="window.closeAboutMeModal()" title="إغلاق">&times;</button>
+      <div class="about-me-modal-header">
+        <img id="aboutMeModalAvatar" class="about-me-modal-avatar" src="" alt="صورة" style="display:none;">
+        <div class="about-me-modal-name" id="aboutMeModalName">زكريا</div>
+      </div>
+      <div class="about-me-modal-body" id="aboutMeModalBody"></div>
+      <div class="about-me-modal-signature" id="aboutMeModalSignature"></div>
+    </div>
   </div>
 
   <script type="module">
@@ -1303,7 +1475,7 @@
       document.getElementById('lightbox').classList.remove('active');
     };
 
-    // ========== الموسيقى الخلفية (مولّدة برمجياً - أجواء ضباب وجبال) ==========
+    // ========== الموسيقى الخلفية (مولّدة برمجياً) ==========
     let musicEnabled = false;
     let audioContext = null;
     let musicNodes = [];
@@ -1596,7 +1768,6 @@
       }
     }
 
-    // ========== Firebase Listeners ==========
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
       if (data) blogSettings = { ...DEFAULT_SETTINGS, ...data };
@@ -1605,7 +1776,6 @@
       window.renderAboutPage();
     });
 
-    // ✅ مستمع زاوية "من أنا"
     onValue(ref(db, 'aboutMe'), (snapshot) => {
       const data = snapshot.val();
       if (data) aboutMe = { ...DEFAULT_ABOUTME, ...data };
@@ -1808,40 +1978,74 @@
       zone.style.display = 'flex';
 
       const nameEl = document.getElementById('aboutMeName');
-      const textEl = document.getElementById('aboutMeText');
+      const excerptEl = document.getElementById('aboutMeExcerpt');
       const sigEl = document.getElementById('aboutMeSignature');
-      const avatarEl = document.getElementById('aboutMeAvatar');
+      const avatarBtn = document.getElementById('aboutMeAvatarBtn');
 
       if (nameEl) nameEl.textContent = aboutMe.name || 'زكريا';
 
-      if (textEl) {
+      // استخراج مقتطف نصي بسيط (بدون HTML) للمعاينة
+      if (excerptEl) {
         if (aboutMe.text) {
-          // السماح بـ HTML بسيط (strong, em, u, a)
-          const allowed = String(aboutMe.text)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/&lt;(\/?)(strong|em|u|b|i|a)(\s[^&]*?)?&gt;/gi, '<$1$2$3>')
-            .replace(/&amp;nbsp;/g, ' ');
-          textEl.innerHTML = allowed;
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = window.sanitizeContent(aboutMe.text);
+          const plainText = (tempDiv.textContent || tempDiv.innerText || '').trim();
+          excerptEl.textContent = plainText;
         } else {
-          textEl.innerHTML = '';
+          excerptEl.textContent = '';
         }
       }
 
       if (sigEl) sigEl.textContent = aboutMe.signature || '';
 
-      if (avatarEl) {
+      if (avatarBtn) {
         if (aboutMe.image) {
-          avatarEl.innerHTML = `<img src="${aboutMe.image}" alt="${aboutMe.name || 'صورة'}">`;
+          avatarBtn.innerHTML = `<img src="${aboutMe.image}" alt="${aboutMe.name || 'صورة'}">`;
         } else {
-          avatarEl.innerHTML = `<span id="aboutMeAvatarPlaceholder">🌿</span>`;
+          avatarBtn.innerHTML = `<span id="aboutMeAvatarPlaceholder">🌿</span>`;
         }
       }
     };
 
-    window.openAboutMeImage = function() {
-      if (aboutMe.image) window.openLightbox(aboutMe.image);
+    window.openAboutMeModal = function() {
+      const modal = document.getElementById('aboutMeModal');
+      if (!modal) return;
+
+      const avatarImg = document.getElementById('aboutMeModalAvatar');
+      const nameEl = document.getElementById('aboutMeModalName');
+      const bodyEl = document.getElementById('aboutMeModalBody');
+      const sigEl = document.getElementById('aboutMeModalSignature');
+
+      if (avatarImg) {
+        if (aboutMe.image) {
+          avatarImg.src = aboutMe.image;
+          avatarImg.style.display = 'block';
+        } else {
+          avatarImg.style.display = 'none';
+        }
+      }
+      if (nameEl) nameEl.textContent = aboutMe.name || 'زكريا';
+      if (bodyEl) {
+        bodyEl.innerHTML = aboutMe.text ? window.sanitizeContent(aboutMe.text) : '';
+      }
+      if (sigEl) {
+        if (aboutMe.signature) {
+          sigEl.textContent = aboutMe.signature;
+          sigEl.style.display = 'block';
+        } else {
+          sigEl.style.display = 'none';
+        }
+      }
+
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    };
+
+    window.closeAboutMeModal = function(e) {
+      if (e && e.target !== e.currentTarget) return;
+      const modal = document.getElementById('aboutMeModal');
+      if (modal) modal.classList.remove('active');
+      document.body.style.overflow = '';
     };
 
     window.loadAboutMeToForm = function() {

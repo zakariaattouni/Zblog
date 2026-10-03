@@ -436,7 +436,7 @@
     .section-heading { font-family: var(--font-heading); font-size: 1.7rem; margin-bottom: 8px; }
     .section-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    /* ===== أدوات القراءة (جديد) ===== */
+    /* ===== أدوات القراءة ===== */
     .reading-toolbar {
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       margin-bottom: 18px; padding: 10px 14px;
@@ -467,7 +467,6 @@
       font-size: 0.8rem; font-weight: 700; color: var(--accent-color);
       min-width: 32px; text-align: center;
     }
-    /* فئات حجم الخط */
     .article-content.font-small, .memory-content.font-small { font-size: 0.95rem !important; }
     .article-content.font-medium, .memory-content.font-medium { font-size: 1.1rem !important; }
     .article-content.font-large, .memory-content.font-large { font-size: 1.35rem !important; }
@@ -720,7 +719,7 @@
       <div id="postSingleContainer"></div>
     </section>
 
-    <!-- 3. PROJECTS PAGE (جديد) -->
+    <!-- 3. PROJECTS PAGE -->
     <section id="page-projects" class="page">
       <h2 class="section-heading">🚀 مشاريعي</h2>
       <p class="section-sub">مجموعة من الكتب والتطبيقات والمشاريع التي عملت عليها — اضغط على الرابط للاطلاع عليها.</p>
@@ -853,7 +852,7 @@
         <div id="adminPostsList" class="admin-post-list"></div>
       </div>
 
-      <!-- ✅ Projects Management (جديد) -->
+      <!-- Projects Management -->
       <div id="admin-tab-projects" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 10px;">إدارة المشاريع</h3>
         <p class="paste-help">أضف كتبك وتطبيقاتك ومشاريعك. كل مشروع يتضمن صورة، لمحة تعريفية، ونوعه (كتاب / تطبيق / موقع / آخر).</p>
@@ -1080,11 +1079,12 @@
     let blogPosts = [];
     let albumItems = [];
     let memories = [];
-    let projects = [];   // ← جديد
+    let projects = [];
     let isAdminLoggedIn = false;
     let deferredPrompt = null;
     window.currentViewPostId = null;
     window.currentCategory = null;
+    window.currentAudio = null; // للتحكم في الصوت الحالي
 
     // ============ أدوات مساعدة ============
     window.showToast = function(message) {
@@ -1358,12 +1358,10 @@
       if (isAdminLoggedIn) window.renderAdminMemoriesList();
     });
 
-    // ✅ مستمع المشاريع (جديد)
     onValue(ref(db, 'projects'), (snapshot) => {
       const data = snapshot.val();
       if (data) {
         projects = Object.keys(data).map(key => ({ id: key, ...data[key] }));
-        // ترتيب: حسب الحقل order ثم createdAt
         projects.sort((a, b) => {
           const orderA = typeof a.order === 'number' ? a.order : 999999;
           const orderB = typeof b.order === 'number' ? b.order : 999999;
@@ -1401,7 +1399,7 @@
       } else if (pageId === 'post' && param) {
         window.currentViewPostId = param;
         window.renderSinglePost(param);
-      } else if (pageId === 'projects') {     // ← جديد
+      } else if (pageId === 'projects') {
         window.currentViewPostId = null;
         window.renderProjects();
       } else if (pageId === 'categories') {
@@ -1676,102 +1674,122 @@
       });
     };
 
-    // ========== أدوات القراءة (جديد) ==========
-    // فئة حجم الخط الافتراضية
-    window.currentFontSize = localStorage.getItem('reading_font_size') || 'medium';
+    // ==================================================
+    // ✅ القراءة الناطقة باستخدام VoiPi (Edge TTS مع fallback)
+    // ==================================================
+    let voipiModule = null;
 
-    window.setFontSize = function(size, contentSelector) {
-      // إزالة الفئات القديمة وإضافة الجديدة
-      const elements = document.querySelectorAll(contentSelector);
-      elements.forEach(el => {
-        el.classList.remove('font-small', 'font-medium', 'font-large', 'font-xlarge');
-        el.classList.add('font-' + size);
-      });
-      window.currentFontSize = size;
-      localStorage.setItem('reading_font_size', size);
-      // تحديث مؤشرات حجم الخط النشطة في نفس الشريط
-      document.querySelectorAll('.reading-toolbar').forEach(toolbar => {
-        // إذا كان الشريط هو الشريط الأب للعنصر الحالي
-        if (toolbar.closest('.article-content') || toolbar.nextElementSibling?.querySelector(contentSelector) || toolbar.parentElement.querySelector(contentSelector)) {
-          toolbar.querySelectorAll('.font-size-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.size === size);
-          });
-          const indicator = toolbar.querySelector('.font-size-indicator');
-          if (indicator) {
-            const labels = { small: 'ص', medium: 'م', large: 'ك', xlarge: 'ك+' };
-            indicator.textContent = labels[size] || 'م';
-          }
-        }
-      });
-    };
+    // تحميل مكتبة VoiPi ديناميكياً
+    async function loadVoiPi() {
+      if (voipiModule) return voipiModule;
+      try {
+        voipiModule = await import('https://cdn.jsdelivr.net/npm/voipi@latest/dist/voipi.min.js');
+        console.log('✅ تم تحميل VoiPi بنجاح');
+        return voipiModule;
+      } catch (err) {
+        console.warn('⚠️ فشل تحميل VoiPi، سيتم استخدام صوت المتصفح:', err);
+        return null;
+      }
+    }
 
-    window.adjustFontSize = function(delta, contentSelector) {
-      const sizes = ['small', 'medium', 'large', 'xlarge'];
-      let idx = sizes.indexOf(window.currentFontSize);
-      if (idx === -1) idx = 1; // medium
-      idx = Math.max(0, Math.min(sizes.length - 1, idx + delta));
-      window.setFontSize(sizes[idx], contentSelector);
-    };
+    // محاولة تحميل VoiPi مسبقاً في الخلفية
+    loadVoiPi();
 
-    // إيقاف القراءة
+    // إيقاف أي صوت قيد التشغيل
     window.stopReading = function() {
-      if (window.speechSynthesis) {
+      if (window.currentAudio) {
+        try { window.currentAudio.pause(); } catch(e) {}
+        window.currentAudio = null;
+      }
+      if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
       document.querySelectorAll('.reading-toolbar .listen-btn').forEach(btn => {
         btn.classList.remove('active');
-        btn.querySelector('span') && (btn.querySelector('span').textContent = 'استماع');
+        const span = btn.querySelector('span');
+        if (span) span.textContent = 'استماع';
       });
     };
 
-    // بدء القراءة الناطقة
-    window.speakText = function(elementId, btnElement) {
-      if (!('speechSynthesis' in window)) {
-        alert('عذراً، متصفحك لا يدعم القراءة الصوتية.');
-        return;
-      }
+    // دالة القراءة الرئيسية
+    window.speakText = async function(elementId, btnElement) {
       const el = document.getElementById(elementId);
       if (!el) return;
 
       // إيقاف أي قراءة سابقة
-      window.speechSynthesis.cancel();
+      window.stopReading();
 
-      const text = el.innerText || el.textContent || '';
-      if (!text.trim()) {
+      const text = (el.innerText || el.textContent || '').trim();
+      if (!text) {
         window.showToast('لا يوجد نص لقراءته');
         return;
       }
 
+      // تغيير حالة الزر
+      if (btnElement) {
+        btnElement.classList.add('active');
+        const span = btnElement.querySelector('span');
+        if (span) span.textContent = 'جارٍ التحميل...';
+      }
+
+      // محاولة استخدام VoiPi (Edge TTS)
+      try {
+        const voipi = await loadVoiPi();
+        if (voipi && typeof voipi.speak === 'function') {
+          if (btnElement) {
+            const span = btnElement.querySelector('span');
+            if (span) span.textContent = 'إيقاف';
+          }
+          await voipi.speak(text, {
+            lang: 'ar',
+            rate: 0.85,
+            pitch: 0.9
+          });
+          // بعد الانتهاء
+          if (btnElement) {
+            btnElement.classList.remove('active');
+            const span = btnElement.querySelector('span');
+            if (span) span.textContent = 'استماع';
+          }
+          return;
+        }
+      } catch (err) {
+        console.warn('⚠️ فشل VoiPi، سيتم استخدام صوت المتصفح:', err);
+      }
+
+      // fallback: صوت المتصفح
+      if (!('speechSynthesis' in window)) {
+        window.showToast('متصفحك لا يدعم القراءة الصوتية');
+        if (btnElement) {
+          btnElement.classList.remove('active');
+          const span = btnElement.querySelector('span');
+          if (span) span.textContent = 'استماع';
+        }
+        return;
+      }
+
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ar-SA'; // اللغة العربية
-      utterance.rate = 0.85;    // سرعة هادئة
-      utterance.pitch = 0.8;    // نبرة منخفضة قليلاً لصوت رجولي هادئ
+      utterance.lang = 'ar-SA';
+      utterance.rate = 0.85;
+      utterance.pitch = 0.8;
       utterance.volume = 1;
 
       // محاولة اختيار صوت رجولي عربي
       const voices = window.speechSynthesis.getVoices();
-      // البحث عن صوت عربي
-      const arabicVoices = voices.filter(v => v.lang.startsWith('ar'));
-      // البحث عن صوت رجولي (غالباً ما يحتوي على كلمة male أو أسماء معروفة)
-      let selectedVoice = arabicVoices.find(v => 
-        v.name.toLowerCase().includes('male') || 
-        v.name.includes('Maged') || 
-        v.name.includes('Tarik') || 
-        v.name.includes('Hamza') || 
-        v.name.includes('Naayf') ||
-        v.name.includes('Majed')
-      );
-      // إن لم نجد، نأخذ أول صوت عربي
+      const arabicVoices = voices.filter(v => v.lang && v.lang.startsWith('ar'));
+      let selectedVoice = arabicVoices.find(v => {
+        const name = (v.name || '').toLowerCase();
+        return name.includes('male') || name.includes('maged') ||
+               name.includes('tarik') || name.includes('hamza') ||
+               name.includes('naayf') || name.includes('majed') ||
+               name.includes('laith') || name.includes('shakir');
+      });
       if (!selectedVoice && arabicVoices.length > 0) {
         selectedVoice = arabicVoices[0];
       }
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-      }
+      if (selectedVoice) utterance.voice = selectedVoice;
 
-      // إذا كان الزر موجوداً، غيّر حالته
       if (btnElement) {
-        btnElement.classList.add('active');
         const span = btnElement.querySelector('span');
         if (span) span.textContent = 'إيقاف';
       }
@@ -1783,9 +1801,7 @@
           if (span) span.textContent = 'استماع';
         }
       };
-
-      utterance.onerror = (e) => {
-        console.warn('Speech error:', e);
+      utterance.onerror = () => {
         if (btnElement) {
           btnElement.classList.remove('active');
           const span = btnElement.querySelector('span');
@@ -1796,13 +1812,50 @@
       window.speechSynthesis.speak(utterance);
     };
 
-    // جلب الأصوات (بعض المتصفحات تحتاج إلى تفعيلها)
+    // تبديل حالة الاستماع
+    window.toggleListen = function(contentId, btnElement) {
+      // إذا كان هناك صوت يعمل حالياً، أوقفه
+      const isPlaying = (window.currentAudio && !window.currentAudio.paused) ||
+                        (window.speechSynthesis && window.speechSynthesis.speaking);
+      if (isPlaying || (btnElement && btnElement.classList.contains('active'))) {
+        window.stopReading();
+      } else {
+        window.speakText(contentId, btnElement);
+      }
+    };
+
+    // جلب الأصوات (بعض المتصفحات تحتاج تفعيل)
     if ('speechSynthesis' in window) {
-      window.speechSynthesis.getVoices(); // تشغيل الجلب
+      window.speechSynthesis.getVoices();
       window.speechSynthesis.onvoiceschanged = () => {
         window.speechSynthesis.getVoices();
       };
     }
+
+    // ========== حجم الخط ==========
+    window.currentFontSize = localStorage.getItem('reading_font_size') || 'medium';
+
+    window.setFontSize = function(size, contentSelector) {
+      const elements = document.querySelectorAll(contentSelector);
+      elements.forEach(el => {
+        el.classList.remove('font-small', 'font-medium', 'font-large', 'font-xlarge');
+        el.classList.add('font-' + size);
+      });
+      window.currentFontSize = size;
+      localStorage.setItem('reading_font_size', size);
+
+      // تحديث الأزرار في كل أشرطة الأدوات
+      document.querySelectorAll('.reading-toolbar').forEach(toolbar => {
+        toolbar.querySelectorAll('.font-size-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.size === size);
+        });
+        const indicator = toolbar.querySelector('.font-size-indicator');
+        if (indicator) {
+          const labels = { small: 'ص', medium: 'م', large: 'ك', xlarge: 'ك+' };
+          indicator.textContent = labels[size] || 'م';
+        }
+      });
+    };
 
     // توليد شريط أدوات القراءة
     window.buildReadingToolbar = function(contentId, contentSelector) {
@@ -1825,18 +1878,6 @@
           <span class="toolbar-label">قراءة هادئة</span>
         </div>
       `;
-    };
-
-    window.toggleListen = function(contentId, btnElement) {
-      if (window.speechSynthesis && window.speechSynthesis.speaking) {
-        // إذا كان يتحدث بالفعل، أوقفه
-        window.speechSynthesis.cancel();
-        btnElement.classList.remove('active');
-        const span = btnElement.querySelector('span');
-        if (span) span.textContent = 'استماع';
-      } else {
-        window.speakText(contentId, btnElement);
-      }
     };
 
     // ========== عرض المقال الفردي ==========
@@ -1913,7 +1954,6 @@
           </div>
         </section>
       `;
-      // تفعيل فئة حجم الخط المحفوظة
       const contentEl = document.getElementById('articleBody');
       if (contentEl) {
         contentEl.classList.add('font-' + (window.currentFontSize || 'medium'));
@@ -2244,7 +2284,7 @@
     };
 
     // ==================================================
-    // غرفة الذكريات (تم إضافة أدوات القراءة)
+    // غرفة الذكريات (مع أدوات القراءة)
     // ==================================================
     window.renderMemories = function() {
       const container = document.getElementById('memoriesList');
@@ -2258,7 +2298,6 @@
         const contentHTML = m.content ? `
           <div class="memory-content" id="${contentId}">${window.formatMemoryContent(m.content)}</div>
         ` : '';
-        // شريط أدوات القراءة لكل ذكرى
         const toolbar = window.buildReadingToolbar(contentId, `#${contentId}`);
         const imagesHTML = (m.images && m.images.length)
           ? `<div class="memory-images">${m.images.map(u => `<img src="${u}" alt="صورة ذكرى" loading="lazy" onclick="event.stopPropagation(); window.openLightbox('${u}')">`).join('')}</div>`
@@ -2273,7 +2312,6 @@
           </article>
         `;
       }).join('');
-      // تفعيل فئات حجم الخط المحفوظة على عناصر المحتوى
       const size = window.currentFontSize || 'medium';
       document.querySelectorAll('.memory-content').forEach(el => {
         el.classList.add('font-' + size);

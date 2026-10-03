@@ -436,7 +436,7 @@
     .section-heading { font-family: var(--font-heading); font-size: 1.7rem; margin-bottom: 8px; }
     .section-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    /* ===== أدوات القراءة ===== */
+    /* ===== شريط حجم الخط ===== */
     .reading-toolbar {
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       margin-bottom: 18px; padding: 10px 14px;
@@ -448,8 +448,8 @@
     .reading-toolbar button {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       background: var(--bg-color); border: 1px solid var(--border-color);
-      border-radius: 6px; padding: 7px 12px; cursor: pointer;
-      font-size: 0.85rem; color: var(--text-main);
+      border-radius: 6px; padding: 7px 14px; cursor: pointer;
+      font-size: 0.85rem; color: var(--text-main); font-weight: 600;
       transition: all 0.2s ease; font-family: inherit;
     }
     .reading-toolbar button:hover {
@@ -459,7 +459,6 @@
     .reading-toolbar button.active {
       background-color: var(--accent-color); color: #fff; border-color: var(--accent-color);
     }
-    .reading-toolbar button svg { width: 15px; height: 15px; }
     .reading-toolbar .toolbar-label {
       font-size: 0.8rem; color: var(--text-muted); margin-left: auto;
     }
@@ -1084,7 +1083,6 @@
     let deferredPrompt = null;
     window.currentViewPostId = null;
     window.currentCategory = null;
-    window.currentAudio = null; // للتحكم في الصوت الحالي
 
     // ============ أدوات مساعدة ============
     window.showToast = function(message) {
@@ -1674,164 +1672,6 @@
       });
     };
 
-    // ==================================================
-    // ✅ القراءة الناطقة باستخدام VoiPi (Edge TTS مع fallback)
-    // ==================================================
-    let voipiModule = null;
-
-    // تحميل مكتبة VoiPi ديناميكياً
-    async function loadVoiPi() {
-      if (voipiModule) return voipiModule;
-      try {
-        voipiModule = await import('https://cdn.jsdelivr.net/npm/voipi@latest/dist/voipi.min.js');
-        console.log('✅ تم تحميل VoiPi بنجاح');
-        return voipiModule;
-      } catch (err) {
-        console.warn('⚠️ فشل تحميل VoiPi، سيتم استخدام صوت المتصفح:', err);
-        return null;
-      }
-    }
-
-    // محاولة تحميل VoiPi مسبقاً في الخلفية
-    loadVoiPi();
-
-    // إيقاف أي صوت قيد التشغيل
-    window.stopReading = function() {
-      if (window.currentAudio) {
-        try { window.currentAudio.pause(); } catch(e) {}
-        window.currentAudio = null;
-      }
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-      document.querySelectorAll('.reading-toolbar .listen-btn').forEach(btn => {
-        btn.classList.remove('active');
-        const span = btn.querySelector('span');
-        if (span) span.textContent = 'استماع';
-      });
-    };
-
-    // دالة القراءة الرئيسية
-    window.speakText = async function(elementId, btnElement) {
-      const el = document.getElementById(elementId);
-      if (!el) return;
-
-      // إيقاف أي قراءة سابقة
-      window.stopReading();
-
-      const text = (el.innerText || el.textContent || '').trim();
-      if (!text) {
-        window.showToast('لا يوجد نص لقراءته');
-        return;
-      }
-
-      // تغيير حالة الزر
-      if (btnElement) {
-        btnElement.classList.add('active');
-        const span = btnElement.querySelector('span');
-        if (span) span.textContent = 'جارٍ التحميل...';
-      }
-
-      // محاولة استخدام VoiPi (Edge TTS)
-      try {
-        const voipi = await loadVoiPi();
-        if (voipi && typeof voipi.speak === 'function') {
-          if (btnElement) {
-            const span = btnElement.querySelector('span');
-            if (span) span.textContent = 'إيقاف';
-          }
-          await voipi.speak(text, {
-            lang: 'ar',
-            rate: 0.85,
-            pitch: 0.9
-          });
-          // بعد الانتهاء
-          if (btnElement) {
-            btnElement.classList.remove('active');
-            const span = btnElement.querySelector('span');
-            if (span) span.textContent = 'استماع';
-          }
-          return;
-        }
-      } catch (err) {
-        console.warn('⚠️ فشل VoiPi، سيتم استخدام صوت المتصفح:', err);
-      }
-
-      // fallback: صوت المتصفح
-      if (!('speechSynthesis' in window)) {
-        window.showToast('متصفحك لا يدعم القراءة الصوتية');
-        if (btnElement) {
-          btnElement.classList.remove('active');
-          const span = btnElement.querySelector('span');
-          if (span) span.textContent = 'استماع';
-        }
-        return;
-      }
-
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'ar-SA';
-      utterance.rate = 0.85;
-      utterance.pitch = 0.8;
-      utterance.volume = 1;
-
-      // محاولة اختيار صوت رجولي عربي
-      const voices = window.speechSynthesis.getVoices();
-      const arabicVoices = voices.filter(v => v.lang && v.lang.startsWith('ar'));
-      let selectedVoice = arabicVoices.find(v => {
-        const name = (v.name || '').toLowerCase();
-        return name.includes('male') || name.includes('maged') ||
-               name.includes('tarik') || name.includes('hamza') ||
-               name.includes('naayf') || name.includes('majed') ||
-               name.includes('laith') || name.includes('shakir');
-      });
-      if (!selectedVoice && arabicVoices.length > 0) {
-        selectedVoice = arabicVoices[0];
-      }
-      if (selectedVoice) utterance.voice = selectedVoice;
-
-      if (btnElement) {
-        const span = btnElement.querySelector('span');
-        if (span) span.textContent = 'إيقاف';
-      }
-
-      utterance.onend = () => {
-        if (btnElement) {
-          btnElement.classList.remove('active');
-          const span = btnElement.querySelector('span');
-          if (span) span.textContent = 'استماع';
-        }
-      };
-      utterance.onerror = () => {
-        if (btnElement) {
-          btnElement.classList.remove('active');
-          const span = btnElement.querySelector('span');
-          if (span) span.textContent = 'استماع';
-        }
-      };
-
-      window.speechSynthesis.speak(utterance);
-    };
-
-    // تبديل حالة الاستماع
-    window.toggleListen = function(contentId, btnElement) {
-      // إذا كان هناك صوت يعمل حالياً، أوقفه
-      const isPlaying = (window.currentAudio && !window.currentAudio.paused) ||
-                        (window.speechSynthesis && window.speechSynthesis.speaking);
-      if (isPlaying || (btnElement && btnElement.classList.contains('active'))) {
-        window.stopReading();
-      } else {
-        window.speakText(contentId, btnElement);
-      }
-    };
-
-    // جلب الأصوات (بعض المتصفحات تحتاج تفعيل)
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
-    }
-
     // ========== حجم الخط ==========
     window.currentFontSize = localStorage.getItem('reading_font_size') || 'medium';
 
@@ -1844,7 +1684,6 @@
       window.currentFontSize = size;
       localStorage.setItem('reading_font_size', size);
 
-      // تحديث الأزرار في كل أشرطة الأدوات
       document.querySelectorAll('.reading-toolbar').forEach(toolbar => {
         toolbar.querySelectorAll('.font-size-btn').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.size === size);
@@ -1857,25 +1696,18 @@
       });
     };
 
-    // توليد شريط أدوات القراءة
-    window.buildReadingToolbar = function(contentId, contentSelector) {
+    // توليد شريط حجم الخط
+    window.buildReadingToolbar = function(contentSelector) {
       const currentSize = window.currentFontSize || 'medium';
       const labels = { small: 'ص', medium: 'م', large: 'ك', xlarge: 'ك+' };
       return `
         <div class="reading-toolbar">
-          <button type="button" class="listen-btn" onclick="window.toggleListen('${contentId}', this)" title="استماع">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-            </svg>
-            <span>استماع</span>
-          </button>
+          <span style="font-size:0.82rem; color:var(--text-muted); font-weight:600;">حجم الخط:</span>
           <button type="button" class="font-size-btn ${currentSize==='small'?'active':''}" data-size="small" onclick="window.setFontSize('small','${contentSelector}')" title="تصغير الخط">ص</button>
           <button type="button" class="font-size-btn ${currentSize==='medium'?'active':''}" data-size="medium" onclick="window.setFontSize('medium','${contentSelector}')" title="حجم عادي">م</button>
           <button type="button" class="font-size-btn ${currentSize==='large'?'active':''}" data-size="large" onclick="window.setFontSize('large','${contentSelector}')" title="تكبير الخط">ك</button>
           <button type="button" class="font-size-btn ${currentSize==='xlarge'?'active':''}" data-size="xlarge" onclick="window.setFontSize('xlarge','${contentSelector}')" title="تكبير إضافي">ك+</button>
           <span class="font-size-indicator">${labels[currentSize] || 'م'}</span>
-          <span class="toolbar-label">قراءة هادئة</span>
         </div>
       `;
     };
@@ -1895,7 +1727,7 @@
         else formattedContent = sanitized.split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
       }
 
-      const toolbar = window.buildReadingToolbar('articleBody', '#articleBody');
+      const toolbar = formattedContent ? window.buildReadingToolbar('#articleBody') : '';
       const contentSection = formattedContent ? `
         ${toolbar}
         <div class="article-content" id="articleBody">${formattedContent}</div>
@@ -2077,7 +1909,7 @@
     };
 
     // ==================================================
-    // ✅ قسم المشاريع
+    // قسم المشاريع
     // ==================================================
     window.renderProjects = function() {
       const grid = document.getElementById('projectsGrid');
@@ -2284,7 +2116,7 @@
     };
 
     // ==================================================
-    // غرفة الذكريات (مع أدوات القراءة)
+    // غرفة الذكريات
     // ==================================================
     window.renderMemories = function() {
       const container = document.getElementById('memoriesList');
@@ -2298,7 +2130,7 @@
         const contentHTML = m.content ? `
           <div class="memory-content" id="${contentId}">${window.formatMemoryContent(m.content)}</div>
         ` : '';
-        const toolbar = window.buildReadingToolbar(contentId, `#${contentId}`);
+        const toolbar = m.content ? window.buildReadingToolbar(`#${contentId}`) : '';
         const imagesHTML = (m.images && m.images.length)
           ? `<div class="memory-images">${m.images.map(u => `<img src="${u}" alt="صورة ذكرى" loading="lazy" onclick="event.stopPropagation(); window.openLightbox('${u}')">`).join('')}</div>`
           : '';

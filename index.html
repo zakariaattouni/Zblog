@@ -116,7 +116,6 @@
     .nav-links { list-style: none; display: flex; flex-direction: column; gap: 16px; }
     .nav-links a { font-size: 1.1rem; color: var(--text-main); display: block; padding-bottom: 8px; border-bottom: 1px solid var(--border-color); }
 
-    /* ===== شريط الأقسام المنزلق ===== */
     .categories-bar {
       position: sticky; top: 0; z-index: 900; background-color: var(--paper-color);
       border-bottom: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -141,7 +140,6 @@
     }
     .cat-chip .cat-count { font-size: 0.75rem; opacity: 0.75; margin-right: 4px; }
 
-    /* ===== زر عرض المزيد ===== */
     .load-more-btn {
       display: flex; align-items: center; justify-content: center; gap: 8px;
       width: 100%; padding: 14px 20px; margin: 5px 0 20px;
@@ -366,7 +364,6 @@
     }
     .paste-help { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
 
-    /* ===== ألبوم الصور ===== */
     .album-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-top: 18px; }
     .album-item {
       position: relative; margin: 0; overflow: hidden;
@@ -400,7 +397,6 @@
     }
     .album-admin-item button:hover { background: #fbeaea; }
 
-    /* ===== غرفة الذكريات ===== */
     .memories-list { display: flex; flex-direction: column; gap: 28px; }
     .memory-card {
       background: var(--paper-color); border: 1px solid var(--border-color);
@@ -436,7 +432,6 @@
     .section-heading { font-family: var(--font-heading); font-size: 1.7rem; margin-bottom: 8px; }
     .section-sub { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
 
-    /* ===== شريط حجم الخط + الموسيقى ===== */
     .reading-toolbar {
       display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
       margin-bottom: 18px; padding: 10px 14px;
@@ -494,7 +489,6 @@
     .article-content.font-large, .memory-content.font-large { font-size: 1.35rem !important; }
     .article-content.font-xlarge, .memory-content.font-xlarge { font-size: 1.6rem !important; }
 
-    /* ===== قسم المشاريع ===== */
     .projects-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -728,7 +722,6 @@
   </div>
 
   <main>
-    <!-- 1. HOME PAGE -->
     <section id="page-home" class="page active">
       <div class="search-box">
         <input type="text" id="searchInput" class="search-input" placeholder="بحث في المقالات..." oninput="window.handleSearch()">
@@ -736,40 +729,34 @@
       <div id="postsList" class="posts-list"></div>
     </section>
 
-    <!-- 2. SINGLE POST PAGE -->
     <section id="page-post" class="page">
       <div id="postSingleContainer"></div>
     </section>
 
-    <!-- 3. PROJECTS PAGE -->
     <section id="page-projects" class="page">
       <h2 class="section-heading">🚀 مشاريعي</h2>
       <p class="section-sub">مجموعة من الكتب والتطبيقات والمشاريع التي عملت عليها — اضغط على الرابط للاطلاع عليها.</p>
       <div id="projectsGrid" class="projects-grid"></div>
     </section>
 
-    <!-- 4. ALBUM PAGE -->
     <section id="page-album" class="page">
       <h2 class="section-heading">ألبوم الصور</h2>
       <p class="section-sub">مجموعة صور مختارة من بيتي الرقمي — اضغط على أي صورة لتكبيرها.</p>
       <div id="albumGrid" class="album-grid"></div>
     </section>
 
-    <!-- 5. MEMORIES PAGE -->
     <section id="page-memories" class="page">
       <h2 class="section-heading">غرفة الذكريات</h2>
       <p class="section-sub">نصوص وصور وذكريات محفوظة في مكان هادئ.</p>
       <div id="memoriesList" class="memories-list"></div>
     </section>
 
-    <!-- 6. CATEGORIES PAGE -->
     <section id="page-categories" class="page">
       <h2 class="section-heading">التصنيفات</h2>
       <div id="categoriesList" class="categories-list"></div>
       <div id="categoryPostsResult" class="posts-list" style="margin-top: 30px;"></div>
     </section>
 
-    <!-- 7. ABOUT PAGE -->
     <section id="page-about" class="page">
       <div class="about-card">
         <h2 style="font-family: var(--font-heading); margin-bottom: 15px;" id="aboutTitle">عن الكاتب</h2>
@@ -780,7 +767,6 @@
       </div>
     </section>
 
-    <!-- 8. ADMIN LOGIN -->
     <section id="page-admin-login" class="page">
       <div class="about-card" style="max-width: 400px; margin: 0 auto;">
         <h3 style="margin-bottom: 15px; font-family: var(--font-heading);">تسجيل الدخول للإدارة</h3>
@@ -793,7 +779,6 @@
       </div>
     </section>
 
-    <!-- 9. ADMIN PANEL -->
     <section id="page-admin-panel" class="page">
       <div class="admin-nav">
         <button class="admin-tab active" onclick="window.switchAdminTab('editor', event)">مقال جديد / تحرير</button>
@@ -807,7 +792,6 @@
         <button class="admin-tab" onclick="window.logoutAdmin()" style="color: var(--danger-color);">خروج</button>
       </div>
 
-      <!-- Editor -->
       <div id="admin-tab-editor" class="admin-tab-content">
         <h3 style="margin-bottom: 15px;" id="editorFormTitle">إنشاء مقال جديد</h3>
         <input type="hidden" id="editPostId">
@@ -856,7 +840,6 @@
         </div>
       </div>
 
-      <!-- Bulk Paste Tab -->
       <div id="admin-tab-bulk" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">إضافة نص منسق مسبقاً مع عنوانه</h3>
         <p class="paste-help">الصق العنوان في الحقل الأول، والنص المنسق (HTML) في الحقل الثاني، وسيتم إنشاء منشور جديد مباشرةً.</p>
@@ -881,13 +864,11 @@
         <button class="btn" onclick="window.publishBulkPost()">نشر المنشور مباشرة</button>
       </div>
 
-      <!-- Posts Management -->
       <div id="admin-tab-posts" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">المقالات والمسودات</h3>
         <div id="adminPostsList" class="admin-post-list"></div>
       </div>
 
-      <!-- Projects Management -->
       <div id="admin-tab-projects" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 10px;">إدارة المشاريع</h3>
         <p class="paste-help">أضف كتبك وتطبيقاتك ومشاريعك. كل مشروع يتضمن صورة، لمحة تعريفية، ونوعه (كتاب / تطبيق / موقع / آخر).</p>
@@ -941,7 +922,6 @@
         <div id="adminProjectsList" class="admin-post-list"></div>
       </div>
 
-      <!-- Album Management -->
       <div id="admin-tab-album" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 10px;">إدارة ألبوم الصور</h3>
         <p class="paste-help">أضف روابط الصور من الإنترنت، وستظهر مباشرة في صفحة «ألبوم الصور».</p>
@@ -966,7 +946,6 @@
         <div id="adminAlbumList" class="album-admin-grid"></div>
       </div>
 
-      <!-- Memories Management -->
       <div id="admin-tab-memories" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 10px;">إدارة غرفة الذكريات</h3>
         <p class="paste-help">اكتب النص عادياً أو استخدم أزرار التنسيق لإضافة وسوم HTML، ويمكنك إرفاق صور بروابطها.</p>
@@ -1013,13 +992,11 @@
         <div id="adminMemoriesList" class="admin-post-list"></div>
       </div>
 
-      <!-- Comments Management -->
       <div id="admin-tab-comments" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">إدارة جميع التعليقات</h3>
         <div id="adminCommentsList" class="admin-post-list"></div>
       </div>
 
-      <!-- Settings -->
       <div id="admin-tab-settings" class="admin-tab-content" style="display: none;">
         <h3 style="margin-bottom: 15px;">الإعدادات العامة والترويسة</h3>
 
@@ -1082,8 +1059,8 @@
   </div>
 
   <!-- موسيقى الخلفية (أجواء خيالية/سحرية/جبال وضباب) -->
-  <audio id="bgMusic" loop preload="none">
-    <source src="https://cdn.pixabay.com/download/audio/2022/10/25/audio_5f0b8a7fb1.mp3?filename=mystical-ambient-124146.mp3" type="audio/mpeg">
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://ia800905.us.archive.org/19/items/FREE_background_music_dhalius/ambient_slow.mp3" type="audio/mpeg">
   </audio>
 
   <script type="module">
@@ -1125,7 +1102,6 @@
     window.currentViewPostId = null;
     window.currentCategory = null;
 
-    // ============ تصحيح الأخطاء الإملائية الشائعة ============
     window.fixArabicTypos = function(text) {
       if (!text) return text;
       let fixed = String(text);
@@ -1139,7 +1115,6 @@
       return fixed;
     };
 
-    // ============ أدوات مساعدة ============
     window.showToast = function(message) {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -1181,7 +1156,6 @@
     window.formatMemoryContent = function(content) {
       if (!content) return '';
       const sanitized = window.sanitizeContent(content);
-      // إذا احتوى على HTML نعرضه كما هو، وإلا نحول الأسطر لفقرات
       if (/(<([^>]+)>)/i.test(sanitized)) return sanitized;
       return sanitized.split(/\n{2,}/).map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
     };
@@ -1208,7 +1182,6 @@
       window.showToast('تم إدراج رابط الصورة في النص');
     };
 
-    // ========== أدوات التنسيق للمحرر العادي (جديد) ==========
     window.wrapPostSelection = function(openTag, closeTag) {
       const ta = document.getElementById('postContentInput');
       if (!ta) return;
@@ -1236,37 +1209,52 @@
       document.getElementById('lightbox').classList.remove('active');
     };
 
-    // ========== الموسيقى الخلفية (جديد) ==========
+    // ========== الموسيقى الخلفية ==========
     let musicEnabled = false;
-    let musicInitialized = false;
+    let currentMusicBtn = null;
     const bgMusic = document.getElementById('bgMusic');
     if (bgMusic) {
-      bgMusic.volume = 0.35; // مستوى هادئ
+      bgMusic.volume = 0.35;
     }
 
     window.toggleMusic = function(btnElement) {
-      if (!bgMusic) return;
+      if (!bgMusic) {
+        window.showToast('الموسيقى غير متوفرة');
+        return;
+      }
+
       if (musicEnabled) {
         bgMusic.pause();
         musicEnabled = false;
-        if (btnElement) {
-          btnElement.classList.remove('active');
-          const span = btnElement.querySelector('span');
+        document.querySelectorAll('.reading-toolbar .music-btn').forEach(btn => {
+          btn.classList.remove('active');
+          const span = btn.querySelector('span');
           if (span) span.textContent = 'أجواء';
-        }
-      } else {
-        bgMusic.play().then(() => {
-          musicEnabled = true;
-          musicInitialized = true;
-          if (btnElement) {
-            btnElement.classList.add('active');
-            const span = btnElement.querySelector('span');
-            if (span) span.textContent = 'إيقاف';
-          }
-        }).catch(err => {
-          console.warn('تعذر تشغيل الموسيقى:', err);
-          window.showToast('تعذر تشغيل الموسيقى - تحقق من اتصالك');
         });
+      } else {
+        if (btnElement) {
+          const span = btnElement.querySelector('span');
+          if (span) span.textContent = '...';
+        }
+
+        const playPromise = bgMusic.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            musicEnabled = true;
+            document.querySelectorAll('.reading-toolbar .music-btn').forEach(btn => {
+              btn.classList.add('active');
+              const span = btn.querySelector('span');
+              if (span) span.textContent = 'إيقاف';
+            });
+          }).catch(err => {
+            console.warn('فشل تشغيل الموسيقى:', err);
+            window.showToast('تعذر تشغيل الموسيقى - تحقق من اتصالك بالإنترنت');
+            if (btnElement) {
+              const span = btnElement.querySelector('span');
+              if (span) span.textContent = 'أجواء';
+            }
+          });
+        }
       }
     };
 
@@ -1347,7 +1335,6 @@
       });
     }
 
-    // ========== الإشعارات ==========
     window.toggleNotifDropdown = function(e) {
       if (e) e.stopPropagation();
       const dropdown = document.getElementById('notifDropdown');
@@ -1418,7 +1405,6 @@
       }
     }
 
-    // ========== Firebase Listeners ==========
     onValue(ref(db, 'settings'), (snapshot) => {
       const data = snapshot.val();
       if (data) blogSettings = { ...DEFAULT_SETTINGS, ...data };
@@ -1499,7 +1485,6 @@
       setupFooterCounters();
     });
 
-    // ========== التنقل ==========
     window.toggleNav = function(show) {
       const nav = document.getElementById('navOverlay');
       if (show) nav.classList.add('active');
@@ -1512,7 +1497,6 @@
       if (target) target.classList.add('active');
       window.scrollTo(0, 0);
 
-      // إيقاف الموسيقى عند مغادرة صفحات القراءة
       if (pageId !== 'post' && pageId !== 'memories') {
         window.stopMusic();
       }
@@ -1550,7 +1534,6 @@
       return blogPosts.filter(p => p.status === 'published');
     };
 
-    // ========== شريط الأقسام ==========
     window.renderCategoryBar = function() {
       const scroll = document.getElementById('categoriesScroll');
       if (!scroll) return;
@@ -1622,7 +1605,6 @@
       } else imgContainer.style.display = 'none';
     };
 
-    // ========== بناء بطاقة مقال ==========
     window.buildPostItem = function(post) {
       const excerpt = window.getCleanExcerpt(post.content, 140);
       const excerptHTML = excerpt ? `<p class="post-item-excerpt">${excerpt}</p>` : '';
@@ -1657,7 +1639,6 @@
       return item;
     };
 
-    // ========== المقالات (نظام المطوية) ==========
     const VISIBLE_POSTS_COUNT = 5;
 
     window.renderHomePosts = function(posts) {
@@ -1706,7 +1687,6 @@
       window.renderHomePosts(window.getVisibleHomePosts());
     };
 
-    // ========== المشاركة ==========
     window.getPostUrl = function(postId) {
       return window.location.origin + window.location.pathname + '#post-' + postId;
     };
@@ -1803,7 +1783,6 @@
       });
     };
 
-    // ========== حجم الخط ==========
     window.currentFontSize = localStorage.getItem('reading_font_size') || 'medium';
 
     window.setFontSize = function(size, contentSelector) {
@@ -1827,7 +1806,6 @@
       });
     };
 
-    // توليد شريط حجم الخط + زر الموسيقى
     window.buildReadingToolbar = function(contentSelector) {
       const currentSize = window.currentFontSize || 'medium';
       const labels = { small: 'ص', medium: 'م', large: 'ك', xlarge: 'ك+' };
@@ -1851,7 +1829,6 @@
       `;
     };
 
-    // ========== عرض المقال الفردي ==========
     window.renderSinglePost = function(postId) {
       const post = blogPosts.find(p => p.id === postId);
       const container = document.getElementById('postSingleContainer');
@@ -1864,7 +1841,6 @@
       let formattedContent = '';
       if (post.content) {
         const sanitized = window.sanitizeContent(post.content);
-        // المحرر يقبل HTML مباشرة الآن، لذا نعرض المحتوى كما هو إذا احتوى على وسوم
         if (/(<([^>]+)>)/i.test(sanitized)) formattedContent = window.fixArabicTypos(sanitized);
         else formattedContent = window.fixArabicTypos(sanitized).split('\n\n').map(p => `<p>${p.replace(/\n/g, '<br>')}</p>`).join('');
       }
@@ -1974,9 +1950,7 @@
             }).join('') + `</div>`;
         }
         const deleteBtnHTML = isAdminLoggedIn ? `<button class="delete-comment-btn" onclick="window.deleteComment('${postId}', '${commentId}')">حذف التعليق</button>` : '';
-        // ✅ زر الرد للمدير فقط
         const replyBtnHTML = isAdminLoggedIn ? `<button class="reply-btn" onclick="window.showReplyForm('${commentId}')">رد</button>` : '';
-        // نموذج الرد للمدير فقط
         const replyFormHTML = isAdminLoggedIn ? `
           <div id="replyForm-${commentId}" style="display:none; margin-top:10px;">
             <input type="text" id="replyAuthor-${commentId}" placeholder="الاسم" value="د. زكريا محمد عطوني" style="width:100%; margin-bottom:5px; padding:6px; border:1px solid #ccc; border-radius:4px;">
@@ -2059,9 +2033,6 @@
       } catch (err) { alert('حدث خطأ أثناء إرسال الرد:\n' + (err.message || err)); }
     };
 
-    // ==================================================
-    // قسم المشاريع
-    // ==================================================
     window.renderProjects = function() {
       const grid = document.getElementById('projectsGrid');
       if (!grid) return;
@@ -2200,9 +2171,6 @@
       } catch (err) { alert('تعذر الحذف: ' + (err.message || err)); }
     };
 
-    // ==================================================
-    // ألبوم الصور
-    // ==================================================
     window.renderAlbum = function() {
       const grid = document.getElementById('albumGrid');
       if (!grid) return;
@@ -2266,9 +2234,6 @@
       } catch (err) { alert('تعذر الحذف: ' + (err.message || err)); }
     };
 
-    // ==================================================
-    // غرفة الذكريات
-    // ==================================================
     window.renderMemories = function() {
       const container = document.getElementById('memoriesList');
       if (!container) return;
@@ -2403,9 +2368,6 @@
       } catch (err) { alert('تعذر الحذف: ' + (err.message || err)); }
     };
 
-    // ==================================================
-    // الإدارة العامة
-    // ==================================================
     window.loginAdmin = function() {
       const pass = document.getElementById('adminPassInput').value;
       if (pass === 'salem1959') {
@@ -2414,7 +2376,6 @@
         document.getElementById('adminNavBtn').innerText = 'لوحة الإدارة';
         window.navigateTo('admin-panel');
         window.showToast('تم تسجيل الدخول بنجاح');
-        // إعادة عرض التعليقات لتظهر أزرار الرد
         if (window.currentViewPostId) {
           window.renderSinglePost(window.currentViewPostId);
         }
